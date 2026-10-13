@@ -1,0 +1,26 @@
+# Build output
+target/
+
+# Wallet state and key material must never be committed. The tool stores them
+# outside the repo by default (and refuses paths inside a git work tree), these
+# patterns are a second line of defence.
+*.age
+*.age-identity.txt
+mnemonic*.txt
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+.env
+.env.*
+wallets/
+secrets/
+
+# Web app
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env.local
+.env.*.local
+!.env.example

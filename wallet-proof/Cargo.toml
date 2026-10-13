@@ -1,0 +1,55 @@
+[package]
+name = "hushush-wallet-proof"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+publish = false
+
+[dependencies]
+anyhow = "1"
+age = { version = "0.12", features = ["armor"] }
+bip0039 = { version = "0.14", features = ["std"] }
+clap = { version = "4.5", features = ["derive", "env"] }
+futures-util = "0.3"
+hex = "0.4"
+prost = "0.14"
+rand = { version = "0.10", default-features = false, features = ["std", "sys_rng"] }
+rusqlite = { version = "0.37" }
+secrecy = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.21", features = ["macros", "rt-multi-thread", "fs", "io-std", "time"] }
+tonic = { version = "0.14", features = ["gzip", "tls-webpki-roots"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+async-trait = "0.1"
+thiserror = "2"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+uuid = "1"
+
+# Official Zcash Rust wallet stack (librustzcash).
+# Pinned to the NU7-capable pre-releases: the latest stable releases
+# (zcash_client_backend 0.24 / zcash_protocol 0.10.x) do not know the testnet
+# NU7 activation (height 4,465,026, branch 0x77190AD9) and build transactions
+# that testnet nodes reject. See docs/PHASE0_REPORT.md.
+orchard = { version = "=0.16.0", default-features = false }
+sapling = { package = "sapling-crypto", version = "=0.9.0" }
+zcash_address = "=0.14.0-pre.1"
+zcash_client_backend = { version = "=0.25.0-pre.1", features = ["lightwalletd-tonic-tls-webpki-roots", "orchard", "sync"] }
+zcash_client_sqlite = { version = "=0.23.0-pre.1", features = ["orchard"] }
+zcash_keys = { version = "=0.17.0-pre.1", features = ["orchard", "sapling"] }
+zcash_primitives = "=0.31.0-pre.1"
+zcash_proofs = { version = "=0.31.0-pre.1", features = ["bundled-prover"] }
+zcash_protocol = "=0.11.0-pre.0"
+zip321 = "=0.10.0-pre.1"
+
+[dev-dependencies]
+zcash_client_backend = { version = "=0.25.0-pre.1", features = ["test-dependencies"] }
+zcash_client_sqlite = { version = "=0.23.0-pre.1", features = ["test-dependencies"] }
+tempfile = "3"
+zip32 = "=0.3.0"
+
+# Zero-knowledge proving is unusably slow without optimisation, so optimise all
+# dependencies even in the dev/test profile.
+[profile.dev.package."*"]
+opt-level = 3

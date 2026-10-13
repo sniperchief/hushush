@@ -1,0 +1,82 @@
+// Integration test harness: a real PostgreSQL database and the real Rust
+// payroll-api binary. Nothing payroll-related is mocked.
+import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
+import { existsSync } from "node:fs";
+import { createServer } from "node:net";
+import path from "node:path";
+import pg from "pg";
+import type { TestProject } from "vitest/node";
+import { migrate } from "../../scripts/migrate.ts";
+
+declare module "vitest" {
+  export interface ProvidedContext {
+    testEnv: Record<string, string>;
+  }
+}
+
+let child: ChildProcess | undefined;
+
+function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const s = createServer();
+    s.listen(0, "127.0.0.1", () => {
+      const a = s.address();
+      s.close(() => (a && typeof a === "object" ? resolve(a.port) : reject(new Error("no port"))));
+    });
+  });
+}
+
+async function waitHealthy(url: string, ms = 60_000): Promise<void> {
+  const until = Date.now() + ms;
+  while (Date.now() < until) {
+    try {
+      if ((await fetch(`${url}/healthz`)).ok) return;
+    } catch {
+      /* not up yet */
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error("payroll-api did not become healthy");
+}
+
+export default async function setup(project: TestProject) {
+  const dbUrl = process.env.TEST_DATABASE_URL;
+  if (!dbUrl) {
+    throw new Error("TEST_DATABASE_URL must point at a disposable PostgreSQL database (it is wiped).");
+  }
+  if (!/test/i.test(new URL(dbUrl).pathname)) {
+    throw new Error("Refusing to wipe a database whose name does not contain 'test'.");
+  }
+
+  // Fresh schema every run.
+  const c = new pg.Client({ connectionString: dbUrl });
+  await c.connect();
+  await c.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+  await c.end();
+
+  const exe = process.platform === "win32" ? "hushush-payroll-api.exe" : "hushush-payroll-api";
+  const bin = process.env.PAYROLL_API_BIN ?? path.resolve(import.meta.dirname, "../../../payroll-api/target/debug", exe);
+  if (!existsSync(bin)) throw new Error(`payroll-api binary not found at ${bin}; run \`cargo build\` in payroll-api/`);
+
+  const port = await freePort();
+  const token = randomBytes(32).toString("hex");
+  const apiUrl = `http://127.0.0.1:${port}`;
+  child = spawn(bin, [], {
+    env: { ...process.env, PAYROLL_DATABASE_URL: dbUrl, PAYROLL_API_TOKEN: token, PAYROLL_API_ADDR: `127.0.0.1:${port}`, RUST_LOG: "warn" },
+    stdio: ["ignore", "inherit", "inherit"],
+  });
+  await waitHealthy(apiUrl); // payroll-api migrates the payroll schema on start
+  await migrate(dbUrl, () => {});
+
+  project.provide("testEnv", {
+    DATABASE_URL: dbUrl,
+    PAYROLL_API_URL: apiUrl,
+    PAYROLL_API_TOKEN: token,
+    APP_URL: "http://localhost:3000",
+  });
+
+  return async () => {
+    child?.kill();
+  };
+}
