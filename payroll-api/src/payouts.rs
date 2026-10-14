@@ -46,6 +46,8 @@ impl OrgAllow {
 
 pub struct Payouts {
     pub wallet: HttpWallet,
+    /// Seals locked payout addresses (Phase 5); see `crate::seal`.
+    pub sealer: crate::seal::AddressSealer,
     pub policy: PayoutPolicy,
     pub orgs: OrgAllow,
     /// Lease owner identity of this process.
@@ -85,6 +87,10 @@ impl Payouts {
                 "*" => OrgAllow::All,
                 list => OrgAllow::Only(list.split(',').map(|s| s.trim().to_string()).collect()),
             };
+        let sealer = crate::seal::AddressSealer::from_hex(
+            &std::env::var("PAYOUT_ADDRESS_KEY")
+                .map_err(|_| "PAYOUT_ADDRESS_KEY is required with WALLET_URL (64 hex chars)")?,
+        )?;
         let submit_timeout = Duration::from_secs(env_or("WALLET_SUBMIT_TIMEOUT_SECS", 300)?);
         let policy = PayoutPolicy {
             required_confirmations: env_or("PAYOUT_CONFIRMATIONS", 10)?,
@@ -103,6 +109,7 @@ impl Payouts {
                 Duration::from_secs(env_or("WALLET_TIMEOUT_SECS", 60)?),
                 submit_timeout,
             )?,
+            sealer,
             policy,
             orgs,
             owner: format!("payroll-api-{}", uuid::Uuid::new_v4()),
@@ -312,7 +319,7 @@ impl PayoutView {
 
 // ---- handlers --------------------------------------------------------------------------
 
-fn enabled(st: &AppState) -> Result<Arc<Payouts>, ApiError> {
+pub(crate) fn enabled(st: &AppState) -> Result<Arc<Payouts>, ApiError> {
     st.payouts.clone().ok_or_else(|| {
         err(
             StatusCode::SERVICE_UNAVAILABLE,
@@ -322,7 +329,7 @@ fn enabled(st: &AppState) -> Result<Arc<Payouts>, ApiError> {
     })
 }
 
-fn wallet_err(e: WalletError) -> ApiError {
+pub(crate) fn wallet_err(e: WalletError) -> ApiError {
     tracing::warn!("payout wallet call failed: {e}");
     err(
         StatusCode::SERVICE_UNAVAILABLE,
@@ -334,10 +341,10 @@ fn wallet_err(e: WalletError) -> ApiError {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AddressReq {
-    address: String,
+    pub(crate) address: String,
 }
 
-fn clean_address(a: &str) -> Result<String, ApiError> {
+pub(crate) fn clean_address(a: &str) -> Result<String, ApiError> {
     let a = a.trim();
     if a.is_empty() || a.len() > 1_000 || !a.bytes().all(|b| b.is_ascii_alphanumeric()) {
         return Err(err(
@@ -350,7 +357,7 @@ fn clean_address(a: &str) -> Result<String, ApiError> {
 }
 
 /// Blocking work off the async runtime (wallet calls can take minutes).
-async fn blocking<T: Send + 'static>(
+pub(crate) async fn blocking<T: Send + 'static>(
     f: impl FnOnce() -> Result<T, ApiError> + Send + 'static,
 ) -> Result<T, ApiError> {
     tokio::task::spawn_blocking(f).await.map_err(|_| {
@@ -378,7 +385,12 @@ pub struct QuoteView {
     pub required_confirmations: i64,
 }
 
-fn quote_view(claim_id: &str, amount: i64, q: &WalletQuote, policy: &PayoutPolicy) -> QuoteView {
+pub(crate) fn quote_view(
+    claim_id: &str,
+    amount: i64,
+    q: &WalletQuote,
+    policy: &PayoutPolicy,
+) -> QuoteView {
     let fee_ok = q.fee_zats.and_then(|f| policy.max_fee_for(f)).is_some();
     QuoteView {
         claim_id: claim_id.to_string(),

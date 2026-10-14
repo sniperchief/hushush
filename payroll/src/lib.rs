@@ -20,6 +20,7 @@ pub mod accrual;
 pub mod clock;
 pub mod engine;
 pub mod error;
+pub mod flow;
 pub mod migrations;
 pub mod model;
 pub mod money;
@@ -30,6 +31,7 @@ pub mod store;
 
 pub use engine::{MAX_RATE_PERIOD_SECS, Payroll};
 pub use error::{PayrollError, Result};
+pub use flow::{BindOutcome, FlowStream, NewOffer, WithdrawTerms};
 pub use model::*;
 pub use payout::{PayoutPolicy, PayoutTerms};
 pub use pg::PgPayrollDb;

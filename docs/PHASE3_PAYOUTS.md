@@ -259,6 +259,7 @@ Files per wallet: `wallets/<name>/data.sqlite` (wallet DB),
 | `WALLET_URL` | unset → payouts disabled | `https://…`, or `http://` on localhost only |
 | `WALLET_API_TOKEN` | required with `WALLET_URL` | |
 | `PAYOUT_ENABLED_ORGS` | required with `WALLET_URL` | comma-separated org ids; `*` = all (testnet/dev only) |
+| `PAYOUT_ADDRESS_KEY` | required with `WALLET_URL` (Phase 5) | 64 hex chars (32 random bytes): seals workers' locked payout addresses at rest (XChaCha20-Poly1305). Losing or changing it makes stored addresses unreadable: the worker's stream view and withdrawals then fail with an internal error until the key is restored (nothing is paid to any other address). Secret: payroll-api only |
 | `PAYOUT_CONFIRMATIONS` | `10` | |
 | `PAYOUT_EXPIRY_MARGIN_BLOCKS` | `20` | |
 | `PAYOUT_MAX_FEE_ZATS` / `PAYOUT_FEE_HEADROOM_ZATS` | `100000` / `10000` | |

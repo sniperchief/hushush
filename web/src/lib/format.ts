@@ -24,7 +24,3 @@ export function formatClock(unix: number): string {
 export function compactZec(zec: string): string {
   return zec.includes(".") ? zec.replace(/0+$/, "").replace(/\.$/, "") : zec;
 }
-
-export function roleLabel(role: string): string {
-  return role === "member" ? "Contributor" : role === "admin" ? "Admin" : "Owner";
-}

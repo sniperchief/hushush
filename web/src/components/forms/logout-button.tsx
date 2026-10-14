@@ -5,7 +5,7 @@ import { useState } from "react";
 import { api } from "@/lib/client-api";
 import { Button } from "../ui";
 
-export function LogoutButton() {
+export function LogoutButton({ redirectTo = "/" }: { redirectTo?: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   return (
@@ -15,7 +15,7 @@ export function LogoutButton() {
       onClick={async () => {
         setPending(true);
         await api("/api/auth/logout");
-        router.push("/login");
+        router.push(redirectTo);
         router.refresh();
       }}
     >

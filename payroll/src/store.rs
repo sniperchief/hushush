@@ -131,4 +131,24 @@ pub trait StoreTx {
         detail: Option<&str>,
     ) -> Result<()>;
     fn payout_events_of(&mut self, payout_id: &str) -> Result<Vec<PayoutEvent>>;
+
+    // ---- Phase 5 flow ------------------------------------------------------------
+
+    fn insert_offer(&mut self, o: &StreamOffer, link_hash: &str) -> Result<()>;
+    /// `lock = true` must lock the row against concurrent writers.
+    fn load_offer(&mut self, id: &str, lock: bool) -> Result<Option<StreamOffer>>;
+    fn offer_by_link(&mut self, link_hash: &str, lock: bool) -> Result<Option<StreamOffer>>;
+    fn offer_by_stream(&mut self, stream_id: &str) -> Result<Option<StreamOffer>>;
+    fn offers_of_org(&mut self, org: &str) -> Result<Vec<StreamOffer>>;
+    /// Binds an open offer; returns rows updated (0 or 1).
+    fn bind_offer_cas(&mut self, id: &str, stream_id: &str, user: &str, now: i64) -> Result<usize>;
+    /// Cancels an open offer; returns rows updated (0 or 1).
+    fn cancel_offer_cas(&mut self, id: &str, now: i64) -> Result<usize>;
+    /// Replaces the link of an open offer; returns rows updated (0 or 1).
+    fn relink_offer_cas(&mut self, id: &str, link_hash: &str) -> Result<usize>;
+
+    /// A second address for the same stream is a
+    /// [`PayrollError::Conflict`](crate::PayrollError::Conflict).
+    fn insert_payout_address(&mut self, a: &PayoutAddress) -> Result<()>;
+    fn payout_address(&mut self, stream_id: &str) -> Result<Option<PayoutAddress>>;
 }

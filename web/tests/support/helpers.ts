@@ -1,19 +1,23 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest } from "next/server";
 import { expect } from "vitest";
-import { db } from "@/lib/db";
+import { payroll, type FlowStream } from "@/lib/payroll";
+// SOFTWARE authenticator: real WebAuthn responses for the real verifier.
+import { SoftPasskey } from "../../scripts/lib/soft-passkey.mjs";
 
-import * as signupRoute from "@/app/api/auth/signup/route";
-import * as loginRoute from "@/app/api/auth/login/route";
-import * as verifyRoute from "@/app/api/auth/verify/route";
-import * as orgsRoute from "@/app/api/orgs/route";
-import * as inviteRoute from "@/app/api/orgs/[orgId]/invitations/route";
-import * as acceptRoute from "@/app/api/invitations/accept/route";
-import * as streamsRoute from "@/app/api/orgs/[orgId]/streams/route";
-import * as claimsRoute from "@/app/api/streams/[streamId]/claims/route";
-import * as lifecycleRoute from "@/app/api/streams/[streamId]/lifecycle/[action]/route";
+import * as regOptions from "@/app/api/auth/passkey/register/options/route";
+import * as regVerify from "@/app/api/auth/passkey/register/verify/route";
+import * as loginOptions from "@/app/api/auth/passkey/login/options/route";
+import * as loginVerify from "@/app/api/auth/passkey/login/verify/route";
+import * as companyRoute from "@/app/api/company/route";
+import * as streamsRoute from "@/app/api/streams/route";
+import * as joinRoute from "@/app/api/join/[token]/route";
+import * as addressRoute from "@/app/api/streams/[streamId]/address/route";
+import * as withdrawRoute from "@/app/api/streams/[streamId]/withdraw/route";
 
+export { SoftPasskey };
 export const ORIGIN = "http://localhost:3000";
+export const RP_ID = "localhost";
 
 type Handler<P> = (req: NextRequest, ctx: { params: Promise<P> }) => Promise<Response>;
 
@@ -30,7 +34,7 @@ export async function call<P extends Record<string, string>>(
   method: string,
   params: P,
   opts: CallOpts = {},
-): Promise<{ status: number; body: Record<string, unknown>; res: Response }> {
+): Promise<{ status: number; body: Record<string, unknown>; res: Response; cookies: Record<string, string> }> {
   const headers = new Headers();
   if (opts.origin !== null) headers.set("origin", opts.origin ?? ORIGIN);
   if (opts.cookie) headers.set("cookie", opts.cookie);
@@ -42,89 +46,130 @@ export async function call<P extends Record<string, string>>(
   });
   const res = await handler(req, { params: Promise.resolve(params) });
   const text = await res.text();
-  return { status: res.status, body: text ? JSON.parse(text) : {}, res };
+  const cookies: Record<string, string> = {};
+  for (const c of res.headers.getSetCookie()) {
+    const [pair] = c.split(";");
+    const i = pair!.indexOf("=");
+    cookies[pair!.slice(0, i)] = pair!.slice(i + 1);
+  }
+  return { status: res.status, body: text ? JSON.parse(text) : {}, res, cookies };
 }
 
-export const uniqueEmail = (tag: string) => `${tag}-${randomUUID().slice(0, 8)}@example.test`;
-
-/** Latest dev-outbox mail to `to`. */
-export async function lastMail(to: string): Promise<{ subject: string; body: string }> {
-  const { rows } = await db().query("SELECT subject, body FROM dev_outbox WHERE to_address = $1 ORDER BY id DESC LIMIT 1", [to]);
-  expect(rows[0], `no mail to ${to}`).toBeTruthy();
-  return rows[0];
-}
-
-export function tokenFrom(body: string, kind: "verify" | "invite"): string {
-  const m = kind === "verify" ? body.match(/\/verify\?token=([A-Za-z0-9_-]+)/) : body.match(/\/invite\/([A-Za-z0-9_-]+)/);
-  expect(m, `no ${kind} link in mail`).toBeTruthy();
-  return m![1]!;
-}
+export type Kind = "employer" | "worker";
 
 export interface TestUser {
   id: string;
-  email: string;
-  password: string;
+  kind: Kind;
+  name: string;
   cookie: string;
+  passkey: SoftPasskey;
 }
 
-export const PASSWORD = "correct horse battery staple";
+export const newPasskey = () => new SoftPasskey({ origin: ORIGIN, rpId: RP_ID });
 
-/** Signs up, verifies via the emailed link, and signs in. */
-export async function newUser(tag: string, name = tag): Promise<TestUser> {
-  const email = uniqueEmail(tag);
-  const s = await call(signupRoute.POST, "POST", {}, { body: { email, displayName: name, password: PASSWORD } });
-  expect(s.status).toBe(202);
-  const token = tokenFrom((await lastMail(email)).body, "verify");
-  expect((await call(verifyRoute.POST, "POST", {}, { body: { token } })).status).toBe(200);
-  return signIn(email);
+/** Runs the registration ceremony; returns the raw verify result. */
+export async function register(kind: Kind, name: string, passkey = newPasskey(), tamper?: (r: Record<string, unknown>) => void) {
+  const o = await call(regOptions.POST, "POST", {}, { body: { kind, displayName: name } });
+  expect(o.status, JSON.stringify(o.body)).toBe(200);
+  const response = passkey.register(o.body) as Record<string, unknown>;
+  tamper?.(response);
+  const v = await call(regVerify.POST, "POST", {}, { body: { response }, cookie: `hh_webauthn=${o.cookies.hh_webauthn}` });
+  return { options: o, verify: v, passkey };
 }
 
-export async function signIn(email: string, password = PASSWORD): Promise<TestUser> {
-  const r = await call(loginRoute.POST, "POST", {}, { body: { email, password } });
+/** Runs the sign-in ceremony with `passkey`; returns the raw verify result. */
+export async function authenticate(passkey: SoftPasskey, opts: { origin?: string; counter?: number } = {}) {
+  const o = await call(loginOptions.POST, "POST", {});
+  expect(o.status).toBe(200);
+  const response = passkey.authenticate(o.body, opts);
+  return call(loginVerify.POST, "POST", {}, { body: { response }, cookie: `hh_webauthn=${o.cookies.hh_webauthn}` });
+}
+
+async function userOf(cookie: string): Promise<string> {
+  const { getSessionUser } = await import("@/lib/auth");
+  const u = await getSessionUser(cookie.split("=")[1]);
+  expect(u).toBeTruthy();
+  return u!.id;
+}
+
+export async function signUp(kind: Kind, name: string = kind): Promise<TestUser> {
+  const { verify, passkey } = await register(kind, name);
+  expect(verify.status, JSON.stringify(verify.body)).toBe(201);
+  const cookie = `hh_session=${verify.cookies.hh_session}`;
+  return { id: await userOf(cookie), kind, name, cookie, passkey };
+}
+
+export async function signIn(user: TestUser): Promise<TestUser> {
+  const r = await authenticate(user.passkey);
   expect(r.status, JSON.stringify(r.body)).toBe(200);
-  const setCookie = r.res.headers.get("set-cookie") ?? "";
-  const cookie = setCookie.split(";")[0]!;
-  const { rows } = await db().query("SELECT id FROM users WHERE lower(email) = lower($1)", [email]);
-  return { id: rows[0].id, email, password, cookie };
+  return { ...user, cookie: `hh_session=${r.cookies.hh_session}` };
 }
 
-export async function createOrg(owner: TestUser, name = "Org"): Promise<string> {
-  const r = await call(orgsRoute.POST, "POST", {}, { cookie: owner.cookie, body: { name } });
+/** An employer account with its company. */
+export async function newEmployer(name = "Employer", company = `${name} Co`): Promise<TestUser & { companyId: string }> {
+  const u = await signUp("employer", name);
+  const r = await call(companyRoute.POST, "POST", {}, { cookie: u.cookie, body: { name: company } });
   expect(r.status, JSON.stringify(r.body)).toBe(201);
-  return r.body.id as string;
+  return { ...u, companyId: r.body.id as string };
 }
 
-/** Invites `user` into `orgId` as `role` and accepts. */
-export async function join(inviter: TestUser, orgId: string, user: TestUser, role: "member" | "admin" = "member"): Promise<void> {
-  const inv = await call(inviteRoute.POST, "POST", { orgId }, { cookie: inviter.cookie, body: { email: user.email, role } });
-  expect(inv.status, JSON.stringify(inv.body)).toBe(201);
-  const token = tokenFrom((await lastMail(user.email)).body, "invite");
-  const acc = await call(acceptRoute.POST, "POST", {}, { cookie: user.cookie, body: { token } });
-  expect(acc.status, JSON.stringify(acc.body)).toBe(200);
+export const newWorker = (name = "Worker") => signUp("worker", name);
+
+export interface Created {
+  offerId: string;
+  link: string;
+  token: string;
 }
 
-export interface StreamBody {
-  id: string;
-  status: string;
-  balance: { earned_zats: number; reserved_zats: number; claimed_zats: number; available_zats: number; available_zec: string; earned_zec: string };
-}
-
-/** 1 ZEC per second (3600 ZEC/hour) so accrual is observable within a test. */
-export async function fastStream(manager: TestUser, orgId: string, recipient: TestUser, extra: Record<string, unknown> = {}): Promise<StreamBody> {
-  const r = await call(streamsRoute.POST, "POST", { orgId }, {
-    cookie: manager.cookie,
-    body: { recipientUserId: recipient.id, rateZec: "3600", ratePeriodSecs: 3600, startAt: null, endAt: null, ...extra },
+/** Creates a stream offer: `totalZec` over `seconds`, starting now (or `startAt`). */
+export async function createStream(employer: TestUser, totalZec = "0.001", seconds = 10, extra: { startAt?: number; workerName?: string } = {}): Promise<Created> {
+  const now = Math.floor(Date.now() / 1000);
+  const startAt = extra.startAt ?? null;
+  const r = await call(streamsRoute.POST, "POST", {}, {
+    cookie: employer.cookie,
+    body: { workerName: extra.workerName ?? "Wendy", totalZec, startAt, endAt: (startAt ?? now) + seconds },
   });
   expect(r.status, JSON.stringify(r.body)).toBe(201);
-  return r.body as unknown as StreamBody;
+  const link = r.body.link as string;
+  return { offerId: (r.body.offer as { id: string }).id, link, token: link.split("/join/")[1]! };
 }
+
+export async function join(worker: TestUser, token: string) {
+  return call(joinRoute.POST, "POST", { token }, { cookie: worker.cookie });
+}
+
+/** Creates a stream and has `worker` join it; returns the stream id. */
+export async function boundStream(employer: TestUser, worker: TestUser, totalZec = "0.001", seconds = 10): Promise<string> {
+  const c = await createStream(employer, totalZec, seconds);
+  const j = await join(worker, c.token);
+  expect(j.status, JSON.stringify(j.body)).toBe(201);
+  return j.body.streamId as string;
+}
+
+export const setAddress = (u: TestUser, streamId: string, address: string) =>
+  call(addressRoute.POST, "POST", { streamId }, { cookie: u.cookie, body: { address } });
+
+export const withdraw = (u: TestUser, streamId: string, idempotencyKey: string = randomUUID(), opts: { origin?: string | null } = {}) =>
+  call(withdrawRoute.POST, "POST", { streamId }, { cookie: u.cookie, body: { idempotencyKey }, ...opts });
+
+export const flow = (u: TestUser, streamId: string): Promise<FlowStream> => payroll.flowStream(u.id, streamId);
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function lifecycle(user: TestUser, streamId: string, action: "pause" | "resume" | "end") {
-  return call(lifecycleRoute.POST, "POST", { streamId, action }, { cookie: user.cookie });
-}
+/** Controls of the MOCK wallet (tests/support/mock-wallet.ts). */
+export const mock = async (path: string, body: unknown = {}) =>
+  (await fetch(`${process.env.MOCK_WALLET_URL}/__mock/${path}`, { method: "POST", body: JSON.stringify(body) })).json() as Promise<{
+    txs_built: number;
+    submits: number;
+    tip: number;
+  }>;
 
-export async function claim(user: TestUser, streamId: string, amountZec: string, idempotencyKey: string = randomUUID()) {
-  return call(claimsRoute.POST, "POST", { streamId }, { cookie: user.cookie, body: { amountZec, idempotencyKey } });
+export async function waitFor<T>(get: () => Promise<T>, ok: (v: T) => boolean, ms = 15_000): Promise<T> {
+  const until = Date.now() + ms;
+  for (;;) {
+    const v = await get();
+    if (ok(v)) return v;
+    if (Date.now() > until) throw new Error(`timed out; last=${JSON.stringify(v)}`);
+    await sleep(250);
+  }
 }

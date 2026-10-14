@@ -30,6 +30,12 @@
 # (`cargo build --features fault-injection`, copied to
 # hushush-payout-wallet-fault.exe); `npm run build` in web; local dev
 # PostgreSQL and secrets in %LOCALAPPDATA%\hushush-dev. TESTNET ONLY.
+# NOTE (Phase 5): this run drove the Phase 2-4 web routes (password sign-up,
+# invitations, claims, quote/pay) through web/scripts/live-payout.mjs. Those
+# routes were removed in Phase 5, so it no longer runs against the current web
+# app; it is kept as the record of how the p3/p4 evidence was produced. The
+# payout-wallet and payroll-api behaviour it exercised is unchanged. The
+# Phase 5 live run is payout-wallet/scripts/live_flow.sh.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)

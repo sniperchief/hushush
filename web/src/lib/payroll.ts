@@ -1,26 +1,19 @@
 import "server-only";
 import { env } from "./env";
 
-// Client for the internal payroll-api (Rust). All payroll rules, accrual and
-// money parsing/formatting happen there; this module only moves JSON.
+// Client for the internal payroll-api (Rust). All payroll rules, accrual,
+// milestones and money parsing/formatting happen there; this module only
+// moves JSON.
 
 export type Role = "owner" | "admin" | "member";
 export type StreamStatus = "active" | "paused" | "ended";
-export type ClaimStatus = "reserved" | "released" | "settled";
+export type OfferStatus = "open" | "bound" | "cancelled";
 /** Only `confirmed` means paid. `submitted` = broadcast, awaiting confirmations. */
 export type PayoutState = "reserved" | "submitted" | "confirmed" | "failed" | "requires_reconciliation";
 
 export interface Membership {
   organization_id: string;
   organization_name: string;
-  role: Role;
-  joined_at: number;
-}
-
-export interface Member {
-  user_id: string;
-  email: string;
-  display_name: string;
   role: Role;
   joined_at: number;
 }
@@ -35,33 +28,6 @@ export interface BalanceView {
   claimed_zec: string;
   available_zats: number;
   available_zec: string;
-}
-
-export interface StreamView {
-  id: string;
-  organization_id: string;
-  organization_name: string;
-  recipient_user_id: string;
-  recipient_display_name: string;
-  recipient_email: string;
-  created_by: string;
-  rate_zats: number;
-  rate_zec: string;
-  rate_period_secs: number;
-  start_at: number;
-  end_at: number | null;
-  status: StreamStatus;
-  ended_at: number | null;
-  created_at: number;
-  balance: BalanceView;
-}
-
-export interface StreamEvent {
-  kind: "created" | "paused" | "resumed" | "ended";
-  actor_user_id: string;
-  occurred_at: number;
-  banked_active_secs_after: number;
-  earned_zats_after: number;
 }
 
 export interface PayoutView {
@@ -86,38 +52,64 @@ export interface PayoutView {
   updated_at: number;
 }
 
-export interface ClaimView {
+/** A stream offer nobody has bound yet (or that was cancelled). */
+export interface OfferView {
   id: string;
-  stream_id: string;
-  requested_by: string;
-  amount_zats: number;
-  amount_zec: string;
-  status: ClaimStatus;
+  organization_id: string;
+  organization_name: string;
+  worker_name: string;
+  total_zats: number;
+  total_zec: string;
+  start_at: number;
+  end_at: number;
   created_at: number;
-  resolved_at: number | null;
-  settlement_ref: string | null;
-  payout: PayoutView | null;
+  status: OfferStatus;
+  stream_id: string | null;
+  cancelled_at: number | null;
 }
 
-export interface StreamDetail {
-  stream: StreamView;
-  events: StreamEvent[];
-  claims: ClaimView[];
+/** What a worker link shows before sign-in. */
+export interface LinkPreview {
+  organization_name: string;
+  worker_name: string;
+  total_zats: number;
+  total_zec: string;
+  start_at: number;
+  end_at: number;
+  status: OfferStatus;
+}
+
+/** A fixed-total stream with a worker. */
+export interface FlowStream {
+  id: string;
+  offer_id: string;
+  organization_id: string;
+  organization_name: string;
+  worker_name: string;
+  recipient_user_id: string;
+  total_zats: number;
+  total_zec: string;
+  start_at: number;
+  end_at: number;
+  status: StreamStatus;
+  ended_at: number | null;
+  balance: BalanceView;
+  milestone_zats: number;
+  /** What "Withdraw" would pay now; null when it is not enabled. */
+  withdrawable_zats: number | null;
+  withdrawable_zec: string | null;
+  address_locked: boolean;
+  /** The locked address — present only for the stream's worker. */
+  address: string | null;
+  /** Newest first. */
+  payouts: PayoutView[];
   payouts_enabled: boolean;
 }
 
-export interface PayoutQuote {
-  claim_id: string;
-  amount_zats: number;
-  amount_zec: string;
-  fee_zats: number | null;
-  fee_zec: string | null;
-  wallet_debit_zats: number | null;
-  valid_recipient: boolean;
-  sufficient: boolean;
-  reason: string | null;
-  network: "testnet";
-  required_confirmations: number;
+export interface EmployerHome {
+  offers: OfferView[];
+  streams: FlowStream[];
+  payouts_enabled: boolean;
 }
 
 export interface PayoutWalletSummary {
@@ -182,33 +174,30 @@ export const payroll = {
     call<{ id: string }>("POST", "/v1/users", null, { email, display_name: displayName }),
   listOrgs: (actor: string) => call<Membership[]>("GET", "/v1/orgs", actor),
   createOrg: (actor: string, name: string) => call<{ id: string }>("POST", "/v1/orgs", actor, { name }),
-  listMembers: (actor: string, org: string) => call<Member[]>("GET", `/v1/orgs/${enc(org)}/members`, actor),
-  addMember: (actor: string, org: string, userId: string, role: Role) =>
-    call<{ ok: true }>("POST", `/v1/orgs/${enc(org)}/members`, actor, { user_id: userId, role }),
-  setMemberRole: (actor: string, org: string, userId: string, role: Role) =>
-    call<{ ok: true }>("PATCH", `/v1/orgs/${enc(org)}/members/${enc(userId)}`, actor, { role }),
-  removeMember: (actor: string, org: string, userId: string) =>
-    call<{ ok: true }>("DELETE", `/v1/orgs/${enc(org)}/members/${enc(userId)}`, actor),
-  listOrgStreams: (actor: string, org: string) => call<StreamView[]>("GET", `/v1/orgs/${enc(org)}/streams`, actor),
-  createStream: (
+  payoutWallet: (actor: string, org: string) => call<PayoutWalletSummary>("GET", `/v1/orgs/${enc(org)}/payout-wallet`, actor),
+
+  // ---- Phase 5 flow ----
+  createOffer: (
     actor: string,
     org: string,
-    req: { recipient_user_id: string; rate_zec: string; rate_period_secs: number; start_at: number | null; end_at: number | null },
-  ) => call<StreamView>("POST", `/v1/orgs/${enc(org)}/streams`, actor, req),
-  myStreams: (actor: string) => call<StreamView[]>("GET", "/v1/me/streams", actor),
-  stream: (actor: string, id: string) => call<StreamDetail>("GET", `/v1/streams/${enc(id)}`, actor),
-  lifecycle: (actor: string, id: string, op: "pause" | "resume" | "end") =>
-    call<StreamView>("POST", `/v1/streams/${enc(id)}/${op}`, actor),
-  reserveClaim: (actor: string, id: string, amountZec: string, idempotencyKey: string) =>
-    call<{ claim: ClaimView; duplicate: boolean }>("POST", `/v1/streams/${enc(id)}/claims`, actor, {
-      amount_zec: amountZec,
+    req: { worker_name: string; total_zec: string; start_at: number | null; end_at: number; link_hash: string },
+  ) => call<OfferView>("POST", `/v1/orgs/${enc(org)}/offers`, actor, req),
+  employerHome: (actor: string, org: string) => call<EmployerHome>("GET", `/v1/orgs/${enc(org)}/home`, actor),
+  cancelOffer: (actor: string, offer: string) => call<OfferView>("POST", `/v1/offers/${enc(offer)}/cancel`, actor),
+  relinkOffer: (actor: string, offer: string, linkHash: string) =>
+    call<OfferView>("POST", `/v1/offers/${enc(offer)}/relink`, actor, { link_hash: linkHash }),
+  linkPreview: (linkHash: string) => call<LinkPreview>("GET", `/v1/links/${enc(linkHash)}`, null),
+  bindLink: (actor: string, linkHash: string) =>
+    call<{ stream_id: string; duplicate: boolean }>("POST", `/v1/links/${enc(linkHash)}/bind`, actor),
+  workerStreams: (actor: string) => call<FlowStream[]>("GET", "/v1/me/flow-streams", actor),
+  flowStream: (actor: string, id: string) => call<FlowStream>("GET", `/v1/flow-streams/${enc(id)}`, actor),
+  endStream: (actor: string, id: string) => call<unknown>("POST", `/v1/streams/${enc(id)}/end`, actor),
+  setAddress: (actor: string, id: string, address: string) =>
+    call<FlowStream>("POST", `/v1/flow-streams/${enc(id)}/address`, actor, { address }),
+  // Exactly-once: a repeat, or any request while a withdrawal is unfinished,
+  // returns that withdrawal (duplicate: true).
+  withdraw: (actor: string, id: string, idempotencyKey: string) =>
+    call<{ payout: PayoutView; duplicate: boolean }>("POST", `/v1/flow-streams/${enc(id)}/withdraw`, actor, {
       idempotency_key: idempotencyKey,
     }),
-  releaseClaim: (actor: string, claimId: string) => call<ClaimView>("POST", `/v1/claims/${enc(claimId)}/release`, actor),
-  quotePayout: (actor: string, claimId: string, address: string) =>
-    call<PayoutQuote>("POST", `/v1/claims/${enc(claimId)}/payout/quote`, actor, { address }),
-  // Idempotent per claim: a repeat returns the existing payout (duplicate: true).
-  requestPayout: (actor: string, claimId: string, address: string) =>
-    call<{ payout: PayoutView; duplicate: boolean }>("POST", `/v1/claims/${enc(claimId)}/payout`, actor, { address }),
-  payoutWallet: (actor: string, org: string) => call<PayoutWalletSummary>("GET", `/v1/orgs/${enc(org)}/payout-wallet`, actor),
 };

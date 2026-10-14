@@ -327,3 +327,61 @@ pub struct PayoutEvent {
     pub occurred_at: i64,
     pub detail: Option<String>,
 }
+
+// ---- Phase 5 flow: stream offers, locked payout addresses ---------------------------
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum OfferStatus {
+    /// Waiting for the worker to open the link and sign in.
+    Open,
+    /// A worker opened the link; the payroll stream exists.
+    Bound,
+    /// Cancelled by the employer before anyone bound it.
+    Cancelled,
+}
+
+/// What an employer creates: a worker's display name and the stream's terms.
+/// Bound to a worker (and turned into a payroll stream) through the worker link.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct StreamOffer {
+    pub id: String,
+    pub organization_id: String,
+    pub organization_name: String,
+    pub created_by: String,
+    pub worker_name: String,
+    /// The stream pays exactly this over `end_at - start_at`.
+    pub total_zats: i64,
+    pub start_at: i64,
+    pub end_at: i64,
+    pub created_at: i64,
+    pub stream_id: Option<String>,
+    pub bound_user_id: Option<String>,
+    pub bound_at: Option<i64>,
+    pub cancelled_at: Option<i64>,
+}
+
+impl StreamOffer {
+    pub fn status(&self) -> OfferStatus {
+        if self.stream_id.is_some() {
+            OfferStatus::Bound
+        } else if self.cancelled_at.is_some() {
+            OfferStatus::Cancelled
+        } else {
+            OfferStatus::Open
+        }
+    }
+}
+
+/// A stream's payout address, set once by its recipient and locked for the
+/// life of the stream. `address_sealed` is opaque to the engine (payroll-api
+/// encrypts it); `address_fingerprint` is
+/// [`recipient_fingerprint`](crate::payout::recipient_fingerprint)`(stream_id, address)`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PayoutAddress {
+    pub stream_id: String,
+    pub set_by: String,
+    pub address_fingerprint: String,
+    pub address_sealed: String,
+    pub set_at: i64,
+}

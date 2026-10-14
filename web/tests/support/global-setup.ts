@@ -80,6 +80,7 @@ export default async function setup(project: TestProject) {
       WALLET_URL: wallet.url,
       WALLET_API_TOKEN: walletToken,
       PAYOUT_ENABLED_ORGS: "*",
+      PAYOUT_ADDRESS_KEY: randomBytes(32).toString("hex"),
       PAYOUT_POLL_SECS: "1",
       PAYOUT_CONFIRMATIONS: "3",
       WALLET_TIMEOUT_SECS: "5",

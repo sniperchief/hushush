@@ -83,12 +83,12 @@ fn balance_from(s: &Stream, now: i64, reserved: i64, claimed: i64) -> Result<Bal
     })
 }
 
-fn balance_in<T: StoreTx>(tx: &mut T, s: &Stream, now: i64) -> Result<Balance> {
+pub(crate) fn balance_in<T: StoreTx>(tx: &mut T, s: &Stream, now: i64) -> Result<Balance> {
     let (reserved, claimed) = tx.claim_sums(&s.id)?;
     balance_from(s, now, reserved, claimed)
 }
 
-fn record_event<T: StoreTx>(
+pub(crate) fn record_event<T: StoreTx>(
     tx: &mut T,
     s: &Stream,
     kind: &str,
@@ -374,6 +374,14 @@ impl<B: Backend> Payroll<B> {
         let s = load_stream(&mut tx, id, true)?;
         require_can_view(&mut tx, actor, &s)?;
         require_manager(&mut tx, actor, &s.organization_id)?;
+        // A fixed-total stream (Phase 5) pays exactly its total by its end
+        // date; pausing would make that unreachable. It can only be ended.
+        if !matches!(op, Op::End) && tx.offer_by_stream(id)?.is_some() {
+            return Err(PayrollError::InvalidState(
+                "streams with a fixed total cannot be paused or resumed; end the stream instead"
+                    .into(),
+            ));
+        }
         if now < s.last_event_at {
             return Err(PayrollError::ClockSkew);
         }
@@ -474,6 +482,13 @@ impl<B: Backend> Payroll<B> {
         if actor != s.recipient_user_id {
             return Err(PayrollError::Forbidden(
                 "only the stream recipient can claim wages",
+            ));
+        }
+        // Fixed-total streams (Phase 5) pay out only through `withdraw`, which
+        // enforces the 20% milestone rule and the locked payout address.
+        if tx.offer_by_stream(stream_id)?.is_some() {
+            return Err(PayrollError::InvalidState(
+                "this stream pays out through withdrawals".into(),
             ));
         }
 
@@ -602,7 +617,7 @@ impl<B: Backend> Payroll<B> {
     }
 }
 
-fn listings(rows: Vec<ListedRow>, now: i64) -> Result<Vec<StreamListing>> {
+pub(crate) fn listings(rows: Vec<ListedRow>, now: i64) -> Result<Vec<StreamListing>> {
     rows.into_iter()
         .map(|r| {
             let balance = balance_from(&r.stream, now, r.reserved, r.claimed)?;

@@ -1,26 +1,29 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignupForm } from "@/components/forms/auth-forms";
+import { PasskeySignUp } from "@/components/passkey";
 import { Card } from "@/components/ui";
-import { currentUser, safeNext } from "@/lib/session";
+import { currentUser } from "@/lib/session";
 
-export const metadata = { title: "Create account" };
+export const metadata = { title: "Employer sign-up" };
 
-type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
-
-export default async function SignupPage({ searchParams }: Props) {
-  const sp = await searchParams;
-  const next = safeNext(sp.next);
-  if (await currentUser()) redirect(next);
-  const email = typeof sp.email === "string" ? sp.email : undefined;
+export default async function SignupPage() {
+  if (await currentUser()) redirect("/app");
   return (
-    <div className="mx-auto max-w-md">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Create your account</h1>
+    <div className="mx-auto max-w-md space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Create an employer account</h1>
+        <p className="mt-1 text-sm text-ink-soft">Step 1 of 2: your passkey. Next you&apos;ll name your company.</p>
+      </div>
       <Card>
-        <SignupForm next={next} email={email} />
+        <PasskeySignUp kind="employer" />
       </Card>
-      <p className="mt-4 text-center text-sm text-ink-soft">
-        Have an account? <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-ink underline">Sign in</Link>
+      <p className="text-center text-sm text-ink-soft">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-ink underline">
+          Sign in
+        </Link>
+        <br />
+        Being paid? Use the worker link your employer sent you.
       </p>
     </div>
   );

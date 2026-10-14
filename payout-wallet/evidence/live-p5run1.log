@@ -1,0 +1,50 @@
+[15:58:55] === hushush Phase 5 live flow run p5run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, stream 0.001 ZEC over 600s)
+[15:58:56] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4501860 sapling_activation=280000 branch_id=77190ad9
+[15:58:59] database hushush_live_p5run1 created
+[15:59:23] services up: wallet pid 33732, payroll-api pid 33743, web pid 33755
+[15:59:32] treasury total=2080000 spendable=2080000; carol total=1800000
+[15:59:33] === 1-2: employer, stream, worker link, worker joins
+[15:59:35] setup: {"streamId":"68876499-9dcf-4d23-8712-f17195cd97a0","total_zec":"0.00100000","start_at":1791993575,"end_at":1791994175,"milestone_zats":20000,"company":"Live Testnet Co fb64"}
+[15:59:39] invalid address: {"status":422,"error":"invalid_recipient","message":"not a valid Zcash address for this network"}
+[15:59:43] carol's address: {"status":200,"address_locked":true}
+[15:59:45] change to another address: {"status":409,"error":"conflict","message":"the payout address for this stream is locked"}
+[15:59:46] === 3: before the first milestone
+[15:59:48] early withdraw: {"statuses":[409],"created":0,"payout_ids":[],"states":["invalid_state"],"txid":null,"messages":["withdrawals unlock at each 20% of the stream's total (or after it ends)"]}
+[15:59:49] === 4: at 20%, six concurrent taps
+[16:01:37] milestone: {"withdrawable_zats":20333,"earned_zats":20333,"status":"active"}
+[16:02:28] 6 concurrent taps: {"statuses":[200,201,200,200,200,200],"created":1,"payout_ids":["8016d827-6dc2-4f71-bf3d-c951893e1053"],"states":["reserved","submitted","reserved","reserved","reserved","reserved"],"amount_zats":20500,"txid":"d3b41b6319ddc326210a990b9843cb3ee8999c2dc38a832c0193e7bb7c5f9b0d","messages":[]}
+one withdrawal created; the other five got the same withdrawal back
+[16:02:30] withdrawal 1: payout 8016d827-6dc2-4f71-bf3d-c951893e1053, 20500 zats
+[16:02:30] === 5: the employer ends the stream early
+[16:02:52] end: {"status":"ended","earned_zats":32833,"available_zats":12333,"withdrawable_zats":null}
+[16:02:56] remainder withdraw while #1 is unfinished: {"statuses":[200],"created":0,"payout_ids":["8016d827-6dc2-4f71-bf3d-c951893e1053"],"states":["submitted"],"amount_zats":20500,"txid":"d3b41b6319ddc326210a990b9843cb3ee8999c2dc38a832c0193e7bb7c5f9b0d","messages":[]}
+[16:02:56] === 6: confirmations, then the remainder
+[16:02:58] payout 8016d827: submitted 0/10
+[16:03:18] payout 8016d827: submitted 2/10 mined 4501874
+[16:03:38] payout 8016d827: submitted 3/10 mined 4501874
+[16:03:48] payout 8016d827: submitted 4/10 mined 4501874
+[16:04:39] payout 8016d827: submitted 5/10 mined 4501874
+[16:04:49] payout 8016d827: submitted 7/10 mined 4501874
+[16:05:20] payout 8016d827: submitted 8/10 mined 4501874
+[16:05:40] payout 8016d827: confirmed 11/10 mined 4501874
+[16:06:21] remainder (< 20%) after the end, 2 taps: {"statuses":[201,200],"created":1,"payout_ids":["2ca48955-cccd-48f7-a2d9-6c2d07eac067"],"states":["submitted","reserved"],"amount_zats":12333,"txid":"f487d0cc1ac13fa7cd2c64d6ba38314faf20e840b134c723fe2326930bad76d3","messages":[]}
+[16:06:24] payout 2ca48955: submitted 0/10
+[16:08:46] payout 2ca48955: submitted 1/10 mined 4501889
+[16:08:56] payout 2ca48955: submitted 2/10 mined 4501889
+[16:09:27] payout 2ca48955: submitted 3/10 mined 4501889
+[16:10:37] payout 2ca48955: submitted 5/10 mined 4501889
+[16:10:48] payout 2ca48955: submitted 8/10 mined 4501889
+[16:11:08] payout 2ca48955: submitted 9/10 mined 4501889
+[16:11:18] payout 2ca48955: confirmed 10/10 mined 4501889
+[16:11:18] === verification
+[16:11:19] stream: {"status":"ended","balance":{"as_of":1791994279,"earned_zats":32833,"earned_zec":"0.00032833","reserved_zats":0,"reserved_zec":"0.00000000","claimed_zats":32833,"claimed_zec":"0.00032833","available_zats":0,"available_zec":"0.00000000"},"withdrawable_zats":null,"address_locked":true,"payouts":[{"id":"2ca48955-cccd-48f7-a2d9-6c2d07eac067","state":"confirmed","amount_zats":12333,"txid":"f487d0cc1ac13fa7cd2c64d6ba38314faf20e840b134c723fe2326930bad76d3","confirmations":10,"fee_zats":10000},{"id":"8016d827-6dc2-4f71-bf3d-c951893e1053","state":"confirmed","amount_zats":20500,"txid":"d3b41b6319ddc326210a990b9843cb3ee8999c2dc38a832c0193e7bb7c5f9b0d","confirmations":11,"fee_zats":10000}]}
+everything earned was withdrawn, in two confirmed payouts
+carol received exactly once: 12333 zats in f487d0cc1ac13fa7cd2c64d6ba38314faf20e840b134c723fe2326930bad76d3 memo 'hushush payout 2ca48955-cccd-48f7-a2d9-6c2d07eac067'
+[16:11:28] treasury transactions carrying payout 2ca48955-cccd-48f7-a2d9-6c2d07eac067's memo: 1
+carol received exactly once: 20500 zats in d3b41b6319ddc326210a990b9843cb3ee8999c2dc38a832c0193e7bb7c5f9b0d memo 'hushush payout 8016d827-6dc2-4f71-bf3d-c951893e1053'
+[16:11:31] treasury transactions carrying payout 8016d827-6dc2-4f71-bf3d-c951893e1053's memo: 1
+[16:11:32] carol total 1800000 → 1832833 (delta 32833, expected 32833)
+[16:11:58] treasury total 2080000 → 2027167 (delta 52833, expected 52833 = withdrawals + fees)
+[16:11:59] pages: {"worker_page_200":true,"worker_sees_paid":true,"worker_sees_locked_address":true,"employer_home_200":true,"employer_sees_payments":true,"employer_sees_shared_treasury":true,"employer_never_sees_address":true,"worker_txids_shown":true}
+[16:11:59] paid txids: f487d0cc1ac13fa7cd2c64d6ba38314faf20e840b134c723fe2326930bad76d3 d3b41b6319ddc326210a990b9843cb3ee8999c2dc38a832c0193e7bb7c5f9b0d
+[16:12:00] PASS: Phase 5 flow live on testnet — passkey accounts, worker link, locked address, milestone + remainder withdrawals, exactly once

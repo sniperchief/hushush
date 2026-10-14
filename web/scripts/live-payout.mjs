@@ -1,3 +1,6 @@
+// NOTE (Phase 5): drives web routes removed in Phase 5 (see the note in
+// payout-wallet/scripts/live_e2e.sh); kept as the record of the p3/p4 runs.
+// The Phase 5 live driver is scripts/live-flow.mjs.
 // LIVE TESTNET payout driver for scripts/phase3_live_e2e.sh (repo root).
 // Drives the RUNNING app (`next start`) over real HTTP with real cookies, the
 // same way a browser would; reads payout progress from payroll-api.

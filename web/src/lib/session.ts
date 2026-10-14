@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSessionUser, sessionCookieName, type SessionUser } from "./auth";
 
-/** The signed-in, verified user for a server component, or null. */
+/** The signed-in account for a server component, or null. */
 export async function currentUser(): Promise<SessionUser | null> {
   const jar = await cookies();
   return getSessionUser(jar.get(sessionCookieName())?.value);

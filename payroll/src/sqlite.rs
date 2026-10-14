@@ -601,6 +601,151 @@ impl StoreTx for SqliteTx<'_> {
         })?;
         Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
+
+    fn insert_offer(&mut self, o: &StreamOffer, link_hash: &str) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO stream_offers (id, organization_id, created_by, worker_name, total_zats,
+                     start_at, end_at, link_hash, created_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                params![
+                    o.id,
+                    o.organization_id,
+                    o.created_by,
+                    o.worker_name,
+                    o.total_zats,
+                    o.start_at,
+                    o.end_at,
+                    link_hash,
+                    o.created_at
+                ],
+            )
+            .map_err(|e| unique_to_conflict(e, "worker link already in use"))?;
+        Ok(())
+    }
+
+    fn load_offer(&mut self, id: &str, _lock: bool) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.id = ?1", id)
+    }
+
+    fn offer_by_link(&mut self, link_hash: &str, _lock: bool) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.link_hash = ?1", link_hash)
+    }
+
+    fn offer_by_stream(&mut self, stream_id: &str) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.stream_id = ?1", stream_id)
+    }
+
+    fn offers_of_org(&mut self, org: &str) -> Result<Vec<StreamOffer>> {
+        let mut q = self.0.prepare(&format!(
+            "SELECT {OFFER_COLS} FROM stream_offers f JOIN organizations o ON o.id = f.organization_id
+             WHERE f.organization_id = ?1 ORDER BY f.created_at DESC, f.id"
+        ))?;
+        let rows = q.query_map([org], offer_from_row)?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    fn bind_offer_cas(&mut self, id: &str, stream_id: &str, user: &str, now: i64) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE stream_offers SET stream_id = ?1, bound_user_id = ?2, bound_at = ?3
+             WHERE id = ?4 AND stream_id IS NULL AND cancelled_at IS NULL",
+            params![stream_id, user, now, id],
+        )?)
+    }
+
+    fn cancel_offer_cas(&mut self, id: &str, now: i64) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE stream_offers SET cancelled_at = ?1
+             WHERE id = ?2 AND stream_id IS NULL AND cancelled_at IS NULL",
+            params![now, id],
+        )?)
+    }
+
+    fn relink_offer_cas(&mut self, id: &str, link_hash: &str) -> Result<usize> {
+        self.0
+            .execute(
+                "UPDATE stream_offers SET link_hash = ?1
+                 WHERE id = ?2 AND stream_id IS NULL AND cancelled_at IS NULL",
+                params![link_hash, id],
+            )
+            .map_err(|e| unique_to_conflict(e, "worker link already in use"))
+    }
+
+    fn insert_payout_address(&mut self, a: &PayoutAddress) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO stream_payout_addresses (stream_id, set_by, address_fingerprint,
+                     address_sealed, set_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    a.stream_id,
+                    a.set_by,
+                    a.address_fingerprint,
+                    a.address_sealed,
+                    a.set_at
+                ],
+            )
+            .map_err(|e| {
+                unique_to_conflict(e, "the payout address for this stream is already set")
+            })?;
+        Ok(())
+    }
+
+    fn payout_address(&mut self, stream_id: &str) -> Result<Option<PayoutAddress>> {
+        Ok(self
+            .0
+            .query_row(
+                "SELECT stream_id, set_by, address_fingerprint, address_sealed, set_at
+                 FROM stream_payout_addresses WHERE stream_id = ?1",
+                [stream_id],
+                |r| {
+                    Ok(PayoutAddress {
+                        stream_id: r.get(0)?,
+                        set_by: r.get(1)?,
+                        address_fingerprint: r.get(2)?,
+                        address_sealed: r.get(3)?,
+                        set_at: r.get(4)?,
+                    })
+                },
+            )
+            .optional()?)
+    }
+}
+
+impl SqliteTx<'_> {
+    fn offer_where(&mut self, cond: &str, arg: &str) -> Result<Option<StreamOffer>> {
+        Ok(self
+            .0
+            .query_row(
+                &format!(
+                    "SELECT {OFFER_COLS} FROM stream_offers f
+                     JOIN organizations o ON o.id = f.organization_id WHERE {cond}"
+                ),
+                [arg],
+                offer_from_row,
+            )
+            .optional()?)
+    }
+}
+
+const OFFER_COLS: &str = "f.id, f.organization_id, o.name, f.created_by, f.worker_name, f.total_zats,      f.start_at, f.end_at, f.created_at, f.stream_id, f.bound_user_id, f.bound_at, f.cancelled_at";
+
+fn offer_from_row(r: &Row<'_>) -> rusqlite::Result<StreamOffer> {
+    Ok(StreamOffer {
+        id: r.get(0)?,
+        organization_id: r.get(1)?,
+        organization_name: r.get(2)?,
+        created_by: r.get(3)?,
+        worker_name: r.get(4)?,
+        total_zats: r.get(5)?,
+        start_at: r.get(6)?,
+        end_at: r.get(7)?,
+        created_at: r.get(8)?,
+        stream_id: r.get(9)?,
+        bound_user_id: r.get(10)?,
+        bound_at: r.get(11)?,
+        cancelled_at: r.get(12)?,
+    })
 }
 
 const PAYOUT_COLS: &str = "id, claim_id, stream_id, requested_by, amount_zats, recipient_fingerprint, \

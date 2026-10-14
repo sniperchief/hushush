@@ -11,7 +11,9 @@
 //!   (Phase 3, `payouts` module), and payouts are enabled only when the
 //!   payout wallet service is configured (`WALLET_URL`).
 
+mod flow;
 mod payouts;
+mod seal;
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -213,7 +215,7 @@ async fn with_db<T: Send + 'static>(
 // ---- views ---------------------------------------------------------------------
 
 #[derive(Serialize)]
-struct BalanceView {
+pub(crate) struct BalanceView {
     as_of: i64,
     earned_zats: i64,
     earned_zec: String,
@@ -663,6 +665,17 @@ fn app(state: AppState) -> Router {
         .route("/v1/claims/{id}/payout/quote", post(payouts::quote))
         .route("/v1/claims/{id}/payout", post(payouts::request))
         .route("/v1/orgs/{org}/payout-wallet", get(payouts::wallet_summary))
+        // Phase 5 flow
+        .route("/v1/orgs/{org}/offers", post(flow::create_offer))
+        .route("/v1/orgs/{org}/home", get(flow::employer_home))
+        .route("/v1/offers/{id}/cancel", post(flow::cancel_offer))
+        .route("/v1/offers/{id}/relink", post(flow::relink_offer))
+        .route("/v1/links/{hash}", get(flow::link_preview))
+        .route("/v1/links/{hash}/bind", post(flow::bind_link))
+        .route("/v1/me/flow-streams", get(flow::worker_streams))
+        .route("/v1/flow-streams/{id}", get(flow::flow_stream))
+        .route("/v1/flow-streams/{id}/address", post(flow::set_address))
+        .route("/v1/flow-streams/{id}/withdraw", post(flow::withdraw))
         .with_state(state)
 }
 

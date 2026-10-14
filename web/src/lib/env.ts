@@ -20,6 +20,14 @@ export const env = {
   get appUrl() {
     return required("APP_URL").replace(/\/+$/, "");
   },
+  /** Public origin (scheme://host[:port]) — the WebAuthn expected origin. */
+  get appOrigin() {
+    return new URL(this.appUrl).origin;
+  },
+  /** WebAuthn Relying Party ID: the app's host name unless overridden. */
+  get rpId() {
+    return process.env.WEBAUTHN_RP_ID || new URL(this.appUrl).hostname;
+  },
   get smtpUrl() {
     return process.env.SMTP_URL || undefined;
   },

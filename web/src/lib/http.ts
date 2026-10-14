@@ -10,7 +10,8 @@ export function json(data: unknown, status = 200): NextResponse {
   return NextResponse.json(data, { status, headers: { "cache-control": "no-store" } });
 }
 
-function errorResponse(e: unknown): NextResponse {
+/** Maps an error to its JSON response (AppError, payroll-api, validation). */
+export function toResponse(e: unknown): NextResponse {
   if (e instanceof AppError) return json({ error: e.code, message: e.message }, e.status);
   if (e instanceof PayrollApiError) {
     // payroll-api messages are written for end users; internal errors are opaque.
@@ -66,7 +67,7 @@ export function mutation<Ctx>(fn: (req: NextRequest, ctx: Ctx) => Promise<NextRe
       assertSameOrigin(req);
       return await fn(req, ctx);
     } catch (e) {
-      return errorResponse(e);
+      return toResponse(e);
     }
   };
 }
@@ -86,6 +87,27 @@ export function clearSessionCookie(res: NextResponse): void {
     httpOnly: true,
     secure: env.appUrl.startsWith("https://"),
     sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
+/** Short-lived cookie holding a pending passkey ceremony's handle. */
+export function setCeremonyCookie(res: NextResponse, name: string, handle: string, maxAgeSecs: number): void {
+  res.cookies.set(name, handle, {
+    httpOnly: true,
+    secure: env.appUrl.startsWith("https://"),
+    sameSite: "strict",
+    path: "/",
+    maxAge: maxAgeSecs,
+  });
+}
+
+export function clearCookie(res: NextResponse, name: string): void {
+  res.cookies.set(name, "", {
+    httpOnly: true,
+    secure: env.appUrl.startsWith("https://"),
+    sameSite: "strict",
     path: "/",
     maxAge: 0,
   });

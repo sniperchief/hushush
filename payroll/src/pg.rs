@@ -738,6 +738,153 @@ impl StoreTx for PgTx<'_> {
             })
             .collect()
     }
+
+    fn insert_offer(&mut self, o: &StreamOffer, link_hash: &str) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO stream_offers (id, organization_id, created_by, worker_name, total_zats,
+                     start_at, end_at, link_hash, created_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+                &[
+                    &o.id,
+                    &o.organization_id,
+                    &o.created_by,
+                    &o.worker_name,
+                    &o.total_zats,
+                    &o.start_at,
+                    &o.end_at,
+                    &link_hash,
+                    &o.created_at,
+                ],
+            )
+            .map_err(|e| unique_to_conflict(e, "worker link already in use"))?;
+        Ok(())
+    }
+
+    fn load_offer(&mut self, id: &str, lock: bool) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.id = $1", id, lock)
+    }
+
+    fn offer_by_link(&mut self, link_hash: &str, lock: bool) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.link_hash = $1", link_hash, lock)
+    }
+
+    fn offer_by_stream(&mut self, stream_id: &str) -> Result<Option<StreamOffer>> {
+        self.offer_where("f.stream_id = $1", stream_id, false)
+    }
+
+    fn offers_of_org(&mut self, org: &str) -> Result<Vec<StreamOffer>> {
+        self.0
+            .query(
+                &format!(
+                    "SELECT {OFFER_COLS} FROM stream_offers f
+                     JOIN organizations o ON o.id = f.organization_id
+                     WHERE f.organization_id = $1 ORDER BY f.created_at DESC, f.id"
+                ),
+                &[&org],
+            )?
+            .iter()
+            .map(offer_from_row)
+            .collect()
+    }
+
+    fn bind_offer_cas(&mut self, id: &str, stream_id: &str, user: &str, now: i64) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE stream_offers SET stream_id = $1, bound_user_id = $2, bound_at = $3
+             WHERE id = $4 AND stream_id IS NULL AND cancelled_at IS NULL",
+            &[&stream_id, &user, &now, &id],
+        )? as usize)
+    }
+
+    fn cancel_offer_cas(&mut self, id: &str, now: i64) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE stream_offers SET cancelled_at = $1
+             WHERE id = $2 AND stream_id IS NULL AND cancelled_at IS NULL",
+            &[&now, &id],
+        )? as usize)
+    }
+
+    fn relink_offer_cas(&mut self, id: &str, link_hash: &str) -> Result<usize> {
+        Ok(self
+            .0
+            .execute(
+                "UPDATE stream_offers SET link_hash = $1
+                 WHERE id = $2 AND stream_id IS NULL AND cancelled_at IS NULL",
+                &[&link_hash, &id],
+            )
+            .map_err(|e| unique_to_conflict(e, "worker link already in use"))? as usize)
+    }
+
+    fn insert_payout_address(&mut self, a: &PayoutAddress) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO stream_payout_addresses (stream_id, set_by, address_fingerprint,
+                     address_sealed, set_at)
+                 VALUES ($1, $2, $3, $4, $5)",
+                &[
+                    &a.stream_id,
+                    &a.set_by,
+                    &a.address_fingerprint,
+                    &a.address_sealed,
+                    &a.set_at,
+                ],
+            )
+            .map_err(|e| {
+                unique_to_conflict(e, "the payout address for this stream is already set")
+            })?;
+        Ok(())
+    }
+
+    fn payout_address(&mut self, stream_id: &str) -> Result<Option<PayoutAddress>> {
+        match self.0.query_opt(
+            "SELECT stream_id, set_by, address_fingerprint, address_sealed, set_at
+             FROM stream_payout_addresses WHERE stream_id = $1",
+            &[&stream_id],
+        )? {
+            Some(r) => Ok(Some(PayoutAddress {
+                stream_id: r.try_get(0)?,
+                set_by: r.try_get(1)?,
+                address_fingerprint: r.try_get(2)?,
+                address_sealed: r.try_get(3)?,
+                set_at: r.try_get(4)?,
+            })),
+            None => Ok(None),
+        }
+    }
+}
+
+impl PgTx<'_> {
+    fn offer_where(&mut self, cond: &str, arg: &str, lock: bool) -> Result<Option<StreamOffer>> {
+        let sql = format!(
+            "SELECT {OFFER_COLS} FROM stream_offers f
+             JOIN organizations o ON o.id = f.organization_id WHERE {cond}{}",
+            if lock { " FOR UPDATE OF f" } else { "" }
+        );
+        match self.0.query_opt(&sql, &[&arg])? {
+            Some(r) => Ok(Some(offer_from_row(&r)?)),
+            None => Ok(None),
+        }
+    }
+}
+
+const OFFER_COLS: &str = "f.id, f.organization_id, o.name, f.created_by, f.worker_name, f.total_zats,      f.start_at, f.end_at, f.created_at, f.stream_id, f.bound_user_id, f.bound_at, f.cancelled_at";
+
+fn offer_from_row(r: &Row) -> Result<StreamOffer> {
+    Ok(StreamOffer {
+        id: r.try_get(0)?,
+        organization_id: r.try_get(1)?,
+        organization_name: r.try_get(2)?,
+        created_by: r.try_get(3)?,
+        worker_name: r.try_get(4)?,
+        total_zats: r.try_get(5)?,
+        start_at: r.try_get(6)?,
+        end_at: r.try_get(7)?,
+        created_at: r.try_get(8)?,
+        stream_id: r.try_get(9)?,
+        bound_user_id: r.try_get(10)?,
+        bound_at: r.try_get(11)?,
+        cancelled_at: r.try_get(12)?,
+    })
 }
 
 const PAYOUT_COLS: &str = "id, claim_id, stream_id, requested_by, amount_zats, recipient_fingerprint, \

@@ -23,6 +23,11 @@ pub const MIGRATIONS: &[Migration] = &[
         name: "0002_payouts",
         sql: include_str!("../migrations/0002_payouts.sql"),
     },
+    Migration {
+        version: 3,
+        name: "0003_flow",
+        sql: include_str!("../migrations/0003_flow.sql"),
+    },
 ];
 
 pub fn latest_version() -> i64 {
@@ -80,6 +85,11 @@ pub const PG_MIGRATIONS: &[Migration] = &[
         version: 3,
         name: "0003_rls",
         sql: include_str!("../migrations_pg/0003_rls.sql"),
+    },
+    Migration {
+        version: 4,
+        name: "0004_flow",
+        sql: include_str!("../migrations_pg/0004_flow.sql"),
     },
 ];
 
