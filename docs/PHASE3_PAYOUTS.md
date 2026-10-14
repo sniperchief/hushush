@@ -265,8 +265,31 @@ Files per wallet: `wallets/<name>/data.sqlite` (wallet DB),
 | `PAYOUT_POLL_SECS` | `20` | worker interval |
 | `WALLET_SUBMIT_TIMEOUT_SECS` / `WALLET_TIMEOUT_SECS` | `300` / `60` | |
 
-The web app needs nothing new. PostgreSQL migration `0002_payouts` is applied
-by payroll-api at start-up (SQLite: on open).
+PostgreSQL migrations `0002_payouts` and `0003_rls` are applied by
+payroll-api at start-up (SQLite: `0002` on open). The web app's
+`0002_rls.sql` is applied by `npm run db:migrate`.
+
+### Hosted PostgreSQL (e.g. Supabase)
+
+Hosted providers often sign the database certificate with their own CA and
+put a connection pooler in front. Both services support that:
+
+| Variable | Service | |
+|---|---|---|
+| `PAYROLL_DATABASE_CA_PEM` (PEM text) or `PAYROLL_DATABASE_CA_FILE` (path) | payroll-api | extra trusted CA; TLS becomes mandatory and fully verified |
+| `PAYROLL_DB_POOL_SIZE` | payroll-api | default `16`; connections are opened on demand; use about `5` behind a pooler |
+| `DATABASE_CA_PEM` (PEM text) | web app, migrator, test harness, `scripts/smoke.mjs`, `scripts/check-db.mjs` | replaces the URL's `sslmode` with full verification against this CA |
+| `DATABASE_POOL_MAX` | web app | default `10`; about `2` on serverless (Vercel) |
+
+Literal `\n` sequences in the PEM variables are accepted (single-line secret
+stores).
+
+Every table has **row-level security enabled with no policies**. The app's own role owns the tables and bypasses RLS. Any other role sees nothing, including platform API roles such as Supabase's `anon` and `authenticated`.
+
+On Supabase, use the **session pooler** connection string (port 5432). Don't use the transaction pooler (port 6543): payroll-api uses prepared statements.
+
+Before deploying, run `node web/scripts/check-db.mjs` against the real database.
+All of this was verified against a TLS-only PostgreSQL whose certificate is signed by a private CA: web suite 56/56, payroll PostgreSQL suites 101/101, and an API-role probe saw 0 rows in all 16 tables.
 
 ## 7. Operating the payout wallet (testnet)
 

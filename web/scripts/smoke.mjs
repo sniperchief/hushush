@@ -8,7 +8,15 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 
 const APP = process.env.APP_URL ?? "http://localhost:3000";
-const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
+// Same TLS rule as src/lib/pg-config.ts (DATABASE_CA_PEM, e.g. Supabase's root CA).
+function dbConfig(url) {
+  const pem = (process.env.DATABASE_CA_PEM ?? "").replace(/\\n/g, "\n").trim();
+  if (!pem) return { connectionString: url };
+  const u = new URL(url);
+  for (const k of ["sslmode", "sslrootcert", "sslcert", "sslkey", "uselibpqcompat"]) u.searchParams.delete(k);
+  return { connectionString: u.toString(), ssl: { ca: pem, rejectUnauthorized: true } };
+}
+const db = new pg.Client(dbConfig(process.env.DATABASE_URL));
 await db.connect();
 
 let step = 0;

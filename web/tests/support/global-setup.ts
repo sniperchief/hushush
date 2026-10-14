@@ -10,6 +10,7 @@ import path from "node:path";
 import pg from "pg";
 import type { TestProject } from "vitest/node";
 import { migrate } from "../../scripts/migrate.ts";
+import { pgConfig } from "../../src/lib/pg-config.ts";
 import { startMockWallet } from "./mock-wallet.ts";
 
 declare module "vitest" {
@@ -54,7 +55,7 @@ export default async function setup(project: TestProject) {
   }
 
   // Fresh schema every run.
-  const c = new pg.Client({ connectionString: dbUrl });
+  const c = new pg.Client(pgConfig(dbUrl));
   await c.connect();
   await c.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
   await c.end();

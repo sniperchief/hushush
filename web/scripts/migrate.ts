@@ -4,11 +4,12 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import pg from "pg";
+import { pgConfig } from "../src/lib/pg-config.ts";
 
 export async function migrate(databaseUrl: string, log = console.log): Promise<string[]> {
   const dir = path.resolve(import.meta.dirname, "..", "migrations");
   const files = readdirSync(dir).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort();
-  const client = new pg.Client({ connectionString: databaseUrl });
+  const client = new pg.Client(pgConfig(databaseUrl));
   await client.connect();
   const applied: string[] = [];
   try {

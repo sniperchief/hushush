@@ -76,6 +76,11 @@ pub const PG_MIGRATIONS: &[Migration] = &[
         name: "0002_payouts",
         sql: include_str!("../migrations_pg/0002_payouts.sql"),
     },
+    Migration {
+        version: 3,
+        name: "0003_rls",
+        sql: include_str!("../migrations_pg/0003_rls.sql"),
+    },
 ];
 
 /// Applies pending PostgreSQL migrations in the client's current schema.

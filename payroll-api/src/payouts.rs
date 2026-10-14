@@ -426,6 +426,37 @@ pub async fn quote(
     Ok(Json(q))
 }
 
+/// The answer to a repeated request for a claim that already has payout `p`.
+fn existing_payout(
+    p: &Payout,
+    actor: &str,
+    address: &str,
+    need: i64,
+) -> Result<(StatusCode, Json<serde_json::Value>), ApiError> {
+    // Only the claimant may repeat the request. Otherwise a manager (who can
+    // view the claim) could test guessed addresses against the payout's
+    // fingerprint via the duplicate/conflict answer.
+    if p.requested_by != actor {
+        return Err(err(
+            StatusCode::FORBIDDEN,
+            "forbidden",
+            "Only the claimant can request a payout.",
+        ));
+    }
+    if recipient_fingerprint(&p.id, address) != p.recipient_fingerprint {
+        return Err(err(
+            StatusCode::CONFLICT,
+            "payout_conflict",
+            "A payout to a different address was already requested for this claim.",
+        ));
+    }
+    let v = PayoutView::new(p, need);
+    Ok((
+        StatusCode::OK,
+        Json(json!({ "payout": v, "duplicate": true })),
+    ))
+}
+
 /// The contributor's deliberate "pay this claim" action.
 pub async fn request(
     State(st): State<AppState>,
@@ -443,38 +474,29 @@ pub async fn request(
     // without touching the wallet.
     let (cid, a2) = (claim.clone(), a.clone());
     if let Some(p) = with_db(&st, move |db| db.claim_payout(&a2, &cid)).await? {
-        // Only the claimant may repeat the request. Otherwise a manager (who
-        // can view the claim) could test guessed addresses against the
-        // payout's fingerprint via the duplicate/conflict answer.
-        if p.requested_by != a {
-            return Err(err(
-                StatusCode::FORBIDDEN,
-                "forbidden",
-                "Only the claimant can request a payout.",
-            ));
-        }
-        if recipient_fingerprint(&p.id, &address) != p.recipient_fingerprint {
-            return Err(err(
-                StatusCode::CONFLICT,
-                "payout_conflict",
-                "A payout to a different address was already requested for this claim.",
-            ));
-        }
-        let v = PayoutView::new(&p, need);
-        return Ok((
-            StatusCode::OK,
-            Json(json!({ "payout": v, "duplicate": true })),
-        ));
+        return existing_payout(&p, &a, &address, need);
     }
 
     // Eligibility and amount come from the engine; fee and balance from a
     // real proposal in the wallet.
     let orgs = po.orgs.clone();
     let (cid, a2) = (claim.clone(), a.clone());
-    let c = with_db(&st, move |db| {
+    let c = match with_db(&st, move |db| {
         db.payout_eligibility(&a2, &cid, &|o| orgs.allows(o))
     })
-    .await?;
+    .await
+    {
+        Ok(c) => c,
+        Err(e) => {
+            // A concurrent request may have created the payout since the check
+            // above: answer as the repeat it is, not with an error.
+            let (cid, a2) = (claim.clone(), a.clone());
+            if let Ok(Some(p)) = with_db(&st, move |db| db.claim_payout(&a2, &cid)).await {
+                return existing_payout(&p, &a, &address, need);
+            }
+            return Err(e);
+        }
+    };
     let (po2, addr2) = (po.clone(), address.clone());
     let q = blocking(move || po2.wallet.quote(&addr2, c.amount_zats).map_err(wallet_err)).await?;
     if !q.valid_recipient {

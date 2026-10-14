@@ -1212,6 +1212,66 @@ mod postgres {
     }
 
     scenarios!(Pg, #[ignore = "requires PAYROLL_TEST_DATABASE_URL"]);
+
+    /// Hosted Postgres (e.g. Supabase) grants API roles privileges on tables in
+    /// the exposed schema. Row-level security with no policies must still give
+    /// such a role nothing, while the owning role (the app) is unaffected.
+    #[test]
+    #[ignore = "requires PAYROLL_TEST_DATABASE_URL"]
+    fn api_roles_see_no_rows() {
+        let mut w = world(Pg::fresh());
+        let c = w.claim(10_000_000);
+        w.pay(&c.id);
+        let schema = w.f.schema.clone();
+        let mut client = hushush_payroll::pg::connect_client(&w.f.url).unwrap();
+        hushush_payroll::pg::use_schema(&mut client, &schema).unwrap();
+        client
+            .batch_execute(&format!(
+                "DO $$ BEGIN
+                     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'hushush_api_probe') THEN
+                         CREATE ROLE hushush_api_probe NOLOGIN;
+                     END IF;
+                 END $$;
+                 GRANT USAGE ON SCHEMA {schema} TO hushush_api_probe;
+                 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {schema} TO hushush_api_probe;"
+            ))
+            .unwrap();
+        for table in [
+            "users",
+            "organizations",
+            "organization_members",
+            "payroll_streams",
+            "stream_events",
+            "claims",
+            "payouts",
+            "payout_events",
+            "payroll_schema_migrations",
+        ] {
+            let owner: i64 = client
+                .query_one(&format!("SELECT count(*) FROM {table}"), &[])
+                .unwrap()
+                .get(0);
+            assert!(
+                owner > 0,
+                "{table}: the app (owner) must still see its rows"
+            );
+            client.batch_execute("SET ROLE hushush_api_probe").unwrap();
+            let api: i64 = client
+                .query_one(&format!("SELECT count(*) FROM {table}"), &[])
+                .unwrap()
+                .get(0);
+            client.batch_execute("RESET ROLE").unwrap();
+            assert_eq!(api, 0, "{table}: an API role must see no rows");
+        }
+        client.batch_execute("SET ROLE hushush_api_probe").unwrap();
+        let e = client
+            .batch_execute("INSERT INTO organizations (id, name, created_by, created_at) VALUES ('x', 'x', 'x', 0)")
+            .unwrap_err();
+        client.batch_execute("RESET ROLE").unwrap();
+        assert!(format!("{e:?}").contains("row-level security"), "{e:?}");
+        // Workflow through the app is unaffected.
+        assert_eq!(w.claim_status(&c.id), ClaimStatus::Reserved);
+    }
 }
 
 // ---- pure decision rules ---------------------------------------------------------

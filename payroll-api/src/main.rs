@@ -710,8 +710,20 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .await??;
     }
 
+    // Hosted Postgres poolers cap connections (e.g. Supabase's session pooler),
+    // so the size is configurable and connections are opened on demand.
+    let pool_size: u32 = std::env::var("PAYROLL_DB_POOL_SIZE")
+        .ok()
+        .map(|v| v.parse())
+        .transpose()
+        .map_err(|_| "PAYROLL_DB_POOL_SIZE must be a positive integer")?
+        .unwrap_or(16);
+    if pool_size == 0 {
+        return Err("PAYROLL_DB_POOL_SIZE must be a positive integer".into());
+    }
     let pool = r2d2::Pool::builder()
-        .max_size(16)
+        .max_size(pool_size)
+        .min_idle(Some(1))
         .build(PgManager { url, schema })?;
     let payouts = payouts::Payouts::from_env()?.map(Arc::new);
     let state = AppState {

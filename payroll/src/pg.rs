@@ -27,20 +27,66 @@ pub struct PgBackend<C: BorrowMut<Client> = Client> {
 /// PostgreSQL-backed payroll engine.
 pub type PgPayrollDb<C = Client> = Payroll<PgBackend<C>>;
 
-/// Opens a client for `url`. `sslmode=require` (or `verify-full`) in the URL
-/// enables TLS with the Mozilla root store; otherwise the connection is plain
-/// (suitable only for localhost / private networks).
+/// Extra trusted CA certificates for the database's TLS certificate — e.g.
+/// Supabase signs its database certificates with its own root CA, which is
+/// not in the public root store. From `PAYROLL_DATABASE_CA_PEM` (the PEM text;
+/// literal `\n` sequences are accepted for single-line secret stores) or
+/// `PAYROLL_DATABASE_CA_FILE` (a path).
+fn extra_ca_certs() -> Result<Vec<rustls::pki_types::CertificateDer<'static>>> {
+    use rustls::pki_types::{CertificateDer, pem::PemObject};
+    let pem = match (
+        std::env::var("PAYROLL_DATABASE_CA_PEM"),
+        std::env::var("PAYROLL_DATABASE_CA_FILE"),
+    ) {
+        (Ok(p), _) if !p.trim().is_empty() => p.replace("\\n", "\n").into_bytes(),
+        (_, Ok(f)) if !f.trim().is_empty() => std::fs::read(f.trim()).map_err(|e| {
+            PayrollError::Validation(format!("cannot read PAYROLL_DATABASE_CA_FILE: {e}"))
+        })?,
+        _ => return Ok(vec![]),
+    };
+    let certs = CertificateDer::pem_slice_iter(&pem)
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|e| PayrollError::Validation(format!("invalid database CA PEM: {e}")))?;
+    if certs.is_empty() {
+        return Err(PayrollError::Validation(
+            "database CA PEM contains no certificate".into(),
+        ));
+    }
+    Ok(certs)
+}
+
+/// Opens a client for `url`. TLS (always verified: certificate chain and host
+/// name) is used when the URL has `sslmode=require`/`verify-*` or when an
+/// extra CA is configured (see [`extra_ca_certs`]); trusted roots are the
+/// Mozilla store plus that CA. Otherwise the connection is plain (suitable
+/// only for localhost / private networks).
 pub fn connect_client(url: &str) -> Result<Client> {
-    let wants_tls = url.contains("sslmode=require") || url.contains("sslmode=verify");
+    let extra = extra_ca_certs()?;
+    let wants_tls =
+        url.contains("sslmode=require") || url.contains("sslmode=verify") || !extra.is_empty();
     if wants_tls {
         let _ = rustls::crypto::ring::default_provider().install_default();
         let mut roots = rustls::RootCertStore::empty();
         roots.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+        for cert in extra {
+            roots
+                .add(cert)
+                .map_err(|e| PayrollError::Validation(format!("unusable database CA: {e}")))?;
+        }
         let config = rustls::ClientConfig::builder()
             .with_root_certificates(roots)
             .with_no_client_auth();
         let tls = tokio_postgres_rustls::MakeRustlsConnect::new(config);
-        Ok(Client::connect(url, tls)?)
+        // Never let the driver's default `sslmode=prefer` fall back to plain text.
+        let url = if url.contains("sslmode=") {
+            url.to_string()
+        } else {
+            format!(
+                "{url}{}sslmode=require",
+                if url.contains('?') { '&' } else { '?' }
+            )
+        };
+        Ok(Client::connect(&url, tls)?)
     } else {
         Ok(Client::connect(url, postgres::NoTls)?)
     }
