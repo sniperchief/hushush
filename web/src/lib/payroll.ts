@@ -7,6 +7,8 @@ import { env } from "./env";
 export type Role = "owner" | "admin" | "member";
 export type StreamStatus = "active" | "paused" | "ended";
 export type ClaimStatus = "reserved" | "released" | "settled";
+/** Only `confirmed` means paid. `submitted` = broadcast, awaiting confirmations. */
+export type PayoutState = "reserved" | "submitted" | "confirmed" | "failed" | "requires_reconciliation";
 
 export interface Membership {
   organization_id: string;
@@ -62,6 +64,28 @@ export interface StreamEvent {
   earned_zats_after: number;
 }
 
+export interface PayoutView {
+  id: string;
+  claim_id: string;
+  state: PayoutState;
+  amount_zats: number;
+  amount_zec: string;
+  fee_estimate_zats: number;
+  fee_zats: number | null;
+  fee_zec: string | null;
+  txid: string | null;
+  mined_height: number | null;
+  confirmations: number;
+  required_confirmations: number;
+  expiry_height: number | null;
+  detail: string | null;
+  network: "testnet";
+  created_at: number;
+  submitted_at: number | null;
+  resolved_at: number | null;
+  updated_at: number;
+}
+
 export interface ClaimView {
   id: string;
   stream_id: string;
@@ -72,12 +96,40 @@ export interface ClaimView {
   created_at: number;
   resolved_at: number | null;
   settlement_ref: string | null;
+  payout: PayoutView | null;
 }
 
 export interface StreamDetail {
   stream: StreamView;
   events: StreamEvent[];
   claims: ClaimView[];
+  payouts_enabled: boolean;
+}
+
+export interface PayoutQuote {
+  claim_id: string;
+  amount_zats: number;
+  amount_zec: string;
+  fee_zats: number | null;
+  fee_zec: string | null;
+  wallet_debit_zats: number | null;
+  valid_recipient: boolean;
+  sufficient: boolean;
+  reason: string | null;
+  network: "testnet";
+  required_confirmations: number;
+}
+
+export interface PayoutWalletSummary {
+  network: "testnet";
+  spendable_zats: number;
+  spendable_zec: string;
+  pending_zats: number;
+  pending_zec: string;
+  funding_address: string;
+  chain_tip: number | null;
+  last_sync_at: number | null;
+  required_confirmations: number;
 }
 
 /** An error returned by payroll-api, with its HTTP status and error code. */
@@ -153,4 +205,10 @@ export const payroll = {
       idempotency_key: idempotencyKey,
     }),
   releaseClaim: (actor: string, claimId: string) => call<ClaimView>("POST", `/v1/claims/${enc(claimId)}/release`, actor),
+  quotePayout: (actor: string, claimId: string, address: string) =>
+    call<PayoutQuote>("POST", `/v1/claims/${enc(claimId)}/payout/quote`, actor, { address }),
+  // Idempotent per claim: a repeat returns the existing payout (duplicate: true).
+  requestPayout: (actor: string, claimId: string, address: string) =>
+    call<{ payout: PayoutView; duplicate: boolean }>("POST", `/v1/claims/${enc(claimId)}/payout`, actor, { address }),
+  payoutWallet: (actor: string, org: string) => call<PayoutWalletSummary>("GET", `/v1/orgs/${enc(org)}/payout-wallet`, actor),
 };

@@ -1,0 +1,96 @@
+[23:00:16] === hushush Phase 3 live payout run p3run2 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations)
+[23:00:20] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4499399 sapling_activation=280000 branch_id=77190ad9
+[23:00:23] database hushush_live_p3run2 created
+[23:01:54] services up: wallet pid 17710, payroll-api pid 17717, web pid 17722
+[23:01:59] treasury total=3680000 spendable=3680000; carol total=300000
+[23:03:03] setup: {"orgId":"8713fc3f-dc0c-4a79-af71-ed4d28a6efb1","streamId":"68c5d468-0ee5-452a-899a-edc567587596","earned_zec":"0.00600000","owner":"2f672024-ad79-47bb-8ba8-44c227dcfbad","worker":"08890a32-f1c2-4070-8b12-c0d382e69dae"}
+[23:03:03] === A: pay, duplicate, payroll-api crash during confirmation tracking
+[23:03:04] claim A 39a7cc07-e71e-4b28-9d19-e313487eb1e7
+[23:03:06] quote: {"status":200,"claim_id":"39a7cc07-e71e-4b28-9d19-e313487eb1e7","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[23:03:50] pay A: {"status":201,"secs":44,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"39a7cc07-e71e-4b28-9d19-e313487eb1e7","confirmations":0,"created_at":1791932587,"detail":null,"expiry_height":4499449,"fee_estimate_zats":10000,"fee_zats":10000,"fee_zec":"0.00010000","id":"6d531848-1c16-4517-bfef-5e5718bf4ef5","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"submitted","submitted_at":1791932630,"txid":"52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9","updated_at":1791932630}}
+[23:03:52] pay A again: {"status":200,"secs":1,"duplicate":true,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"39a7cc07-e71e-4b28-9d19-e313487eb1e7","confirmations":0,"created_at":1791932587,"detail":null,"expiry_height":4499449,"fee_estimate_zats":10000,"fee_zats":10000,"fee_zec":"0.00010000","id":"6d531848-1c16-4517-bfef-5e5718bf4ef5","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"submitted","submitted_at":1791932630,"txid":"52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9","updated_at":1791932630}}
+[23:03:54] claim A while submitted: reserved (must be reserved = unpaid)
+[23:03:55] payroll-api HARD-KILLED (pid 17717)
+[23:04:19] payroll-api restarted (pid 17879)
+[2026-10-13T23:04:19.528Z] claim=reserved payout=submitted conf=0/10 mined=null txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:04:39.583Z] claim=reserved payout=submitted conf=1/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:05:09.706Z] claim=reserved payout=submitted conf=2/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:05:39.793Z] claim=reserved payout=submitted conf=4/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:05:59.860Z] claim=reserved payout=submitted conf=5/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:06:09.889Z] claim=reserved payout=submitted conf=6/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:06:29.953Z] claim=reserved payout=submitted conf=7/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:06:50.013Z] claim=reserved payout=submitted conf=8/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-13T23:07:00.049Z] claim=settled payout=confirmed conf=11/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[23:07:00] claim A after confirmation: ('settled', '52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9', '0.00150000')
+[23:07:02] pay A after confirmation: (200, True, 'confirmed')
+[23:07:02] === B: payroll-api killed while the wallet builds the transaction
+[23:07:02] claim B 341c2f59-79bd-4d0a-b6cc-7b5f1d05a634
+[23:07:04] quote: {"status":200,"claim_id":"341c2f59-79bd-4d0a-b6cc-7b5f1d05a634","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[23:07:05] crash: {"killed":true,"payout_id":"f4e3ad8f-dde8-4cf5-852d-b323d991e6a0","state_at_kill":"reserved"}
+[23:07:06] client saw: {"status":503,"secs":1,"error":"payroll_unavailable","message":"The payroll service is unavailable. Try again shortly."}
+[23:07:07] payout B in DB while payroll-api is down: {"id":"f4e3ad8f-dde8-4cf5-852d-b323d991e6a0","state":"reserved","txid":null,"leased":true}
+[23:07:17] payroll-api restarted (pid 17967); the dead process's lease must expire first
+[2026-10-13T23:07:19.366Z] claim=reserved payout=reserved conf=0/10 mined=null txid=null detail=
+[2026-10-13T23:11:20.267Z] claim=reserved payout=submitted conf=3/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-13T23:12:10.414Z] claim=reserved payout=submitted conf=4/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-13T23:12:20.441Z] claim=reserved payout=submitted conf=5/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-13T23:13:00.544Z] claim=reserved payout=submitted conf=7/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-13T23:13:40.659Z] claim=reserved payout=submitted conf=9/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-13T23:16:01.233Z] claim=settled payout=confirmed conf=10/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[23:16:01] === C: wallet exits after building, before broadcasting
+[23:16:02] claim C fe897688-0004-43a7-a085-3ce6c0b86f12
+[23:16:04] quote: {"status":200,"claim_id":"fe897688-0004-43a7-a085-3ce6c0b86f12","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[23:16:11] fault-injection wallet started (pid 18066)
+[23:17:14] pay C: {"status":201,"secs":62,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"fe897688-0004-43a7-a085-3ce6c0b86f12","confirmations":0,"created_at":1791933372,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"ec815059-629e-4d1e-8e34-fa7ebae1948e","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791933434}}
+[23:17:15] fault wallet exit code: 86 (86 = injected crash after build)
+[23:17:16] payout C in DB: {"id":"ec815059-629e-4d1e-8e34-fa7ebae1948e","state":"requires_reconciliation","txid":null,"leased":false}
+[23:17:17] wallet intent C after crash: {"state": "built", "txid": "e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d", "broadcast_attempts": 0}
+[23:17:20] chain view of C before restart: Error: transaction not found by lightwalletd 
+[23:17:25] normal wallet restarted (pid 18123)
+[2026-10-13T23:17:26.114Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-13T23:17:36.155Z] claim=reserved payout=submitted conf=0/10 mined=null txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[2026-10-13T23:18:46.464Z] claim=reserved payout=submitted conf=0/10 mined=4499451 txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[2026-10-13T23:19:06.540Z] claim=reserved payout=submitted conf=1/10 mined=4499451 txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[2026-10-13T23:21:06.993Z] claim=reserved payout=submitted conf=2/10 mined=4499451 txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[07:32:10] === hushush Phase 3 live payout run p3run2 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations)
+[07:32:12] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4500595 sapling_activation=280000 branch_id=77190ad9
+[07:32:12] RESUMING run p3run2 (database, state and starting balances from the original run)
+[07:32:27] services up: wallet pid 18225, payroll-api pid 18234, web pid 18239
+[2026-10-14T07:32:28.685Z] claim=settled payout=confirmed conf=11/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-14T07:32:29.266Z] claim=settled payout=confirmed conf=10/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-14T07:32:29.807Z] claim=settled payout=confirmed conf=1145/10 mined=4499451 txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[07:32:29] === verification
+[07:32:41] payout 6d531848-1c16-4517-bfef-5e5718bf4ef5: claim=settled txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout 6d531848-1c16-4517-bfef-5e5718bf4ef5'
+[07:32:43] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499411}
+[07:32:46] payout f4e3ad8f-dde8-4cf5-852d-b323d991e6a0: claim=settled txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout f4e3ad8f-dde8-4cf5-852d-b323d991e6a0'
+[07:32:49] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499429}
+[07:32:51] payout ec815059-629e-4d1e-8e34-fa7ebae1948e: claim=settled txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout ec815059-629e-4d1e-8e34-fa7ebae1948e'
+[07:32:54] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499451}
+[07:32:54] carol total 300000 → 750000 (delta 450000, expected 450000)
+[07:33:20] treasury total 3680000 → 3200000 (delta 480000, expected 480000 = 3 payouts + fees)
+[07:33:22] pages: {"contributor_stream_page":500,"claim_labels_on_page":[],"owner_org_page":500,"owner_sees_payout_wallet":false}
+[07:33:22] PASS (): live testnet payouts submitted, confirmed, reconciled after crashes, verified; no duplicate payments
+[07:34:13] === hushush Phase 3 live payout run p3run2 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations)
+[07:34:14] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4500597 sapling_activation=280000 branch_id=77190ad9
+[07:34:14] RESUMING run p3run2 (database, state and starting balances from the original run)
+[07:34:36] services up: wallet pid 18436, payroll-api pid 18443, web pid 18448
+[2026-10-14T07:34:36.910Z] claim=settled payout=confirmed conf=11/10 mined=4499411 txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 detail=
+[2026-10-14T07:34:37.395Z] claim=settled payout=confirmed conf=10/10 mined=4499429 txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 detail=
+[2026-10-14T07:34:37.931Z] claim=settled payout=confirmed conf=1145/10 mined=4499451 txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d detail=
+[07:34:38] === verification
+[07:34:44] payout 6d531848-1c16-4517-bfef-5e5718bf4ef5: claim=settled txid=52682f9a124823bc6b07ed9e84e4fef5efafc50ce6bed188be34aa539d3440d9 fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout 6d531848-1c16-4517-bfef-5e5718bf4ef5'
+[07:34:47] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499411}
+[07:34:50] payout f4e3ad8f-dde8-4cf5-852d-b323d991e6a0: claim=settled txid=e804851e726086b4c0cdc43dd17a8664a0f754a8cb7393e7876b7362069065f6 fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout f4e3ad8f-dde8-4cf5-852d-b323d991e6a0'
+[07:34:52] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499429}
+[07:34:55] payout ec815059-629e-4d1e-8e34-fa7ebae1948e: claim=settled txid=e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d fee=10000
+carol received exactly once: 150000 zats, memo 'hushush payout ec815059-629e-4d1e-8e34-fa7ebae1948e'
+[07:34:58] observer: {'fully_shielded': True, 'transparent_inputs': 0, 'sapling_spends': 0, 'sapling_outputs': 0, 'orchard_actions': 0, 'ironwood_actions': 2, 'ironwood_value_balance_zats': 10000, 'fee_zats': 10000, 'mined_height': 4499451}
+[07:34:58] carol total 300000 → 750000 (delta 450000, expected 450000)
+[07:35:26] treasury total 3680000 → 3200000 (delta 480000, expected 480000 = 3 payouts + fees)
+[07:35:29] pages: {"contributor_stream_page":200,"claim_labels_on_page":["Paid · payout confirmed"],"owner_org_page":200,"owner_sees_payout_wallet":true}
+[07:35:30] PASS (resumed): live testnet payouts submitted, confirmed, reconciled after crashes, verified; no duplicate payments

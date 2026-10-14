@@ -778,7 +778,8 @@ fn migrations_are_idempotent_and_state_persists() {
         .connection()
         .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(n, 1);
+    // Each migration recorded exactly once (was `1` before Phase 3 added 0002).
+    assert_eq!(n, migrations::MIGRATIONS.len() as i64);
     let b = db.balance(&f.worker, &s.id).unwrap();
     assert_eq!((b.earned, b.reserved), (COIN, 1_000));
 }

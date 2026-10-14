@@ -1,0 +1,42 @@
+[22:36:08] === hushush Phase 3 live payout run p3run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations)
+[22:36:09] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4499343 sapling_activation=280000 branch_id=77190ad9
+[22:36:12] database hushush_live_p3run1 created
+[22:36:38] services up: wallet pid 17134, payroll-api pid 17146, web pid 17151
+[22:36:46] treasury total=4000000 spendable=4000000; carol total=0
+[22:37:54] setup: {"orgId":"66fd1a24-0c5f-4340-beb0-15360ca6b3c3","streamId":"c8942c2a-df78-46b3-9116-37d5d2b36199","earned_zec":"0.00600000","owner":"1d3cae5b-b396-4dec-8339-4a9a30736c3d","worker":"22d2cde5-3246-4f81-a55d-3ef22f6aa01b"}
+[22:37:54] === A: pay, duplicate, payroll-api crash during confirmation tracking
+[22:37:55] claim A 94dbe97c-c5e0-4bc2-8fdc-2bb4f1041c7e
+[22:37:57] quote: {"status":200,"claim_id":"94dbe97c-c5e0-4bc2-8fdc-2bb4f1041c7e","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[22:39:45] pay A: {"status":201,"secs":107,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"94dbe97c-c5e0-4bc2-8fdc-2bb4f1041c7e","confirmations":0,"created_at":1791931084,"detail":null,"expiry_height":4499390,"fee_estimate_zats":10000,"fee_zats":10000,"fee_zec":"0.00010000","id":"9c149c03-8b70-4e25-a6c7-4116166b254f","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"submitted","submitted_at":1791931184,"txid":"31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50","updated_at":1791931184}}
+[22:39:54] pay A again: {"status":200,"secs":1,"duplicate":true,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"94dbe97c-c5e0-4bc2-8fdc-2bb4f1041c7e","confirmations":0,"created_at":1791931084,"detail":null,"expiry_height":4499390,"fee_estimate_zats":10000,"fee_zats":10000,"fee_zec":"0.00010000","id":"9c149c03-8b70-4e25-a6c7-4116166b254f","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"submitted","submitted_at":1791931184,"txid":"31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50","updated_at":1791931184}}
+[22:40:10] claim A while submitted: reserved (must be reserved = unpaid)
+[22:40:14] payroll-api HARD-KILLED (pid 17146)
+[22:40:43] payroll-api restarted (pid 17315)
+[2026-10-13T22:40:45.693Z] claim=reserved payout=submitted conf=0/10 mined=null txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[2026-10-13T22:41:16.249Z] claim=reserved payout=submitted conf=1/10 mined=4499355 txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[2026-10-13T22:42:37.491Z] claim=reserved payout=submitted conf=2/10 mined=4499355 txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[2026-10-13T22:43:38.753Z] claim=reserved payout=submitted conf=5/10 mined=4499355 txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[2026-10-13T22:45:00.519Z] claim=reserved payout=submitted conf=7/10 mined=4499355 txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[2026-10-13T22:45:20.829Z] claim=settled payout=confirmed conf=10/10 mined=4499355 txid=31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50 detail=
+[22:45:26] claim A after confirmation: ('settled', '31ca0061720a10cbc63823568530ed0ea39c13534a6f980f04951a5a3eb52a50', '0.00150000')
+[22:45:33] pay A after confirmation: (200, True, 'confirmed')
+[22:45:33] === B: payroll-api killed while the wallet builds the transaction
+[22:45:37] claim B 6f426612-561d-40fb-9ce9-f79f47defa3e
+[22:45:45] quote: {"status":200,"claim_id":"6f426612-561d-40fb-9ce9-f79f47defa3e","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[22:45:53] crash: {"killed":true,"payout_id":"83a0ad4e-a2d2-4305-b7fc-d7c953f6a33e","state_at_kill":"reserved"}
+[22:45:55] client saw: {"status":503,"secs":5,"error":"payroll_unavailable","message":"The payroll service is unavailable. Try again shortly."}
+[22:46:00] payout B in DB while payroll-api is down: {"id":"83a0ad4e-a2d2-4305-b7fc-d7c953f6a33e","state":"reserved","txid":null,"leased":true}
+[22:46:17] payroll-api restarted (pid 17394); the dead process's lease must expire first
+[2026-10-13T22:46:21.650Z] claim=reserved payout=reserved conf=0/10 mined=null txid=null detail=
+[2026-10-13T22:50:24.596Z] claim=reserved payout=submitted conf=2/10 mined=4499370 txid=ef344ccd56f1f023e2cd0435a4ccd384d655d717d6eba01812405d8c6a4721b4 detail=
+[2026-10-13T22:50:34.620Z] claim=reserved payout=submitted conf=3/10 mined=4499370 txid=ef344ccd56f1f023e2cd0435a4ccd384d655d717d6eba01812405d8c6a4721b4 detail=
+[2026-10-13T22:51:04.718Z] claim=reserved payout=submitted conf=6/10 mined=4499370 txid=ef344ccd56f1f023e2cd0435a4ccd384d655d717d6eba01812405d8c6a4721b4 detail=
+[2026-10-13T22:51:24.771Z] claim=reserved payout=submitted conf=7/10 mined=4499370 txid=ef344ccd56f1f023e2cd0435a4ccd384d655d717d6eba01812405d8c6a4721b4 detail=
+[2026-10-13T22:51:54.861Z] claim=settled payout=confirmed conf=10/10 mined=4499370 txid=ef344ccd56f1f023e2cd0435a4ccd384d655d717d6eba01812405d8c6a4721b4 detail=
+[22:51:55] === C: wallet exits after building, before broadcasting
+[22:51:55] claim C 0174862f-aef1-4008-a097-d580cead80d7
+[22:52:03] quote: {"status":200,"claim_id":"0174862f-aef1-4008-a097-d580cead80d7","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[22:52:14] fault-injection wallet started (pid 17557)
+[22:52:15] pay C: {"status":503,"secs":0,"error":"wallet_unavailable","message":"The payout wallet is unavailable. Try again shortly."}
+[22:52:48] fault wallet exit code: 127 (86 = injected crash after build)
+[22:52:49] payout C in DB: null

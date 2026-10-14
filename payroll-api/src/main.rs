@@ -6,9 +6,14 @@
 //!   and `X-Actor-Id: <user id>` — the user the web app authenticated. All
 //!   authorization decisions are made by the engine from that actor.
 //! * Storage is PostgreSQL (`PAYROLL_DATABASE_URL`); migrations run at start.
-//! * There is deliberately no endpoint to settle (mark paid) a claim: payouts
-//!   are out of scope for this phase.
+//! * There is deliberately no endpoint to settle (mark paid) a claim by hand.
+//!   A claim becomes paid only when its shielded payout is confirmed on chain
+//!   (Phase 3, `payouts` module), and payouts are enabled only when the
+//!   payout wallet service is configured (`WALLET_URL`).
 
+mod payouts;
+
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -75,6 +80,8 @@ struct AppState {
     pool: Pool,
     token: Arc<Vec<u8>>,
     clock: Arc<dyn Clock>,
+    /// `None` when payouts are disabled (no `WALLET_URL`).
+    payouts: Option<Arc<payouts::Payouts>>,
 }
 
 // ---- errors ------------------------------------------------------------------
@@ -286,12 +293,14 @@ struct ClaimView {
     requested_by: String,
     amount_zats: i64,
     amount_zec: String,
-    /// `reserved` = pending and UNPAID. `settled` only ever comes from a
-    /// confirmed payout (not possible in this phase).
+    /// `reserved` = pending and UNPAID, even while a payout is in flight.
+    /// `settled` = paid: its payout was confirmed on chain.
     status: ClaimStatus,
     created_at: i64,
     resolved_at: Option<i64>,
     settlement_ref: Option<String>,
+    /// The claim's shielded payout, if one was requested.
+    payout: Option<payouts::PayoutView>,
 }
 
 impl From<&Claim> for ClaimView {
@@ -306,6 +315,7 @@ impl From<&Claim> for ClaimView {
             created_at: c.created_at,
             resolved_at: c.resolved_at,
             settlement_ref: c.settlement_ref.clone(),
+            payout: None,
         }
     }
 }
@@ -315,6 +325,8 @@ struct StreamDetail {
     stream: StreamView,
     events: Vec<StreamEvent>,
     claims: Vec<ClaimView>,
+    /// Whether this stream's claims can be paid out from this server.
+    payouts_enabled: bool,
 }
 
 // ---- requests ------------------------------------------------------------------
@@ -521,18 +533,38 @@ async fn stream_detail(
 ) -> ApiResult<StreamDetail> {
     let a = actor(&st, &h)?;
     require_actor(&a)?;
-    let (l, events, claims) = with_db(&st, move |db| {
+    let (l, events, claims, payouts) = with_db(&st, move |db| {
         Ok((
             db.stream_listing(&a, &id)?,
             db.stream_events(&a, &id)?,
             db.list_claims(&a, &id)?,
+            db.list_payouts(&a, &id)?,
         ))
     })
     .await?;
+    let need = st
+        .payouts
+        .as_ref()
+        .map_or(0, |p| p.policy.required_confirmations);
+    let by_claim: HashMap<&str, &hushush_payroll::Payout> =
+        payouts.iter().map(|p| (p.claim_id.as_str(), p)).collect();
     Ok(Json(StreamDetail {
         stream: (&l).into(),
         events,
-        claims: claims.iter().map(ClaimView::from).collect(),
+        claims: claims
+            .iter()
+            .map(|c| {
+                let mut v = ClaimView::from(c);
+                v.payout = by_claim
+                    .get(c.id.as_str())
+                    .map(|p| payouts::PayoutView::new(p, need));
+                v
+            })
+            .collect(),
+        payouts_enabled: st
+            .payouts
+            .as_ref()
+            .is_some_and(|p| p.orgs.allows(&l.stream.organization_id)),
     }))
 }
 
@@ -628,6 +660,9 @@ fn app(state: AppState) -> Router {
         .route("/v1/streams/{id}/end", post(end))
         .route("/v1/streams/{id}/claims", post(reserve_claim))
         .route("/v1/claims/{id}/release", post(release_claim))
+        .route("/v1/claims/{id}/payout/quote", post(payouts::quote))
+        .route("/v1/claims/{id}/payout", post(payouts::request))
+        .route("/v1/orgs/{org}/payout-wallet", get(payouts::wallet_summary))
         .with_state(state)
 }
 
@@ -648,6 +683,15 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let addr: SocketAddr = std::env::var("PAYROLL_API_ADDR")
         .unwrap_or_else(|_| "127.0.0.1:7878".into())
         .parse()?;
+    // It trusts X-Actor-Id from anyone holding the service token: keep it off
+    // public interfaces unless explicitly placed behind a private network.
+    if !addr.ip().is_loopback() && std::env::var("PAYROLL_API_ALLOW_NONLOCAL").as_deref() != Ok("1")
+    {
+        return Err(format!(
+            "refusing to listen on non-loopback {addr}; set PAYROLL_API_ALLOW_NONLOCAL=1 only on a private network"
+        )
+        .into());
+    }
     let schema = std::env::var("PAYROLL_DATABASE_SCHEMA")
         .ok()
         .filter(|s| !s.is_empty());
@@ -669,11 +713,23 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let pool = r2d2::Pool::builder()
         .max_size(16)
         .build(PgManager { url, schema })?;
+    let payouts = payouts::Payouts::from_env()?.map(Arc::new);
     let state = AppState {
         pool,
         token: Arc::new(token.into_bytes()),
         clock,
+        payouts: payouts.clone(),
     };
+    match &payouts {
+        Some(po) => {
+            tracing::info!(
+                confirmations = po.policy.required_confirmations,
+                "payouts ENABLED (testnet payout wallet configured)"
+            );
+            payouts::spawn_worker(state.clone(), po.clone());
+        }
+        None => tracing::info!("payouts disabled (WALLET_URL not set)"),
+    }
     let listener = tokio::net::TcpListener::bind(addr).await?;
     tracing::info!("payroll-api listening on {addr}");
     axum::serve(listener, app(state))

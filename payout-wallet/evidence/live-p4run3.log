@@ -1,0 +1,172 @@
+[09:52:19] === hushush live payout run p4run3 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, scenarios CDEFG)
+[09:52:23] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4500945 sapling_activation=280000 branch_id=77190ad9
+[09:52:25] database hushush_live_p4run3 created
+[09:52:48] services up: wallet pid 21896, payroll-api pid 21901, web pid 21909
+[09:52:54] treasury total=2720000 spendable=2720000; carol total=1200000
+[09:53:59] setup: {"orgId":"5c343db4-7e3e-4a17-8455-ad7a93b6866a","streamId":"e5da425d-64a2-48b2-8fbb-001fbd2d2708","earned_zec":"0.00600000","owner":"2dfa0f88-96ab-4e91-914d-8346fa8b6139","worker":"a1dc400a-4ba6-4681-9e48-3616358567c8"}
+[09:54:00] wages: {"contributor_page":200,"earned_zec":"0.00600000","available_zec":"0.00600000","shown_on_page":true,"employer_org_page":200}
+[09:54:00] === C: wallet exits after recording the built tx, before broadcasting
+[09:54:00] claim C cec41fd1-3e90-4790-b36d-3362bde47357
+[09:54:02] quote: {"status":200,"claim_id":"cec41fd1-3e90-4790-b36d-3362bde47357","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[09:54:08] fault-injection wallet started (pid 21998, WALLET_FAULT=crash_after_build)
+[09:54:50] pay C: {"status":201,"secs":42,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"cec41fd1-3e90-4790-b36d-3362bde47357","confirmations":0,"created_at":1791971648,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"4457c9d1-f1d5-42fc-95d8-b009b2d13e62","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791971690}}
+[09:54:51] fault wallet exit code: 86 (86 = injected crash at crash_after_build)
+[09:54:51] payout C in DB: {"id":"4457c9d1-f1d5-42fc-95d8-b009b2d13e62","state":"requires_reconciliation","txid":null,"leased":true}
+[09:54:53] wallet intent C after crash: {"state": "built", "txid": "c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2", "broadcast_attempts": 0, "failure_reason": null}
+[09:54:55] chain view of C before restart: Error: transaction not found by lightwalletd 
+[09:55:00] normal wallet restarted (pid 22056)
+[2026-10-14T09:55:00.824Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-14T09:55:10.849Z] claim=reserved payout=submitted conf=0/10 mined=null txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T09:58:51.496Z] claim=reserved payout=submitted conf=1/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T09:59:11.542Z] claim=reserved payout=submitted conf=2/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T09:59:21.565Z] claim=reserved payout=submitted conf=3/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:00:31.736Z] claim=reserved payout=submitted conf=4/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:01:21.864Z] claim=reserved payout=submitted conf=5/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:01:31.888Z] claim=reserved payout=submitted conf=6/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:02:11.986Z] claim=reserved payout=submitted conf=7/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:02:22.014Z] claim=reserved payout=submitted conf=8/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:03:12.178Z] claim=settled payout=confirmed conf=10/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[10:03:12] === D: wallet exits after recording the intent, before building
+[10:03:13] claim D 3ef7fa15-fb2d-4906-849a-ed0f128551ad
+[10:03:15] quote: {"status":200,"claim_id":"3ef7fa15-fb2d-4906-849a-ed0f128551ad","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[10:03:19] fault-injection wallet started (pid 22184, WALLET_FAULT=crash_before_build)
+[10:03:19] pay D: {"status":201,"secs":0,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"3ef7fa15-fb2d-4906-849a-ed0f128551ad","confirmations":0,"created_at":1791972199,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"2615579e-83a4-4094-82eb-0ae2ec733e79","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791972199}}
+[10:03:20] fault wallet exit code: 86 (86 = injected crash at crash_before_build)
+[10:03:20] payout D in DB: {"id":"2615579e-83a4-4094-82eb-0ae2ec733e79","state":"requires_reconciliation","txid":null,"leased":false}
+[10:03:22] wallet intent D after crash: {"state": "pending", "txid": null, "broadcast_attempts": 0, "failure_reason": null}
+[10:03:26] normal wallet restarted (pid 22218)
+[10:03:27] wallet intent D after recovery: {"state": "failed", "txid": null, "broadcast_attempts": 0, "failure_reason": "interrupted before a transaction was built"}
+[2026-10-14T10:03:27.946Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-14T10:03:48.015Z] claim=released payout=failed conf=0/10 mined=null txid=null detail=interrupted before a transaction was built
+[10:03:48] claim D: ('released', 'interrupted before a transaction was built') (must be released: nothing was sent)
+[10:03:49] treasury holds 0 transactions for payout D
+[10:03:49] === E: wallet exits after storing the signed tx, before recording it in the intent store
+[10:03:50] claim E 4adba81f-cd2b-4b38-b4dd-a43ae343bbd0
+[10:03:52] quote: {"status":200,"claim_id":"4adba81f-cd2b-4b38-b4dd-a43ae343bbd0","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[10:03:59] fault-injection wallet started (pid 22272, WALLET_FAULT=crash_after_wallet_store)
+[10:04:41] pay E: {"status":201,"secs":41,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"4adba81f-cd2b-4b38-b4dd-a43ae343bbd0","confirmations":0,"created_at":1791972239,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"9634c160-d0f9-4720-8ffc-fc99acb837f9","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791972280}}
+[10:04:41] fault wallet exit code: 86 (86 = injected crash at crash_after_wallet_store)
+[10:04:42] payout E in DB: {"id":"9634c160-d0f9-4720-8ffc-fc99acb837f9","state":"requires_reconciliation","txid":null,"leased":false}
+[10:04:43] wallet intent E after crash: {"state": "pending", "txid": null, "broadcast_attempts": 0, "failure_reason": null}
+[10:04:48] normal wallet restarted (pid 22317); start-up recovery searches the wallet DB by memo
+[10:04:48] wallet intent E after recovery: {"state": "broadcast", "txid": "d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48", "broadcast_attempts": 1, "failure_reason": null}
+[2026-10-14T10:04:49.304Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-14T10:04:59.331Z] claim=reserved payout=submitted conf=0/10 mined=null txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:06:39.649Z] claim=reserved payout=submitted conf=1/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:07:09.740Z] claim=reserved payout=submitted conf=5/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:07:19.767Z] claim=reserved payout=submitted conf=7/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:07:39.829Z] claim=reserved payout=submitted conf=8/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:08:09.910Z] claim=reserved payout=submitted conf=9/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:08:50.033Z] claim=settled payout=confirmed conf=11/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[10:08:50] === F: wallet exits right after the network accepted the tx, before recording the broadcast
+[10:08:51] claim F d2fb7a09-a7ae-4cc8-9966-4c1a1c52ff0f
+[10:08:54] quote: {"status":200,"claim_id":"d2fb7a09-a7ae-4cc8-9966-4c1a1c52ff0f","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[10:08:58] fault-injection wallet started (pid 22402, WALLET_FAULT=crash_after_broadcast)
+[10:09:41] pay F: {"status":201,"secs":43,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"d2fb7a09-a7ae-4cc8-9966-4c1a1c52ff0f","confirmations":0,"created_at":1791972538,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"35d1732e-f82c-494e-a246-d69d77502252","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791972580}}
+[10:09:41] fault wallet exit code: 86 (86 = injected crash at crash_after_broadcast)
+[10:09:42] payout F in DB: {"id":"35d1732e-f82c-494e-a246-d69d77502252","state":"requires_reconciliation","txid":null,"leased":false}
+[10:09:43] wallet intent F after crash: {"state": "built", "txid": "c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a", "broadcast_attempts": 0, "failure_reason": null}
+[10:09:46] chain view of F before restart: {   "txid": "c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a",   "mined_height": null,   "size_bytes": 9166,   "tx_version": "V6",   "consensus
+[10:09:50] normal wallet restarted (pid 22457)
+[2026-10-14T10:09:50.885Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-14T10:10:00.923Z] claim=reserved payout=submitted conf=0/10 mined=null txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:12:11.362Z] claim=reserved payout=submitted conf=1/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:12:51.478Z] claim=reserved payout=submitted conf=2/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:13:01.513Z] claim=reserved payout=submitted conf=3/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:13:41.647Z] claim=reserved payout=submitted conf=4/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:14:01.713Z] claim=reserved payout=submitted conf=5/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:14:11.748Z] claim=reserved payout=submitted conf=6/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:15:01.926Z] claim=reserved payout=submitted conf=7/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:15:21.987Z] claim=reserved payout=submitted conf=8/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:16:32.190Z] claim=settled payout=confirmed conf=10/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[10:16:32] wallet intent F after recovery: {"state": "broadcast", "txid": "c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a", "broadcast_attempts": 1, "failure_reason": null}
+[10:16:32] === G: like E, and the wallet's intent store is LOST before restart
+[10:16:34] claim G ff4d4f1f-63d5-4303-96b4-65b192890010
+[10:16:35] quote: {"status":200,"claim_id":"ff4d4f1f-63d5-4303-96b4-65b192890010","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[10:16:44] fault-injection wallet started (pid 22572, WALLET_FAULT=crash_after_wallet_store)
+[10:17:27] pay G: {"status":201,"secs":42,"duplicate":false,"payout":{"amount_zats":150000,"amount_zec":"0.00150000","claim_id":"ff4d4f1f-63d5-4303-96b4-65b192890010","confirmations":0,"created_at":1791973004,"detail":"payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet","expiry_height":null,"fee_estimate_zats":10000,"fee_zats":null,"fee_zec":null,"id":"aaed609a-f1f8-48cf-b49f-40bc383f8c8e","mined_height":null,"network":"testnet","required_confirmations":10,"resolved_at":null,"state":"requires_reconciliation","submitted_at":null,"txid":null,"updated_at":1791973046}}
+[10:17:27] fault wallet exit code: 86 (86 = injected crash at crash_after_wallet_store)
+[10:17:28] payout G in DB: {"id":"aaed609a-f1f8-48cf-b49f-40bc383f8c8e","state":"requires_reconciliation","txid":null,"leased":false}
+[10:17:30] wallet intent G after crash: {"state": "pending", "txid": null, "broadcast_attempts": 0, "failure_reason": null}
+[10:17:30] intent store moved aside to payout-intents.sqlite.lost-p4run3 (simulated loss); the wallet starts with an empty one
+[10:17:35] normal wallet restarted (pid 22627)
+[2026-10-14T10:17:36.255Z] claim=reserved payout=requires_reconciliation conf=0/10 mined=null txid=null detail=payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet
+[2026-10-14T10:17:46.311Z] claim=reserved payout=submitted conf=0/10 mined=null txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:19:16.603Z] claim=reserved payout=submitted conf=1/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:20:46.915Z] claim=reserved payout=submitted conf=2/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:21:16.995Z] claim=reserved payout=submitted conf=3/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:21:47.061Z] claim=reserved payout=submitted conf=4/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:22:37.202Z] claim=reserved payout=submitted conf=5/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:23:07.333Z] claim=reserved payout=submitted conf=6/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:23:27.389Z] claim=reserved payout=submitted conf=9/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[2026-10-14T10:24:17.567Z] claim=settled payout=confirmed conf=10/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[10:24:18] wallet intent G (adopted): {"state": "broadcast", "txid": "2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08", "broadcast_attempts": 1, "failure_reason": null}
+[10:24:18] === verification
+[10:24:26] payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62: claim=settled txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62'
+[10:24:27] treasury transactions carrying this payout's memo: 1
+[10:24:30] payout 9634c160-d0f9-4720-8ffc-fc99acb837f9: claim=settled txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 9634c160-d0f9-4720-8ffc-fc99acb837f9'
+[10:24:31] treasury transactions carrying this payout's memo: 1
+[10:24:34] payout 35d1732e-f82c-494e-a246-d69d77502252: claim=settled txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 35d1732e-f82c-494e-a246-d69d77502252'
+[10:24:35] treasury transactions carrying this payout's memo: 1
+[10:24:38] payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e: claim=settled txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e'
+[10:24:39] treasury transactions carrying this payout's memo: 1
+[10:24:41] failed payout 2615579e-83a4-4094-82eb-0ae2ec733e79: carol received nothing, as required
+[10:24:41] carol total 1200000 → 1800000 (delta 600000, expected 600000)
+[10:25:07] treasury total 2720000 → 2080000 (delta 640000, expected 640000 = 4 payouts + fees)
+[10:25:08] pages: {"contributor_stream_page":200,"claim_labels_on_page":["Paid · payout confirmed","Payout failed"],"owner_org_page":200,"owner_sees_payout_wallet":true}
+[10:25:09] FAIL: server-rendered pages wrong
+[10:25:50] === hushush live payout run p4run3 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, scenarios ABCDEFG)
+[10:25:51] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4501031 sapling_activation=280000 branch_id=77190ad9
+[10:25:52] RESUMING run p4run3 (database, state and starting balances from the original run)
+[10:26:08] services up: wallet pid 22995, payroll-api pid 23000, web pid 23005
+[2026-10-14T10:26:09.055Z] claim=settled payout=confirmed conf=10/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:26:09.564Z] claim=settled payout=confirmed conf=11/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:26:10.051Z] claim=settled payout=confirmed conf=10/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:26:10.504Z] claim=settled payout=confirmed conf=10/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[10:26:10] === verification
+[10:26:16] payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62: claim=settled txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62'
+[10:26:17] treasury transactions carrying this payout's memo: 1
+[10:26:20] payout 9634c160-d0f9-4720-8ffc-fc99acb837f9: claim=settled txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 9634c160-d0f9-4720-8ffc-fc99acb837f9'
+[10:26:21] treasury transactions carrying this payout's memo: 1
+[10:26:25] payout 35d1732e-f82c-494e-a246-d69d77502252: claim=settled txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 35d1732e-f82c-494e-a246-d69d77502252'
+[10:26:26] treasury transactions carrying this payout's memo: 1
+[10:26:29] payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e: claim=settled txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e'
+[10:26:30] treasury transactions carrying this payout's memo: 1
+[10:26:30] carol total 1200000 → 1800000 (delta 600000, expected 600000)
+[10:26:57] treasury total 2720000 → 2080000 (delta 640000, expected 640000 = 4 payouts + fees)
+[10:26:58] pages: {"contributor_stream_page":200,"claim_labels_on_page":["Paid · payout confirmed","Payout failed"],"owner_org_page":200,"owner_sees_payout_wallet":true}
+[10:26:59] FAIL: server-rendered pages wrong
+[10:27:13] === hushush live payout run p4run3 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, scenarios ABCDEFG)
+[10:27:14] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4501031 sapling_activation=280000 branch_id=77190ad9
+[10:27:14] RESUMING run p4run3 (database, state and starting balances from the original run)
+[10:27:30] services up: wallet pid 23279, payroll-api pid 23284, web pid 23292
+[2026-10-14T10:27:31.181Z] claim=settled payout=confirmed conf=10/10 mined=4500969 txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 detail=
+[2026-10-14T10:27:31.615Z] claim=settled payout=confirmed conf=11/10 mined=4500984 txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 detail=
+[2026-10-14T10:27:32.047Z] claim=settled payout=confirmed conf=10/10 mined=4501004 txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a detail=
+[2026-10-14T10:27:32.469Z] claim=settled payout=confirmed conf=10/10 mined=4501020 txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 detail=
+[10:27:32] === verification
+[10:27:37] payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62: claim=settled txid=c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 4457c9d1-f1d5-42fc-95d8-b009b2d13e62'
+[10:27:38] treasury transactions carrying this payout's memo: 1
+[10:27:41] payout 9634c160-d0f9-4720-8ffc-fc99acb837f9: claim=settled txid=d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 9634c160-d0f9-4720-8ffc-fc99acb837f9'
+[10:27:42] treasury transactions carrying this payout's memo: 1
+[10:27:45] payout 35d1732e-f82c-494e-a246-d69d77502252: claim=settled txid=c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout 35d1732e-f82c-494e-a246-d69d77502252'
+[10:27:46] treasury transactions carrying this payout's memo: 1
+[10:27:49] payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e: claim=settled txid=2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08 fee=10000 events=reserved > requires_reconciliation > submitted > confirmed
+carol received exactly once: 150000 zats, memo 'hushush payout aaed609a-f1f8-48cf-b49f-40bc383f8c8e'
+[10:27:50] treasury transactions carrying this payout's memo: 1
+[10:27:51] carol total 1200000 → 1800000 (delta 600000, expected 600000)
+[10:28:16] treasury total 2720000 → 2080000 (delta 640000, expected 640000 = 4 payouts + fees)
+[10:28:19] pages: {"contributor_stream_page":200,"claim_labels_on_page":["Paid · payout confirmed","Payout failed"],"owner_org_page":200,"owner_sees_payout_wallet":true}
+[10:28:20] paid txids: c3bf1e6eb5d0339dc29b010269aa8bfc8108a6a499874d594c2981f69b1728e2 d20f11745ea00a95bfbf57e260f5703c399c3cdc9f328f199f2931c0b236cc48 c713b94251b32fae261c55c2d506059a9aa8feb24e0282884979dbbb0098022a 2e0ab31f0fd310df7cf69d574be1bf999079aecfc22f942da295e3e8abf67b08
+[10:28:20] PASS (resumed): live testnet payouts submitted, confirmed, reconciled after crashes, verified; no duplicate payments

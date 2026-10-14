@@ -173,7 +173,7 @@ export function ClaimForm({ streamId, availableZec, availableZats }: { streamId:
             tone: "green",
             text: r.data.duplicate
               ? "This claim was already submitted; showing the original reservation."
-              : `Reserved ${r.data.claim.amount_zec} ZEC. It's pending and unpaid until payouts are enabled.`,
+              : `Reserved ${r.data.claim.amount_zec} ZEC. It's pending and unpaid until you pay it out.`,
           });
           setAmount("");
           setKey(newKey());
@@ -205,7 +205,7 @@ export function ClaimForm({ streamId, availableZec, availableZats }: { streamId:
       </Field>
       {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
       <Button type="submit" disabled={pending || availableZats <= 0}>{pending ? "Reserving…" : "Request claim"}</Button>
-      <p className="text-xs text-ink-soft">Claims reserve earned wages for payout. No ZEC is sent in this version.</p>
+      <p className="text-xs text-ink-soft">A claim reserves earned wages. Nothing is sent until you choose &ldquo;Pay out&rdquo; on the claim.</p>
     </form>
   );
 }

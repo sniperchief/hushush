@@ -1,0 +1,40 @@
+[09:21:42] === hushush live payout run p4run2 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, scenarios ABCDEFG)
+[09:21:57] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4500871 sapling_activation=280000 branch_id=77190ad9
+[09:21:59] database hushush_live_p4run2 created
+[09:22:37] services up: wallet pid 20535, payroll-api pid 20545, web pid 20554
+[09:22:43] treasury total=3040000 spendable=3040000; carol total=900000
+[09:23:47] setup: {"orgId":"d5ebdbf6-b5e2-4e0d-8e3d-ed109b75c94e","streamId":"18b7a4d9-5fc7-4729-8abe-3df05b4eee40","earned_zec":"0.00600000","owner":"875c09f3-7e4a-4778-8492-37a9179ac7bc","worker":"c2c4a280-871b-4d29-a422-54f1907e5010"}
+[09:23:48] wages: {"contributor_page":200,"earned_zec":"0.00600000","available_zec":"0.00600000","shown_on_page":true,"employer_org_page":200}
+[09:23:48] === A: concurrent requests, second instance, crash during confirmation polling
+[09:23:49] claim A 43be2ede-2ecb-47bc-8481-ca0843f88edc
+[09:23:50] quote: {"status":200,"claim_id":"43be2ede-2ecb-47bc-8481-ca0843f88edc","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+5 concurrent pay requests: 1 created, 4 duplicates, statuses [200, 201, 200, 200, 200], distinct payout ids 1
+[09:24:39] claim A while submitted: ('reserved', 'submitted') (must be reserved = unpaid)
+[09:24:43] second payroll-api instance started (pid 20719) — two workers now poll the same payouts
+[09:25:14] payroll-api #1 HARD-KILLED during confirmation polling (pid 20545)
+[2026-10-14T09:25:14.629Z] claim=reserved payout=submitted conf=0/10 mined=null txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:27:25.028Z] claim=reserved payout=submitted conf=1/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:27:55.122Z] claim=reserved payout=submitted conf=3/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:28:45.253Z] claim=reserved payout=submitted conf=4/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:29:05.309Z] claim=reserved payout=submitted conf=6/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:29:55.428Z] claim=reserved payout=submitted conf=7/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:30:35.525Z] claim=reserved payout=submitted conf=9/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[2026-10-14T09:30:55.585Z] claim=settled payout=confirmed conf=10/10 mined=4500884 txid=f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847 detail=
+[09:30:59] payroll-api #1 restarted (pid 20946)
+[09:30:59] claim A after confirmation: ('settled', 'f17b057fad28cdf0e8e979bb86dd900cc2b3252aee97c27379d6045c0fd26847', '0.00150000')
+[09:31:01] pay A after confirmation: (200, True, 'confirmed')
+[09:31:01] === B: payroll-api killed while the wallet builds the transaction
+[09:31:02] claim B a8dff464-4f75-401a-9ad5-abca16f92437
+[09:31:03] quote: {"status":200,"claim_id":"a8dff464-4f75-401a-9ad5-abca16f92437","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[09:31:05] crash: {"killed":true,"payout_id":"6f125692-006b-4685-9315-ec14912e54a2","state_at_kill":"reserved"}
+[09:31:05] client saw: {"status":503,"secs":1,"error":"payroll_unavailable","message":"The payroll service is unavailable. Try again shortly."}
+[09:31:05] payout B in DB while payroll-api is down: {"id":"6f125692-006b-4685-9315-ec14912e54a2","state":"reserved","txid":null,"leased":true}
+[09:31:17] payroll-api restarted (pid 21016); the dead process's lease must expire first
+[2026-10-14T09:31:18.921Z] claim=reserved payout=reserved conf=0/10 mined=null txid=null detail=
+[2026-10-14T09:35:19.683Z] claim=reserved payout=submitted conf=8/10 mined=4500901 txid=cb950e9e35eca6fbef9da03a2804c28e06d0d99ba1dddde50b914135ef33545c detail=
+[2026-10-14T09:35:39.743Z] claim=reserved payout=submitted conf=9/10 mined=4500901 txid=cb950e9e35eca6fbef9da03a2804c28e06d0d99ba1dddde50b914135ef33545c detail=
+[2026-10-14T09:35:59.831Z] claim=settled payout=confirmed conf=10/10 mined=4500901 txid=cb950e9e35eca6fbef9da03a2804c28e06d0d99ba1dddde50b914135ef33545c detail=
+[09:35:59] === C: wallet exits after recording the built tx, before broadcasting
+[09:36:01] claim C 9c8eaef4-5c3e-46a9-899d-2fa8400446f0
+[09:36:02] quote: {"status":200,"claim_id":"9c8eaef4-5c3e-46a9-899d-2fa8400446f0","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[09:45:34] FAIL: http://127.0.0.1:7979/healthz never came up

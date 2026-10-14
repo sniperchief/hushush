@@ -4,13 +4,14 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.88"
 publish = false
-description = "hushush payroll engine: streams, server-side accrual, claim reservations (accounting only)"
+description = "hushush payroll engine: streams, server-side accrual, claim reservations and the payout state machine"
 
 [dependencies]
 rusqlite = { version = "0.37", features = ["bundled"] }
 thiserror = "2"
 uuid = { version = "1", features = ["v4"] }
 serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
 
 # PostgreSQL backend
 postgres = "0.19"

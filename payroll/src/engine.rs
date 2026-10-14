@@ -18,7 +18,7 @@ pub struct Payroll<B: Backend> {
     pub(crate) clock: Arc<dyn Clock>,
 }
 
-fn new_id() -> String {
+pub(crate) fn new_id() -> String {
     uuid::Uuid::new_v4().to_string()
 }
 
@@ -32,7 +32,7 @@ pub(crate) fn validate_text(field: &str, v: &str, max: usize) -> Result<()> {
     Ok(())
 }
 
-fn validate_id(field: &'static str, v: &str) -> Result<()> {
+pub(crate) fn validate_id(field: &'static str, v: &str) -> Result<()> {
     if uuid::Uuid::parse_str(v).is_err() {
         // Malformed ids can't exist; report them like any unknown id.
         return Err(PayrollError::NotFound(field));
@@ -41,7 +41,7 @@ fn validate_id(field: &'static str, v: &str) -> Result<()> {
 }
 
 /// Recipient, or an owner/admin of the paying organization.
-fn require_can_view<T: StoreTx>(tx: &mut T, actor: &str, s: &Stream) -> Result<()> {
+pub(crate) fn require_can_view<T: StoreTx>(tx: &mut T, actor: &str, s: &Stream) -> Result<()> {
     if actor == s.recipient_user_id {
         return Ok(());
     }
@@ -52,7 +52,7 @@ fn require_can_view<T: StoreTx>(tx: &mut T, actor: &str, s: &Stream) -> Result<(
     }
 }
 
-fn require_manager<T: StoreTx>(tx: &mut T, actor: &str, org: &str) -> Result<Role> {
+pub(crate) fn require_manager<T: StoreTx>(tx: &mut T, actor: &str, org: &str) -> Result<Role> {
     match tx.role_of(org, actor)? {
         Some(r) if r.manages_payroll() => Ok(r),
         Some(_) => Err(PayrollError::Forbidden(
@@ -105,7 +105,7 @@ fn record_event<T: StoreTx>(
     )
 }
 
-fn load_stream<T: StoreTx>(tx: &mut T, id: &str, lock: bool) -> Result<Stream> {
+pub(crate) fn load_stream<T: StoreTx>(tx: &mut T, id: &str, lock: bool) -> Result<Stream> {
     validate_id("stream", id)?;
     tx.load_stream(id, lock)?
         .ok_or(PayrollError::NotFound("stream"))
@@ -521,9 +521,10 @@ impl<B: Backend> Payroll<B> {
         self.resolve_claim(actor, claim_id, None)
     }
 
-    /// Records that a reserved claim was paid (by a later phase's payout worker).
-    /// Owner/admin only. No payout happens here; this is accounting only, and
-    /// the web API does not expose it.
+    /// Records that a reserved claim was paid outside hushush. Owner/admin
+    /// only; accounting only, and the web API does not expose it. Claims paid
+    /// through hushush are settled by their payout's confirmation instead
+    /// (see [`crate::payout`]); this refuses claims that have a payout.
     pub fn settle_claim(
         &mut self,
         actor: &str,
@@ -567,6 +568,13 @@ impl<B: Backend> Payroll<B> {
         if c.status != ClaimStatus::Reserved {
             return Err(PayrollError::InvalidState(
                 "claim is no longer reserved".into(),
+            ));
+        }
+        // A claim with a payout is resolved only by that payout (confirmation
+        // settles it, failure releases it), never by hand.
+        if tx.payout_by_claim(claim_id, true)?.is_some() {
+            return Err(PayrollError::InvalidState(
+                "a payout is in progress for this claim".into(),
             ));
         }
         let to = if settlement_ref.is_some() {

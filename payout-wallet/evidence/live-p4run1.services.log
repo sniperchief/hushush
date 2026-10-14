@@ -1,0 +1,485 @@
+2026-10-14T08:49:41.846240Z  INFO hushush_payout_wallet: starting payout wallet (TESTNET); syncing and recovering wallet=treasury lightwalletd=https://testnet.zec.rocks:443
+2026-10-14T08:49:42.992595Z  INFO schemerz: Migrating everything
+2026-10-14T08:49:43.451009Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:49:43.708170Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:49:44.068595Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:49:44.548409Z  INFO zcash_client_backend::sync: Latest block height is 4500790
+2026-10-14T08:49:44.564561Z  INFO zcash_client_backend::sync: Fetching Verify(4500601..4500611)
+2026-10-14T08:49:46.104754Z  INFO zcash_client_backend::sync: Scanning Verify(4500601..4500611)
+2026-10-14T08:49:46.161229Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500611..4500791)
+2026-10-14T08:49:49.663040Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500611..4500791)
+2026-10-14T08:49:50.060339Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:49:51.441575Z  INFO hushush_payout_wallet: payout wallet listening on 127.0.0.1:7979
+2026-10-14T08:50:11.187935Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:50:11.398303Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:50:11.637614Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:50:12.065581Z  INFO zcash_client_backend::sync: Latest block height is 4502026-10-14T08:51:44.898192Z  INFO hushush_payroll_api::payouts: payout reserved; submitting to wallet payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980
+2026-10-14T08:52:59.039047Z  INFO hushush_payroll_api::payouts: payout submission recorded payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa state="submitted" txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91")
+2026-10-14T08:53:12.370661Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=0 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:53:27.827967Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=0 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:53:43.291743Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=0 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+ 4500795
+2026-10-14T08:50:51.778828Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:51:11.083320Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:51:11.290593Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:51:11.936144Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:51:12.163207Z  INFO zcash_client_backend::sync: Latest block height is 4500798
+2026-10-14T08:51:12.172554Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500796..4500799)
+2026-10-14T08:51:12.932045Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500796..4500799)
+2026-10-14T08:51:13.104241Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:51:31.054349Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:51:31.247806Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:51:31.450595Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:51:31.669846Z  INFO zcash_client_backend::sync: Latest block height is 4500799
+2026-10-14T08:51:31.678909Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500799..4500800)
+2026-10-14T08:51:32.061016Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500799..4500800)
+2026-10-14T08:51:32.104334Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:51:45.008070Z  INFO hushush_payout_wallet::actor: payment accepted; building payment_id="a5fe05ed-55fa-467f-ba72-727d2be36ffa" amount_zats=150000
+2026-10-14T08:51:45.346292Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:51:45.595576Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:51:45.873556Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:51:46.130619Z  INFO zcash_client_backend::sync: Latest block height is 4500799
+2026-10-14T08:51:46.139496Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:52:58.016308Z  INFO hushush_payout_wallet::actor: transaction built and recorded payment_id="a5fe05ed-55fa-467f-ba72-727d2be36ffa" txid=2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91 fee_zats=10000
+2026-10-14T08:52:58.577249Z  INFO hushush_payout_wallet::actor: broadcast accepted payment_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91")
+2026-10-14T08:52:58.953041Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:52:59.131799Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:52:59.316002Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:52:59.534644Z  INFO zcash_client_backend::sync: Latest block height is 4500800
+2026-10-14T08:52:59.543970Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500800..4500801)
+2026-10-14T08:52:59.894004Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500800..4500801)
+2026-10-14T08:52:59.946093Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:53:18.957447Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:53:19.139617Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:53:19.337780Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:53:19.557322Z  INFO zcash_client_backend::sync: Latest block height is 4500802
+2026-10-14T08:53:19.566465Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500801..4500803)
+2026-10-14T08:53:19.930688Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500801..4500803)
+2026-10-14T08:53:19.975464Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:53:39.027992Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:53:39.224958Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:53:39.407711Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:53:39.617962Z  INFO zcash_client_backend::sync: Latest block height is 4500804
+2026-10-14T08:53:39.627491Z  INFO zcash_client_bac2026-10-14T08:53:42.227507Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=0 txid=Some("2cbdef9b1bb5e1353da045a1efef2a32026-10-14T08:53:59.020827Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:53:59.789767Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:53:59.972948Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:54:00.160483Z  INFO zcash_client_backend::sync: Latest block h2026-10-14T08:54:13.291721Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2b2026-10-14T08:54:19.055806Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:54:19.227425Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtre2026-10-14T08:54:28.745074Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detai2026-102026-10-14T08:54:44.205801Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:54:59.648754Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:55:15.136082Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:55:30.582966Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:55:46.017270Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:56:01.606755Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=2 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:56:17.185891Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=3 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:56:32.643413Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=4 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:56:48.235587Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=5 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:57:03.708272Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=5 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:57:19.191314Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=5 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:57:34.672088Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=7 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:57:50.157792Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=7 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:58:05.739502Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=7 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:58:21.202391Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=8 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:58:36.656553Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=8 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:58:52.155441Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=8 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:59:07.649353Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="submitted" confirmations=9 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+2026-10-14T08:59:23.138315Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=a5fe05ed-55fa-467f-ba72-727d2be36ffa claim_id=7e63fdb4-9c89-49f4-ba63-abbbaec40980 state="confirmed" confirmations=11 txid=Some("2cbdef9b1bb5e1353da045a1efef2a3a48609760a679ae2b119bb457769f1f91") detail=None
+cash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:58:00.091952Z  INFO zcash_client_backend::sync: Latest block height is 4500811
+2026-10-14T08:58:00.100950Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:58:19.295467Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:58:19.482587Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:58:19.687580Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:58:19.889760Z  INFO zcash_client_backend::sync: Latest block height is 4500812
+2026-10-14T08:58:19.898522Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500812..4500813)
+2026-10-14T08:58:20.251843Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500812..4500813)
+2026-10-14T08:58:20.298383Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:58:39.360302Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:58:39.566245Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:58:39.749162Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:58:39.975031Z  INFO zcash_client_backend::sync: Latest block height is 4500812
+2026-10-14T08:58:39.983335Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:58:59.390874Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:58:59.561065Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:58:59.791233Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:58:59.982043Z  INFO zcash_client_backend::sync: Latest block height is 4500813
+2026-10-14T08:58:59.991284Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500813..4500814)
+2026-10-14T08:59:00.519166Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500813..4500814)
+2026-10-14T08:59:00.557574Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:59:19.407071Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:59:19.604872Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:59:19.787271Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:59:19.978013Z  INFO zcash_client_backend::sync: Latest block height is 4500815
+2026-10-14T08:59:19.986986Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500814..4500816)
+2026-10-14T08:59:20.351747Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500814..4500816)
+2026-10-14T08:59:20.390981Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:59:39.434402Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:59:39.638927Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T08:59:39.846012Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T08:59:40.047730Z  INFO zcash_client_backend::sync: Latest block height is 4500815
+2026-10-14T08:59:40.056419Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T08:59:59.586137Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T08:59:59.978256Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:00:00.189021Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:00:00.441501Z  INFO zcash_client_backend::sync: Latest block height is 4500817
+2026-10-14T09:00:00.450064Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500816..4500818)
+2026-10-14T09:00:00.993403Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500816..4500818)
+2026-10-14T09:00:01.029151Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:00:19.466099Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:00:19.658169Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:00:19.860800Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:00:20.068202Z  INFO zcash_client_backend::sync: Latest block height is 4500819
+2026-10-14T09:00:20.077349Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500818..4500820)
+2026-10-14T09:00:20.445558Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500818..4500820)
+2026-10-14T09:00:20.485065Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:00:39.550124Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:00:39.740301Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:00:39.926694Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:00:40.111344Z  INFO zcash_client_backend::sync: Latest block height is 4500819
+2026-10-14T09:00:40.119824Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:00:59.687318Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:01:00.172671Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:01:00.563823Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:01:00.928958Z  INFO zcash_client_backend::sync: Latest block height is 4500820
+2026-10-14T09:01:00.938343Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500820..4500821)
+2026-10-14T09:01:02.483270Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500820..4500821)
+2026-10-14T09:01:02.521127Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:01:19.746224Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:01:19.951497Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:01:20.270066Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:01:20.475217Z  INFO zcash_client_backend::sync: Latest block height is 4500820
+2026-10-14T09:01:20.484090Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:01:39.572232Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:01:39.897078Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:01:40.094666Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:01:40.380879Z  INFO zcash_client_backend::sync: Latest block height is 4500821
+2026-10-14T09:01:40.389645Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500821..4500822)
+2026-10-14T09:01:40.818776Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500821..4500822)
+2026-10-14T09:01:40.866287Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:01:59.546589Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:01:59.738787Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:01:59.940980Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:02:00.139262Z  INFO zcash_client_backend::sync: Latest block height is 4500823
+2026-10-14T09:02:00.148450Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500822..4500824)
+2026-10-14T09:02:00.622946Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500822..4500824)
+2026-10-14T09:02:00.689327Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:02:19.565109Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:02:19.748875Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:02:19.933996Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:02:20.165901Z  INFO zcash_client_backend::sync: Latest block height is 4500823
+2026-10-14T09:02:20.174309Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:02:39.815478Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:02:40.109673Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:02:40.355254Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:02:40.576625Z  INFO zcash_client_backend::sync: Latest block height is 4500824
+2026-10-14T09:02:40.585582Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500824..4500825)
+2026-10-14T09:02:41.050248Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500824..4500825)
+2026-10-14T09:02:41.087071Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:02:59.751069Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:03:00.078618Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:03:00.377845Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:03:01.115147Z  INFO zcash_client_backend::sync: Latest block height is 4500826
+2026-10-14T09:03:01.123767Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500825..4500827)
+2026-10-14T09:03:01.902605Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500825..4500827)
+2026-10-14T09:03:01.938804Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:03:19.780571Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:03:20.129635Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:03:20.468637Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:03:20.774582Z  INFO zcash_client_backend::sync: Latest block height is 4500826
+2026-10-14T09:03:20.783170Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:03:40.185108Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:03:40.385622Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:03:40.621140Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:03:40.841354Z  INFO zcash_client_backend::sync: Latest block height is 4500826
+2026-10-14T09:03:40.850139Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:03:59.671428Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:03:59.871520Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:04:00.045891Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:04:00.235520Z  INFO zcash_client_backend::sync: Latest block height is 4500826
+2026-10-14T09:04:00.244415Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:04:19.795241Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:04:20.342529Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:04:20.516727Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:04:20.703646Z  INFO zcash_client_backend::sync: Latest block height is 4500828
+2026-10-14T09:04:20.712063Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500827..4500829)
+2026-10-14T09:04:21.071290Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500827..4500829)
+2026-10-14T09:04:21.116145Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:04:39.818399Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:04:40.079114Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:04:40.273749Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:04:40.486264Z  INFO zcash_client_backend::sync: Latest block height is 4500828
+2026-10-14T09:04:40.494924Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:04:59.735013Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:04:59.958995Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:05:00.192138Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:05:00.393841Z  INFO zcash_client_backend::sync: Latest block height is 4500828
+2026-10-14T09:05:00.403338Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:05:19.819540Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:05:20.006614Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:05:20.212965Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:05:20.394308Z  INFO zcash_client_backend::sync: Latest block height is 4500829
+2026-10-14T09:05:20.403707Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500829..4500830)
+2026-10-14T09:05:20.900684Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500829..4500830)
+2026-10-14T09:05:20.953144Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:05:39.814309Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:05:40.026852Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:05:40.215666Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:05:40.396086Z  INFO zcash_client_backend::sync: Latest block height is 4500829
+2026-10-14T09:05:40.404815Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:05:59.794030Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:05:59.986208Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:06:00.162891Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:06:00.357681Z  INFO zcash_client_backend::sync: Latest block height is 4500830
+2026-10-14T09:06:00.368752Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500830..4500831)
+2026-10-14T09:06:00.746562Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500830..4500831)
+2026-10-14T09:06:00.790084Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:06:20.078675Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:06:20.389877Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:06:20.702718Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:06:21.342869Z  INFO zcash_client_backend::sync: Latest block height is 4500831
+2026-10-14T09:06:21.351191Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500831..4500832)
+2026-10-14T09:06:22.218379Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500831..4500832)
+2026-10-14T09:06:22.248456Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:06:39.819156Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:06:39.998950Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:06:40.214827Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:06:40.462140Z  INFO zcash_client_backend::sync: Latest block height is 4500832
+2026-10-14T09:06:40.471629Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500832..4500833)
+2026-10-14T09:06:41.029171Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500832..4500833)
+2026-10-14T09:06:41.062562Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:06:59.984003Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:07:00.202662Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:07:00.535400Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:07:00.806037Z  INFO zcash_client_backend::sync: Latest block height is 4500835
+2026-10-14T09:07:00.814424Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500833..4500836)
+2026-10-14T09:07:01.561273Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500833..4500836)
+2026-10-14T09:07:01.592237Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:07:19.902978Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:07:20.090882Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:07:20.280856Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:07:20.468550Z  INFO zcash_client_backend::sync: Latest block height is 4500835
+2026-10-14T09:07:20.476778Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:07:39.867227Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:07:40.072179Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:07:40.247234Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:07:40.432746Z  INFO zcash_client_backend::sync: Latest block height is 4500836
+2026-10-14T09:07:40.441088Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500836..4500837)
+2026-10-14T09:07:40.795636Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500836..4500837)
+2026-10-14T09:07:40.833633Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:07:59.884105Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:08:00.064884Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:08:00.242365Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:08:00.433219Z  INFO zcash_client_backend::sync: Latest block height is 4500838
+2026-10-14T09:08:00.441174Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500837..4500839)
+2026-10-14T09:08:00.798248Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500837..4500839)
+2026-10-14T09:08:00.833560Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:08:19.922561Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:08:20.128873Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:08:20.346955Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:08:20.566687Z  INFO zcash_client_backend::sync: Latest block height is 4500839
+2026-10-14T09:08:20.575050Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500839..4500840)
+2026-10-14T09:08:20.925748Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500839..4500840)
+2026-10-14T09:08:20.964271Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:08:39.913317Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:08:40.093721Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:08:40.272458Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:08:40.492339Z  INFO zcash_client_backend::sync: Latest block height is 4500839
+2026-10-14T09:08:40.500149Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:09:00.156466Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:09:00.522564Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:09:00.734641Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:09:00.933191Z  INFO zcash_client_backend::sync: Latest block height is 4500840
+2026-10-14T09:09:00.942711Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500840..4500841)
+2026-10-14T09:09:01.483602Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500840..4500841)
+2026-10-14T09:09:01.546701Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:09:19.916626Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:09:20.102383Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:09:20.280512Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:09:20.481658Z  INFO zcash_client_backend::sync: Latest block height is 4500841
+2026-10-14T09:09:20.490975Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500841..4500842)
+2026-10-14T09:09:20.878939Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500841..4500842)
+2026-10-14T09:09:20.943575Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:09:39.953322Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:09:40.123364Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:09:40.313927Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:09:40.524332Z  INFO zcash_client_backend::sync: Latest block height is 4500842
+2026-10-14T09:09:40.532047Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500842..4500843)
+2026-10-14T09:09:40.887687Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500842..4500843)
+2026-10-14T09:09:40.924701Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:09:59.938346Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:10:00.209247Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:10:00.466661Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:10:00.723733Z  INFO zcash_client_backend::sync: Latest block height is 4500842
+2026-10-14T09:10:00.732999Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:10:19.947347Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:10:20.126328Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:10:20.300967Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:10:20.590064Z  INFO zcash_client_backend::sync: Latest block height is 4500842
+2026-10-14T09:10:20.599013Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:10:40.186531Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:10:40.360845Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:10:40.598687Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:10:40.896828Z  INFO zcash_client_backend::sync: Latest block height is 4500842
+2026-10-14T09:10:40.906016Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:11:00.067758Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:11:00.255094Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:11:00.429779Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:11:00.612637Z  INFO zcash_client_backend::sync: Latest block height is 4500843
+2026-10-14T09:11:00.621750Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500843..4500844)
+2026-10-14T09:11:00.994330Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500843..4500844)
+2026-10-14T09:11:01.066722Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:11:19.971533Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:11:20.154121Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:11:20.350281Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:11:20.531467Z  INFO zcash_client_backend::sync: Latest block height is 4500846
+2026-10-14T09:11:20.540414Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500844..4500847)
+2026-10-14T09:11:20.881917Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500844..4500847)
+2026-10-14T09:11:20.919079Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:11:40.224403Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:11:40.413111Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:11:40.600426Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:11:40.831615Z  INFO zcash_client_backend::sync: Latest block height is 4500846
+2026-10-14T09:11:40.841295Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:12:04.938842Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:12:05.145280Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:12:05.344117Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:12:05.758241Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:12:05.766738Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500847..4500848)
+2026-10-14T09:12:06.473929Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500847..4500848)
+2026-10-14T09:12:06.507122Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:12:20.006326Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:12:20.483597Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:12:21.011621Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:12:21.718194Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:12:21.727455Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:12:41.668381Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:12:41.857495Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:12:42.118346Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:12:42.442818Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:12:42.452582Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:13:00.386482Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:13:00.571709Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:13:00.751346Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:13:03.790447Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:13:03.799782Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:13:20.149181Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:13:20.342066Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:13:20.645005Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:13:20.831783Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:13:20.839660Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:13:40.016155Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:13:40.206582Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:13:40.392663Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:13:40.592088Z  INFO zcash_client_backend::sync: Latest block height is 4500847
+2026-10-14T09:13:40.600539Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:14:00.107860Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:14:00.420711Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:14:00.936808Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:14:01.665966Z  INFO zcash_client_backend::sync: Latest block height is 4500849
+2026-10-14T09:14:01.676122Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500848..4500850)
+2026-10-14T09:14:02.388672Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500848..4500850)
+2026-10-14T09:14:02.466667Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:14:27.061558Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:14:27.241757Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:14:27.423974Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:14:27.621434Z  INFO zcash_client_backend::sync: Latest block height is 4500850
+2026-10-14T09:14:27.631339Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500850..4500851)
+2026-10-14T09:14:28.042369Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500850..4500851)
+2026-10-14T09:14:28.100396Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:14:40.065767Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:14:40.248743Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:14:40.419473Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:14:40.617229Z  INFO zcash_client_backend::sync: Latest block height is 4500850
+2026-10-14T09:14:40.628181Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:15:00.124303Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:15:00.311515Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:15:00.500935Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:15:00.682247Z  INFO zcash_client_backend::sync: Latest block height is 4500851
+2026-10-14T09:15:00.690322Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500851..4500852)
+2026-10-14T09:15:01.078552Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500851..4500852)
+2026-10-14T09:15:01.136220Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:15:20.079704Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:15:20.267302Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:15:20.455608Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:15:20.646417Z  INFO zcash_client_backend::sync: Latest block height is 4500854
+2026-10-14T09:15:20.656256Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500852..4500855)
+2026-10-14T09:15:21.033491Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500852..4500855)
+2026-10-14T09:15:21.085513Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:15:40.278098Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:15:40.461707Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:15:40.847148Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:15:41.052159Z  INFO zcash_client_backend::sync: Latest block height is 4500856
+2026-10-14T09:15:41.062693Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500855..4500857)
+2026-10-14T09:15:41.466554Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500855..4500857)
+2026-10-14T09:15:41.503268Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:16:00.251216Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:16:00.552532Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:16:00.841598Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:16:01.127648Z  INFO zcash_client_backend::sync: Latest block height is 4500856
+2026-10-14T09:16:01.137279Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:16:20.483597Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:16:20.673073Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:16:20.868819Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:16:21.068737Z  INFO zcash_client_backend::sync: Latest block height is 4500856
+2026-10-14T09:16:21.078444Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:16:40.457452Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:16:40.722663Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:16:41.751312Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:16:42.491310Z  INFO zcash_client_backend::sync: Latest block height is 4500858
+2026-10-14T09:16:42.500157Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500857..4500859)
+2026-10-14T09:16:42.900762Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500857..4500859)
+2026-10-14T09:16:42.949856Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:17:00.678575Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:17:01.396582Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:17:01.828248Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:17:02.031113Z  INFO zcash_client_backend::sync: Latest block height is 4500858
+2026-10-14T09:17:02.040761Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:17:22.889052Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:17:23.071545Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:17:23.258513Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:17:23.567586Z  INFO zcash_client_backend::sync: Latest block height is 4500859
+2026-10-14T09:17:23.577009Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500859..4500860)
+2026-10-14T09:17:24.358391Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500859..4500860)
+2026-10-14T09:17:24.406651Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:17:42.793919Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:17:43.163208Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:17:43.455863Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:17:43.739844Z  INFO zcash_client_backend::sync: Latest block height is 4500862
+2026-10-14T09:17:43.748125Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500860..4500863)
+2026-10-14T09:17:44.180143Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500860..4500863)
+2026-10-14T09:17:44.219904Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:18:00.521966Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:18:00.733012Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:18:00.922870Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:18:01.161685Z  INFO zcash_client_backend::sync: Latest block height is 4500863
+2026-10-14T09:18:01.171447Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500863..4500864)
+2026-10-14T09:18:01.586357Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500863..4500864)
+2026-10-14T09:18:01.621334Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:18:20.133390Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:18:20.341705Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:18:20.535359Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:18:20.744337Z  INFO zcash_client_backend::sync: Latest block height is 4500865
+2026-10-14T09:18:20.753730Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500864..4500866)
+2026-10-14T09:18:21.140577Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500864..4500866)
+2026-10-14T09:18:21.176856Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:18:40.092912Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:18:40.263673Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:18:40.444074Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:18:40.633707Z  INFO zcash_client_backend::sync: Latest block height is 4500865
+2026-10-14T09:18:40.642786Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:19:00.078677Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:19:00.255694Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:19:00.441765Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:19:00.623732Z  INFO zcash_client_backend::sync: Latest block height is 4500865
+2026-10-14T09:19:00.633276Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:19:20.105556Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:19:20.282731Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:19:20.460608Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:19:20.643838Z  INFO zcash_client_backend::sync: Latest block height is 4500866
+2026-10-14T09:19:20.652038Z  INFO zcash_client_backend::sync: Fetching ChainTip(4500866..4500867)
+2026-10-14T09:19:21.094888Z  INFO zcash_client_backend::sync: Scanning ChainTip(4500866..4500867)
+2026-10-14T09:19:21.159976Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-14T09:19:40.102575Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-14T09:19:40.282043Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-14T09:19:40.462910Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-14T09:19:40.968927Z  INFO zcash_client_backend::sync: Latest block height is 4500866
+2026-10-14T09:19:40.977340Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...

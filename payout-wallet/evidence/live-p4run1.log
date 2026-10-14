@@ -1,0 +1,20 @@
+[08:49:30] === hushush live payout run p4run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, scenarios ABCDEFG)
+[08:49:36] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4500790 sapling_activation=280000 branch_id=77190ad9
+[08:49:39] database hushush_live_p4run1 created
+[08:50:07] services up: wallet pid 19590, payroll-api pid 19605, web pid 19613
+[08:50:16] treasury total=3200000 spendable=3200000; carol total=750000
+[08:51:28] setup: {"orgId":"ef575dfe-2404-460e-b423-0928030fbe45","streamId":"ffb83bfd-bd10-436f-bfe4-8ed25390391e","earned_zec":"0.00600000","owner":"ae2e94e7-2a82-4ab1-a23a-d71073eddca3","worker":"feb77fc5-0fc5-4741-a60c-d1e66299b763"}
+[08:51:32] wages: {"contributor_page":200,"earned_zec":"0.00600000","available_zec":"0.00600000","shown_on_page":true,"employer_org_page":200}
+[08:51:33] === A: concurrent requests, second instance, crash during confirmation polling
+[08:51:35] claim A 7e63fdb4-9c89-49f4-ba63-abbbaec40980
+[08:51:42] quote: {"status":200,"claim_id":"7e63fdb4-9c89-49f4-ba63-abbbaec40980","amount_zats":150000,"amount_zec":"0.00150000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":160000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+5 concurrent pay requests: 1 created, 4 duplicates, statuses [201, 200, 200, 200, 200], distinct payout ids 1
+[08:53:04] claim A while submitted: ('reserved', 'submitted') (must be reserved = unpaid)
+[08:53:11] second payroll-api instance started (pid 19767) — two workers now poll the same payouts
+[08:53:44] payroll-api #1 HARD-KILLED during confirmation polling (pid 19605)
+[2026-10-14T08:53:46.178Z] payroll-api unreachable (fetch failed)
+[2026-10-14T09:22:20.818Z] payroll-api unreachable (payroll-api 401)
+[2026-10-14T09:25:21.418Z] payroll-api unreachable (fetch failed)
+[2026-10-14T09:31:01.860Z] payroll-api unreachable (payroll-api 401)
+[2026-10-14T09:31:11.917Z] payroll-api unreachable (fetch failed)
+[2026-10-14T09:31:21.961Z] payroll-api unreachable (payroll-api 401)

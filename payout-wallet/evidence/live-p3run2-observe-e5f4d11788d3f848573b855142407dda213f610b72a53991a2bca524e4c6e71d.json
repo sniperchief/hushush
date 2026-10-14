@@ -1,0 +1,32 @@
+{
+  "txid": "e5f4d11788d3f848573b855142407dda213f610b72a53991a2bca524e4c6e71d",
+  "mined_height": 4499451,
+  "size_bytes": 9166,
+  "tx_version": "V6",
+  "consensus_branch_id": "Nu7",
+  "lock_time": 0,
+  "expiry_height": 4499481,
+  "transparent_inputs": 0,
+  "transparent_outputs": [],
+  "sprout_joinsplits": 0,
+  "sapling_spends": 0,
+  "sapling_outputs": 0,
+  "sapling_value_balance_zats": 0,
+  "orchard_actions": 0,
+  "orchard_value_balance_zats": 0,
+  "orchard_anchor_hex": null,
+  "ironwood_actions": 2,
+  "ironwood_value_balance_zats": 10000,
+  "ironwood_anchor_hex": "013d9afb24c9e9712c317363d8fddf0f9c147124001c8a04d4b7e4a3d643ca39",
+  "fee_zats": 10000,
+  "fully_shielded": true,
+  "disclosures": [
+    "No transparent inputs or outputs: no addresses or payment amounts are visible.",
+    "Fee is public: 10000 zatoshis (implies the ZIP 317 logical-action count).",
+    "Transaction shape is public: 0 Sapling spend(s), 0 Sapling output(s), 0 Orchard action(s), 2 Ironwood action(s). Orchard/Ironwood actions are padded (min 2), so counts bound but do not reveal the number of recipients.",
+    "Expiry height 4499481 and lock time 0 are public; mined height/time are public once mined.",
+    "Anchors (commitment-tree roots) are public and indicate roughly which chain height the spent notes were proven against.",
+    "Nullifiers and note commitments are public but are not linkable to addresses or values without a viewing key.",
+    "Confirmations: 1148"
+  ]
+}

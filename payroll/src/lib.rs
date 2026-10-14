@@ -2,8 +2,10 @@
 //!
 //! Organizations pay members through *payroll streams*: a fixed ZEC rate that
 //! accrues over active time, computed only on the server from the server clock.
-//! Recipients *claim* earned wages; a claim is purely an accounting reservation
-//! — nothing here talks to the Zcash wallet.
+//! Recipients *claim* earned wages; a claim is an accounting reservation. A
+//! reserved claim can then be paid out through the shielded payout wallet
+//! ([`payout`]); this crate never holds keys or talks to the chain itself —
+//! it drives the wallet service through the [`payout::WalletApi`] contract.
 //!
 //! Business rules are written once in [`engine`], generic over a storage
 //! [`store::Backend`]. Two backends exist: [`sqlite`] (the Phase 1 tested
@@ -21,6 +23,7 @@ pub mod error;
 pub mod migrations;
 pub mod model;
 pub mod money;
+pub mod payout;
 pub mod pg;
 pub mod sqlite;
 pub mod store;
@@ -28,5 +31,6 @@ pub mod store;
 pub use engine::{MAX_RATE_PERIOD_SECS, Payroll};
 pub use error::{PayrollError, Result};
 pub use model::*;
+pub use payout::{PayoutPolicy, PayoutTerms};
 pub use pg::PgPayrollDb;
 pub use sqlite::PayrollDb;

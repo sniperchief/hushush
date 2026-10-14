@@ -1,0 +1,16 @@
+[2026-10-13T22:22:10Z] info: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4499317 sapling_activation=280000 branch_id=77190ad9
+wallet:   C:\Users\USER\AppData\Local\hushush-phase0\wallets\treasury
+identity: C:\Users\USER\AppData\Local\hushush-phase0\secrets\treasury.age-identity.txt (keep secret; required to spend)
+birthday: 4499217
+[2026-10-13T22:22:23Z] treasury address: utest1d7snp7aztul7eamlfe89p0ljnkxkf6gzaemmns37zkuyg0nt8uj8acp65jddxd6frf8j8zjxp387hu8u0qkfgjctg5xp42rftnev90zyslkfr876wegv2vv883nhj7cg53amjxyhzj05ptnvecphnltxaejx35kfdqjee9wq0sdtfnqh
+[2026-10-13T22:22:23Z] treasury birthday: 4499217
+wallet:   C:\Users\USER\AppData\Local\hushush-phase0\wallets\carol
+identity: C:\Users\USER\AppData\Local\hushush-phase0\secrets\carol.age-identity.txt (keep secret; required to spend)
+birthday: 4499217
+[2026-10-13T22:22:28Z] carol address: utest1qql4rkhn92cydgm5d78adxuw29dxuvnzgy4g0rjdqlgh8gv86e3jn86t8fkrphf2nefteepurcd8c2n4wxm0zl3wumalfhvd497k0mvq3p0yz0cjyxerz9qscadt5h0vg6f2kqwzmyg8g0wqzxwqa34zak7rhp82txqv9dfe8unhl29k
+[2026-10-13T22:22:28Z] carol birthday: 4499217
+[2026-10-13T22:22:36Z] alice sync: {"chain_tip_height":4499317,"fully_scanned_height":4499317,"sapling_spendable":0,"orchard_spendable":0,"ironwood_spendable":12340000,"spendable_total":12340000,"pending_change":0,"pending_spendability":0,"total":12340000,"transparent_total":0}
+proposal: {"steps":1,"fee_zats":10000,"payment_pools":["Shielded(Ironwood)"],"input_pools":["Shielded(Ironwood)"],"change_pools":["Shielded(Ironwood)"]}
+building and proving transaction...
+broadcasting 9166 bytes...
+[2026-10-13T22:23:52Z] funding txid: 98cb28bdfc8bc49f7ddc0224813dbfe7faa57b167d7a3ffe40a146071dbc4cd3

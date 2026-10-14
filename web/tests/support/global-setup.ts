@@ -1,5 +1,7 @@
 // Integration test harness: a real PostgreSQL database and the real Rust
-// payroll-api binary. Nothing payroll-related is mocked.
+// payroll-api binary. Nothing payroll-related is mocked. The payout WALLET is
+// a MOCK (tests/support/mock-wallet.ts): an in-memory implementation of the
+// wallet service's API contract, so no keys, chain or funds are involved.
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -8,6 +10,7 @@ import path from "node:path";
 import pg from "pg";
 import type { TestProject } from "vitest/node";
 import { migrate } from "../../scripts/migrate.ts";
+import { startMockWallet } from "./mock-wallet.ts";
 
 declare module "vitest" {
   export interface ProvidedContext {
@@ -16,6 +19,7 @@ declare module "vitest" {
 }
 
 let child: ChildProcess | undefined;
+let wallet: Awaited<ReturnType<typeof startMockWallet>> | undefined;
 
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -61,9 +65,25 @@ export default async function setup(project: TestProject) {
 
   const port = await freePort();
   const token = randomBytes(32).toString("hex");
+  const walletToken = randomBytes(32).toString("hex");
+  wallet = await startMockWallet(walletToken);
   const apiUrl = `http://127.0.0.1:${port}`;
   child = spawn(bin, [], {
-    env: { ...process.env, PAYROLL_DATABASE_URL: dbUrl, PAYROLL_API_TOKEN: token, PAYROLL_API_ADDR: `127.0.0.1:${port}`, RUST_LOG: "warn" },
+    env: {
+      ...process.env,
+      PAYROLL_DATABASE_URL: dbUrl,
+      PAYROLL_API_TOKEN: token,
+      PAYROLL_API_ADDR: `127.0.0.1:${port}`,
+      RUST_LOG: "warn",
+      // Payouts against the MOCK wallet; fast worker, short confirmation policy.
+      WALLET_URL: wallet.url,
+      WALLET_API_TOKEN: walletToken,
+      PAYOUT_ENABLED_ORGS: "*",
+      PAYOUT_POLL_SECS: "1",
+      PAYOUT_CONFIRMATIONS: "3",
+      WALLET_TIMEOUT_SECS: "5",
+      WALLET_SUBMIT_TIMEOUT_SECS: "10",
+    },
     stdio: ["ignore", "inherit", "inherit"],
   });
   await waitHealthy(apiUrl); // payroll-api migrates the payroll schema on start
@@ -74,9 +94,11 @@ export default async function setup(project: TestProject) {
     PAYROLL_API_URL: apiUrl,
     PAYROLL_API_TOKEN: token,
     APP_URL: "http://localhost:3000",
+    MOCK_WALLET_URL: wallet.url,
   });
 
   return async () => {
     child?.kill();
+    wallet?.server.close();
   };
 }

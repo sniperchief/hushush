@@ -62,11 +62,11 @@ impl StreamStatus {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ClaimStatus {
-    /// Funds held for the claimant. NOT paid.
+    /// Funds held for the claimant. NOT paid (even while a payout is in flight).
     Reserved,
-    /// Reservation cancelled; funds available again.
+    /// Reservation cancelled, or its payout failed; funds available again.
     Released,
-    /// A payout was recorded by the (future) payout worker.
+    /// Paid: its payout was confirmed on chain (or recorded by `settle_claim`).
     Settled,
 }
 
@@ -215,4 +215,115 @@ pub struct ListedRow {
 pub enum StreamFilter<'a> {
     Organization(&'a str),
     Recipient(&'a str),
+}
+
+/// Payout of one reserved claim through the shielded payout wallet.
+///
+/// ```text
+/// reserved ──▶ submitted ──▶ confirmed          (claim → settled)
+///    │  ╲          │ ╲
+///    │   ╲         │  ╲──▶ failed               (claim → released)
+///    │    ╲        ▼
+///    │     ╲──▶ requires_reconciliation ──▶ submitted | confirmed | failed
+///    ╰──────────────────────────────────────▶ failed
+/// ```
+///
+/// `confirmed` and `failed` are final. A payout is only `failed` once it is
+/// certain that no transaction for it can ever be mined; anything ambiguous
+/// is `requires_reconciliation`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PayoutState {
+    /// Payout recorded and claim locked to it; the wallet may or may not have
+    /// been asked to pay yet.
+    Reserved,
+    /// A transaction exists and the network accepted it. NOT yet paid.
+    Submitted,
+    /// Mined under the confirmation policy and verified. The claim is settled.
+    Confirmed,
+    /// Established that no transaction was or can be mined. Claim released.
+    Failed,
+    /// Outcome unknown or inconsistent; resolved by the reconciler (or a human).
+    RequiresReconciliation,
+}
+
+impl PayoutState {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            PayoutState::Reserved => "reserved",
+            PayoutState::Submitted => "submitted",
+            PayoutState::Confirmed => "confirmed",
+            PayoutState::Failed => "failed",
+            PayoutState::RequiresReconciliation => "requires_reconciliation",
+        }
+    }
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "reserved" => Some(PayoutState::Reserved),
+            "submitted" => Some(PayoutState::Submitted),
+            "confirmed" => Some(PayoutState::Confirmed),
+            "failed" => Some(PayoutState::Failed),
+            "requires_reconciliation" => Some(PayoutState::RequiresReconciliation),
+            _ => None,
+        }
+    }
+    pub fn is_final(self) -> bool {
+        matches!(self, PayoutState::Confirmed | PayoutState::Failed)
+    }
+    /// The allowed state changes (mirrored by the schema triggers).
+    pub fn can_become(self, to: PayoutState) -> bool {
+        use PayoutState::*;
+        matches!(
+            (self, to),
+            (Reserved, Submitted | Failed | RequiresReconciliation)
+                | (Submitted, Confirmed | Failed | RequiresReconciliation)
+                | (RequiresReconciliation, Submitted | Confirmed | Failed)
+        )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Payout {
+    /// Also the wallet's payment id: the wallet builds at most one transaction per id.
+    pub id: String,
+    pub claim_id: String,
+    pub stream_id: String,
+    pub requested_by: String,
+    pub amount_zats: i64,
+    /// Salted hash of the destination address. The address itself is not
+    /// stored in the payroll database (see `payout::recipient_fingerprint`).
+    pub recipient_fingerprint: String,
+    pub fee_estimate_zats: i64,
+    pub max_fee_zats: i64,
+    pub state: PayoutState,
+    pub txid: Option<String>,
+    pub fee_zats: Option<i64>,
+    pub expiry_height: Option<i64>,
+    pub mined_height: Option<i64>,
+    pub confirmations: i64,
+    /// Failure or reconciliation reason, for display and operators.
+    pub detail: Option<String>,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub submitted_at: Option<i64>,
+    pub resolved_at: Option<i64>,
+    #[serde(skip)]
+    pub lease_owner: Option<String>,
+    #[serde(skip)]
+    pub lease_until: Option<i64>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct PayoutOutcome {
+    pub payout: Payout,
+    /// True when the claim already had a payout and it was returned instead.
+    pub duplicate: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct PayoutEvent {
+    pub from_state: Option<PayoutState>,
+    pub to_state: PayoutState,
+    pub occurred_at: i64,
+    pub detail: Option<String>,
 }

@@ -12,11 +12,18 @@ pub struct Migration {
     pub sql: &'static str,
 }
 
-pub const MIGRATIONS: &[Migration] = &[Migration {
-    version: 1,
-    name: "0001_init",
-    sql: include_str!("../migrations/0001_init.sql"),
-}];
+pub const MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "0001_init",
+        sql: include_str!("../migrations/0001_init.sql"),
+    },
+    Migration {
+        version: 2,
+        name: "0002_payouts",
+        sql: include_str!("../migrations/0002_payouts.sql"),
+    },
+];
 
 pub fn latest_version() -> i64 {
     MIGRATIONS.last().map_or(0, |m| m.version)
@@ -58,11 +65,18 @@ pub fn migrate(conn: &mut Connection, now: i64) -> Result<Vec<i64>, PayrollError
 }
 
 /// PostgreSQL migrations (`migrations_pg/`), mirroring [`MIGRATIONS`].
-pub const PG_MIGRATIONS: &[Migration] = &[Migration {
-    version: 1,
-    name: "0001_init",
-    sql: include_str!("../migrations_pg/0001_init.sql"),
-}];
+pub const PG_MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "0001_init",
+        sql: include_str!("../migrations_pg/0001_init.sql"),
+    },
+    Migration {
+        version: 2,
+        name: "0002_payouts",
+        sql: include_str!("../migrations_pg/0002_payouts.sql"),
+    },
+];
 
 /// Applies pending PostgreSQL migrations in the client's current schema.
 /// Concurrent migrators (several service instances starting at once) are

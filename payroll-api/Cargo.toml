@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.88"
 publish = false
-description = "Internal HTTP service exposing the hushush payroll engine (PostgreSQL) to the web app"
+description = "Internal HTTP service exposing the hushush payroll engine (PostgreSQL) to the web app, and driving shielded payouts"
 
 [dependencies]
 hushush-payroll = { path = "../payroll" }
@@ -15,5 +15,7 @@ serde_json = "1"
 r2d2 = "0.8"
 postgres = "0.19"
 subtle = "2"
+ureq = { version = "2.12", features = ["json"] }
+uuid = { version = "1", features = ["v4"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }

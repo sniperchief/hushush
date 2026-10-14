@@ -4,9 +4,9 @@ import { InviteForm, MemberControls, RevokeInviteButton } from "@/components/for
 import { AutoRefresh, CreateStreamForm } from "@/components/forms/stream-forms";
 import { StreamTable } from "@/components/stream-table";
 import { Badge, Card, CardTitle, Empty } from "@/components/ui";
-import { formatClock, formatTime, roleLabel } from "@/lib/format";
+import { compactZec, formatClock, formatTime, roleLabel } from "@/lib/format";
 import { listInvitations } from "@/lib/invitations";
-import { payroll } from "@/lib/payroll";
+import { payroll, PayrollApiError, type PayoutWalletSummary } from "@/lib/payroll";
 import { requirePageUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -34,10 +34,11 @@ export default async function OrgPage({ params }: Props) {
     );
   }
 
-  const [streams, members, invitations] = await Promise.all([
+  const [streams, members, invitations, wallet] = await Promise.all([
     payroll.listOrgStreams(user.id, orgId),
     payroll.listMembers(user.id, orgId),
     listInvitations(user.id, orgId),
+    payoutWallet(user.id, orgId),
   ]);
   const asOf = streams[0]?.balance.as_of;
 
@@ -60,6 +61,8 @@ export default async function OrgPage({ params }: Props) {
           members={members.map((m) => ({ id: m.user_id, label: `${m.display_name} (${m.email})` }))}
         />
       </Card>
+
+      {wallet !== "disabled" && <PayoutWalletCard wallet={wallet} />}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -104,6 +107,50 @@ export default async function OrgPage({ params }: Props) {
         </Card>
       </div>
     </div>
+  );
+}
+
+/** The payout wallet for managers; "disabled" hides the card, "unavailable" shows a notice. */
+async function payoutWallet(actor: string, orgId: string): Promise<PayoutWalletSummary | "disabled" | "unavailable"> {
+  try {
+    return await payroll.payoutWallet(actor, orgId);
+  } catch (e) {
+    if (e instanceof PayrollApiError && (e.code === "payouts_disabled" || e.status === 403 || e.status === 404)) return "disabled";
+    return "unavailable";
+  }
+}
+
+function PayoutWalletCard({ wallet }: { wallet: PayoutWalletSummary | "unavailable" }) {
+  return (
+    <Card>
+      <CardTitle action={<Badge tone="amber">Testnet</Badge>}>Payout wallet</CardTitle>
+      {wallet === "unavailable" ? (
+        <p className="text-sm text-ink-soft">The payout wallet isn&apos;t reachable right now. Contributors can&apos;t be paid out until it is.</p>
+      ) : (
+        <div className="space-y-3 text-sm">
+          <div className="flex flex-wrap gap-x-8 gap-y-2">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-ink-soft">Spendable</div>
+              <div className="font-mono text-lg font-semibold">{compactZec(wallet.spendable_zec)} TAZ</div>
+            </div>
+            {wallet.pending_zats > 0 && (
+              <div>
+                <div className="text-xs uppercase tracking-wide text-ink-soft">Awaiting confirmations</div>
+                <div className="font-mono text-lg">{compactZec(wallet.pending_zec)} TAZ</div>
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wide text-ink-soft">Funding address (shielded)</div>
+            <div className="mt-1 break-all rounded-lg bg-muted px-3 py-2 font-mono text-xs">{wallet.funding_address}</div>
+          </div>
+          <p className="text-xs text-ink-soft">
+            Contributors are paid from this wallet; each payout also pays a small network fee. Fund it only with testnet ZEC, from a shielded
+            wallet: funding from a transparent address or exchange is public at that step. Payouts count as paid after {wallet.required_confirmations} confirmations.
+          </p>
+        </div>
+      )}
+    </Card>
   );
 }
 

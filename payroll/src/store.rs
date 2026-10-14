@@ -94,4 +94,41 @@ pub trait StoreTx {
         settlement_ref: Option<&str>,
     ) -> Result<usize>;
     fn claims_of(&mut self, stream_id: &str) -> Result<Vec<Claim>>;
+
+    // ---- payouts (Phase 3) ----------------------------------------------------
+
+    /// Inserts a new `reserved` payout. A second payout for the same claim is
+    /// a [`PayrollError::Conflict`](crate::PayrollError::Conflict).
+    fn insert_payout(&mut self, p: &Payout) -> Result<()>;
+    /// `lock = true` must lock the row against concurrent writers.
+    fn load_payout(&mut self, id: &str, lock: bool) -> Result<Option<Payout>>;
+    fn payout_by_claim(&mut self, claim_id: &str, lock: bool) -> Result<Option<Payout>>;
+    fn payouts_of_stream(&mut self, stream_id: &str) -> Result<Vec<Payout>>;
+    /// Writes every mutable field of `next`, but only if the row is still in
+    /// `expected_state` and leased by `expected_lease_owner`. Returns rows
+    /// updated (0 or 1).
+    fn update_payout_cas(
+        &mut self,
+        next: &Payout,
+        expected_state: PayoutState,
+        expected_lease_owner: Option<&str>,
+    ) -> Result<usize>;
+    /// Atomically leases up to `limit` unfinished payouts whose lease is free
+    /// or expired at `now`, skipping rows another transaction holds.
+    fn lease_due_payouts(
+        &mut self,
+        owner: &str,
+        now: i64,
+        lease_until: i64,
+        limit: i64,
+    ) -> Result<Vec<Payout>>;
+    fn insert_payout_event(
+        &mut self,
+        payout_id: &str,
+        from: Option<PayoutState>,
+        to: PayoutState,
+        now: i64,
+        detail: Option<&str>,
+    ) -> Result<()>;
+    fn payout_events_of(&mut self, payout_id: &str) -> Result<Vec<PayoutEvent>>;
 }

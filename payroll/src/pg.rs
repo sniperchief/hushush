@@ -525,4 +525,202 @@ impl StoreTx for PgTx<'_> {
             .map(claim_from_row)
             .collect()
     }
+
+    fn insert_payout(&mut self, p: &Payout) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO payouts (id, claim_id, stream_id, requested_by, amount_zats,
+                     recipient_fingerprint, fee_estimate_zats, max_fee_zats, state, confirmations,
+                     lease_owner, lease_until, created_at, updated_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, $10, $11, $12, $12)",
+                &[
+                    &p.id,
+                    &p.claim_id,
+                    &p.stream_id,
+                    &p.requested_by,
+                    &p.amount_zats,
+                    &p.recipient_fingerprint,
+                    &p.fee_estimate_zats,
+                    &p.max_fee_zats,
+                    &p.state.as_str(),
+                    &p.lease_owner,
+                    &p.lease_until,
+                    &p.created_at,
+                ],
+            )
+            .map_err(|e| unique_to_conflict(e, "claim already has a payout"))?;
+        Ok(())
+    }
+
+    fn load_payout(&mut self, id: &str, lock: bool) -> Result<Option<Payout>> {
+        let sql = format!(
+            "SELECT {PAYOUT_COLS} FROM payouts WHERE id = $1{}",
+            if lock { " FOR UPDATE" } else { "" }
+        );
+        match self.0.query_opt(&sql, &[&id])? {
+            Some(r) => Ok(Some(payout_from_row(&r)?)),
+            None => Ok(None),
+        }
+    }
+
+    fn payout_by_claim(&mut self, claim_id: &str, lock: bool) -> Result<Option<Payout>> {
+        let sql = format!(
+            "SELECT {PAYOUT_COLS} FROM payouts WHERE claim_id = $1{}",
+            if lock { " FOR UPDATE" } else { "" }
+        );
+        match self.0.query_opt(&sql, &[&claim_id])? {
+            Some(r) => Ok(Some(payout_from_row(&r)?)),
+            None => Ok(None),
+        }
+    }
+
+    fn payouts_of_stream(&mut self, stream_id: &str) -> Result<Vec<Payout>> {
+        self.0
+            .query(
+                &format!(
+                    "SELECT {PAYOUT_COLS} FROM payouts WHERE stream_id = $1 ORDER BY created_at, id"
+                ),
+                &[&stream_id],
+            )?
+            .iter()
+            .map(payout_from_row)
+            .collect()
+    }
+
+    fn update_payout_cas(
+        &mut self,
+        n: &Payout,
+        expected_state: PayoutState,
+        expected_lease_owner: Option<&str>,
+    ) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE payouts SET state = $1, txid = $2, fee_zats = $3, expiry_height = $4,
+                 mined_height = $5, confirmations = $6, detail = $7, lease_owner = $8,
+                 lease_until = $9, updated_at = $10, submitted_at = $11, resolved_at = $12
+             WHERE id = $13 AND state = $14 AND lease_owner IS NOT DISTINCT FROM $15",
+            &[
+                &n.state.as_str(),
+                &n.txid,
+                &n.fee_zats,
+                &n.expiry_height,
+                &n.mined_height,
+                &n.confirmations,
+                &n.detail,
+                &n.lease_owner,
+                &n.lease_until,
+                &n.updated_at,
+                &n.submitted_at,
+                &n.resolved_at,
+                &n.id,
+                &expected_state.as_str(),
+                &expected_lease_owner,
+            ],
+        )? as usize)
+    }
+
+    fn lease_due_payouts(
+        &mut self,
+        owner: &str,
+        now: i64,
+        lease_until: i64,
+        limit: i64,
+    ) -> Result<Vec<Payout>> {
+        // SKIP LOCKED: concurrent workers never wait on (or double-lease) a row.
+        self.0
+            .query(
+                &format!(
+                    "UPDATE payouts SET lease_owner = $1, lease_until = $2
+                     WHERE id IN (
+                         SELECT id FROM payouts
+                         WHERE state IN ('reserved', 'submitted', 'requires_reconciliation')
+                           AND (lease_until IS NULL OR lease_until <= $3)
+                         ORDER BY updated_at, id LIMIT $4
+                         FOR UPDATE SKIP LOCKED)
+                     RETURNING {PAYOUT_COLS}"
+                ),
+                &[&owner, &lease_until, &now, &limit],
+            )?
+            .iter()
+            .map(payout_from_row)
+            .collect()
+    }
+
+    fn insert_payout_event(
+        &mut self,
+        payout_id: &str,
+        from: Option<PayoutState>,
+        to: PayoutState,
+        now: i64,
+        detail: Option<&str>,
+    ) -> Result<()> {
+        self.0.execute(
+            "INSERT INTO payout_events (payout_id, from_state, to_state, occurred_at, detail)
+             VALUES ($1, $2, $3, $4, $5)",
+            &[
+                &payout_id,
+                &from.map(PayoutState::as_str),
+                &to.as_str(),
+                &now,
+                &detail,
+            ],
+        )?;
+        Ok(())
+    }
+
+    fn payout_events_of(&mut self, payout_id: &str) -> Result<Vec<PayoutEvent>> {
+        self.0
+            .query(
+                "SELECT from_state, to_state, occurred_at, detail
+                 FROM payout_events WHERE payout_id = $1 ORDER BY id",
+                &[&payout_id],
+            )?
+            .iter()
+            .map(|r| {
+                let from: Option<String> = r.try_get(0)?;
+                let to: String = r.try_get(1)?;
+                Ok(PayoutEvent {
+                    from_state: match from {
+                        Some(s) => {
+                            Some(PayoutState::parse(&s).ok_or_else(|| corrupt("payout state"))?)
+                        }
+                        None => None,
+                    },
+                    to_state: PayoutState::parse(&to).ok_or_else(|| corrupt("payout state"))?,
+                    occurred_at: r.try_get(2)?,
+                    detail: r.try_get(3)?,
+                })
+            })
+            .collect()
+    }
+}
+
+const PAYOUT_COLS: &str = "id, claim_id, stream_id, requested_by, amount_zats, recipient_fingerprint, \
+     fee_estimate_zats, max_fee_zats, state, txid, fee_zats, expiry_height, mined_height, \
+     confirmations, detail, created_at, updated_at, submitted_at, resolved_at, lease_owner, lease_until";
+
+fn payout_from_row(r: &Row) -> Result<Payout> {
+    let state: String = r.try_get(8)?;
+    Ok(Payout {
+        id: r.try_get(0)?,
+        claim_id: r.try_get(1)?,
+        stream_id: r.try_get(2)?,
+        requested_by: r.try_get(3)?,
+        amount_zats: r.try_get(4)?,
+        recipient_fingerprint: r.try_get(5)?,
+        fee_estimate_zats: r.try_get(6)?,
+        max_fee_zats: r.try_get(7)?,
+        state: PayoutState::parse(&state).ok_or_else(|| corrupt("payout state"))?,
+        txid: r.try_get(9)?,
+        fee_zats: r.try_get(10)?,
+        expiry_height: r.try_get(11)?,
+        mined_height: r.try_get(12)?,
+        confirmations: r.try_get(13)?,
+        detail: r.try_get(14)?,
+        created_at: r.try_get(15)?,
+        updated_at: r.try_get(16)?,
+        submitted_at: r.try_get(17)?,
+        resolved_at: r.try_get(18)?,
+        lease_owner: r.try_get(19)?,
+        lease_until: r.try_get(20)?,
+    })
 }
