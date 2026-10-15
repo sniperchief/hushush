@@ -17,5 +17,18 @@ locks a shielded Zcash **testnet** payout address once, and withdraws at each
 only after its transaction is confirmed on chain and verified, and is never
 paid twice. There is no mainnet code path.
 
+Each company pays from its own payout account, funded by the employer (or, on
+testnet, with a "Get test TAZ" faucet top-up):
+[docs/PHASE6_COMPANY_WALLETS.md](docs/PHASE6_COMPANY_WALLETS.md).
+
 Security review, exactly-once verification and independent privacy checks:
 [docs/PHASE4_REPORT.md](docs/PHASE4_REPORT.md).
+
+## Roadmap: v2, non-custodial on mainnet
+
+v1 holds testnet payout keys so the product can be tested end to end. **v2
+makes hushush non-custodial:** employers keep their funds in their own wallet
+(Zashi or Keystone) with their own seed phrase. hushush gets a view-only key,
+prepares each shielded payout, and the employer approves it on their own
+device. hushush can see payroll but can never move funds:
+[docs/V2_NONCUSTODIAL_ROADMAP.md](docs/V2_NONCUSTODIAL_ROADMAP.md).
