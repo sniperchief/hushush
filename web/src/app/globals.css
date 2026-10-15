@@ -77,3 +77,117 @@ body {
 table {
   border-collapse: collapse;
 }
+
+/*
+ * Landing page palette (app/(marketing)). Warm, light-only. The app screens
+ * still use the tokens above until they are restyled.
+ */
+@theme {
+  --color-cream: #f8f7f5;
+  --color-paper: #ffffff;
+  --color-linen: #e3dfd5;
+  --color-stone: #d5d2cd;
+  --color-bark: #61594a;
+  --color-espresso: #261b07;
+  --color-amber: #f9a600;
+  --color-amber-deep: #e89b01;
+  --color-honey: #f8da9d;
+  --color-honey-band: #f6ead0;
+  --color-wisteria: #d5befa;
+  --color-terracotta: #f0624f;
+  --color-failed-bg: #fbd9d3;
+  --color-failed-ink: #7a2416;
+  /* Supporting shades from the design file. */
+  --color-mist: #efece5; /* inner dividers, chart grid */
+  --color-chalk: #fbfaf8; /* mockup sidebar */
+  --color-ivory: #fffaf0; /* "Available" highlight */
+  --color-sand: #d6cdbb; /* body text on espresso */
+  --color-oat: #cfc5b2; /* labels on espresso */
+  --color-umber: #6b5a3a; /* inactive badges/dots on espresso */
+  --color-umber-line: #4a3d24; /* dividers on espresso */
+  --color-cocoa: #5a4a2c; /* redaction bars */
+  --color-rust: #a23a2a; /* danger text */
+
+  --font-landing: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-plex: var(--font-plex-mono), ui-monospace, monospace;
+
+  --font-weight-mid: 492;
+  --font-weight-semi: 584;
+
+  --shadow-warm: 0 4px 8px rgba(38, 27, 7, 0.06);
+  --shadow-amber: inset 0 2px 4px rgba(255, 255, 255, 0.56), 0 4px 8px rgba(38, 27, 7, 0.06), 0 1px 2px rgba(38, 27, 7, 0.36);
+  --shadow-shot: 0 28px 56px rgba(38, 27, 7, 0.12), 0 4px 8px rgba(38, 27, 7, 0.06);
+  --shadow-shot-sm: 0 20px 40px rgba(38, 27, 7, 0.14);
+  --shadow-phone: 0 28px 56px rgba(38, 27, 7, 0.14);
+  --shadow-deck: 0 24px 48px rgba(38, 27, 7, 0.16), 0 4px 8px rgba(38, 27, 7, 0.06);
+  --shadow-pill: 0 6px 16px rgba(38, 27, 7, 0.18);
+
+  --ease-deck: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@utility mono {
+  font-family: var(--font-plex);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The only filled button colour. */
+@utility btn-amber {
+  background: var(--color-amber);
+  color: var(--color-espresso);
+  box-shadow: var(--shadow-amber);
+  &:hover {
+    background: var(--color-amber-deep);
+  }
+}
+
+@utility btn-ghost {
+  background: transparent;
+  color: var(--color-espresso);
+  border: 1px solid var(--color-espresso);
+  box-shadow: var(--shadow-warm);
+  &:hover {
+    background: var(--color-paper);
+  }
+}
+
+@utility tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 492;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1.25;
+}
+
+@utility eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+@utility l-card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-linen);
+  border-radius: 8px;
+  box-shadow: var(--shadow-warm);
+}
+
+.landing {
+  font-feature-settings: "ss01" on;
+  color-scheme: light;
+}
+
+.landing :focus-visible {
+  outline: 2px solid var(--color-amber-deep);
+  outline-offset: 3px;
+}
+
+/* Phone swipe rails: scroll-snap with the scrollbar hidden. */
+.landing .rail {
+  scrollbar-width: none;
+}
+.landing .rail::-webkit-scrollbar {
+  display: none;
+}
