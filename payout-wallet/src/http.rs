@@ -10,10 +10,15 @@
 //! | `GET  /v1/payments/{id}` | payment state + chain status + verification |
 //! | `POST /v1/payments/{id}/cancel` | fence an id the wallet never saw |
 //! | `GET  /v1/transactions/{txid}` | keyless observer view + confirmations |
+//! | `POST /v1/accounts` | create (or find) a company's payout account |
+//! | `GET  /v1/accounts/{key}` | that account's balance, funding address, faucet |
+//! | `POST /v1/accounts/{key}/faucet` | testnet top-up from the treasury |
+//!
+//! Quotes and payments take an optional `account` (a company's key); without
+//! it they use the treasury.
 //!
 //! Addresses arrive only in request bodies and are never logged.
 
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use axum::extract::{Path, Request, State};
@@ -26,14 +31,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use subtle::ConstantTimeEq;
 use tokio::sync::{mpsc, oneshot};
-use zcash_client_sqlite::AccountUuid;
-use zcash_keys::keys::UnifiedFullViewingKey;
 use zcash_primitives::transaction::Transaction;
 use zcash_protocol::consensus::{BlockHeight, BranchId};
 
 use hushush_wallet_proof::{NETWORK, observer, remote, wallet};
 
-use crate::actor::{Cmd, CmdError, SubmitReq};
+use crate::actor::{AccountStatusView, AccountView, Cmd, CmdError, SharedUfvks, SubmitReq};
 use crate::chain::{self, Fetched};
 use crate::intents::{Intent, IntentState, IntentStore};
 use crate::policy::{self, TxVerification};
@@ -44,7 +47,8 @@ pub struct AppState {
     pub actor: mpsc::Sender<Cmd>,
     pub reader: Arc<Mutex<IntentStore>>,
     pub client: remote::Client,
-    pub ufvks: Arc<HashMap<AccountUuid, UnifiedFullViewingKey>>,
+    /// Every account's viewing key (updated when an account is created).
+    pub ufvks: SharedUfvks,
     /// The wallet DB, opened read-only per lookup for the wallet's own view.
     pub wallet_db: std::path::PathBuf,
     pub chain_ok: Arc<std::sync::atomic::AtomicBool>,
@@ -137,6 +141,12 @@ async fn ask<T>(
         Err(CmdError::Conflict(m)) => {
             Err(ApiError(StatusCode::CONFLICT, "idempotency_conflict", m))
         }
+        Err(CmdError::UnknownAccount(k)) => Err(ApiError(
+            StatusCode::CONFLICT,
+            "unknown_account",
+            format!("no payout account is registered for {k:?}"),
+        )),
+        Err(CmdError::Refused(m)) => Err(ApiError(StatusCode::CONFLICT, "refused", m)),
         Err(CmdError::Internal(e)) => Err(internal(format!("{e:#}"))),
     }
 }
@@ -199,6 +209,11 @@ async fn payment_view(st: &AppState, i: Intent) -> Result<PaymentView, ApiError>
         return Err(unavailable("lightwalletd failed its network/branch check"));
     }
     let wv = wallet_view(&st.wallet_db, &txid);
+    let ufvks = st
+        .ufvks
+        .read()
+        .map_err(|_| internal("ufvk lock poisoned"))?
+        .clone();
     let mut c = st.client.clone();
     let tip = remote::chain_tip(&mut c).await.map_err(unavailable)?;
     let tip_h = BlockHeight::from_u32(tip);
@@ -208,7 +223,7 @@ async fn payment_view(st: &AppState, i: Intent) -> Result<PaymentView, ApiError>
             len,
             mined,
             tip_h,
-            &st.ufvks,
+            &ufvks,
             &i.payment_id,
             address,
             source,
@@ -301,6 +316,8 @@ async fn validate(Json(r): Json<AddressReq>) -> Json<serde_json::Value> {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct QuoteReq {
+    #[serde(default)]
+    account: Option<String>,
     address: String,
     amount_zats: i64,
 }
@@ -311,6 +328,7 @@ async fn quote(
 ) -> ApiResult<crate::actor::QuoteView> {
     Ok(Json(
         ask(&st, |reply| Cmd::Quote {
+            account: r.account,
             address: r.address,
             amount_zats: r.amount_zats,
             reply,
@@ -323,6 +341,8 @@ async fn quote(
 #[serde(deny_unknown_fields)]
 struct PaymentReq {
     payment_id: String,
+    #[serde(default)]
+    account: Option<String>,
     address: String,
     amount_zats: i64,
     max_fee_zats: i64,
@@ -330,9 +350,13 @@ struct PaymentReq {
 
 async fn submit(State(st): State<AppState>, Json(r): Json<PaymentReq>) -> ApiResult<PaymentView> {
     check_payment_id(&r.payment_id)?;
+    if let Some(k) = &r.account {
+        check_account_key(k)?;
+    }
     let i = ask(&st, |reply| Cmd::Submit {
         req: SubmitReq {
             payment_id: r.payment_id,
+            account: r.account,
             address: r.address,
             amount_zats: r.amount_zats,
             max_fee_zats: r.max_fee_zats,
@@ -340,12 +364,16 @@ async fn submit(State(st): State<AppState>, Json(r): Json<PaymentReq>) -> ApiRes
         reply,
     })
     .await?;
-    // The payment is recorded; if the chain is momentarily unreachable,
-    // report the record without chain status rather than an error.
+    Ok(Json(recorded_view(&st, i).await))
+}
+
+/// The payment is recorded; if the chain is momentarily unreachable, report
+/// the record without chain status rather than an error.
+async fn recorded_view(st: &AppState, i: Intent) -> PaymentView {
     let fallback = i.clone();
-    match payment_view(&st, i).await {
-        Ok(v) => Ok(Json(v)),
-        Err(_) => Ok(Json(PaymentView {
+    match payment_view(st, i).await {
+        Ok(v) => v,
+        Err(_) => PaymentView {
             recipient_fingerprint: fallback.recipient_fingerprint(),
             payment_id: fallback.payment_id,
             state: fallback.state,
@@ -360,8 +388,71 @@ async fn submit(State(st): State<AppState>, Json(r): Json<PaymentReq>) -> ApiRes
             last_broadcast_error: fallback.last_broadcast_error,
             created_at: fallback.created_at,
             updated_at: fallback.updated_at,
-        })),
+        },
     }
+}
+
+/// Account keys are opaque ids chosen by payroll-api (organization ids).
+fn check_account_key(k: &str) -> Result<(), ApiError> {
+    if (1..=64).contains(&k.len())
+        && k.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+    {
+        Ok(())
+    } else {
+        Err(ApiError(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "validation",
+            "account key must be 1-64 characters of [A-Za-z0-9_-]".into(),
+        ))
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct AccountReq {
+    key: String,
+}
+
+async fn ensure_account(
+    State(st): State<AppState>,
+    Json(r): Json<AccountReq>,
+) -> ApiResult<AccountView> {
+    check_account_key(&r.key)?;
+    Ok(Json(
+        ask(&st, |reply| Cmd::EnsureAccount { key: r.key, reply }).await?,
+    ))
+}
+
+async fn account_status(
+    State(st): State<AppState>,
+    Path(key): Path<String>,
+) -> ApiResult<AccountStatusView> {
+    check_account_key(&key)?;
+    Ok(Json(
+        ask(&st, |reply| Cmd::AccountStatus { key, reply }).await?,
+    ))
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FaucetReq {
+    payment_id: String,
+}
+
+async fn faucet(
+    State(st): State<AppState>,
+    Path(key): Path<String>,
+    Json(r): Json<FaucetReq>,
+) -> ApiResult<PaymentView> {
+    check_account_key(&key)?;
+    check_payment_id(&r.payment_id)?;
+    let i = ask(&st, |reply| Cmd::Faucet {
+        key,
+        payment_id: r.payment_id,
+        reply,
+    })
+    .await?;
+    Ok(Json(recorded_view(&st, i).await))
 }
 
 async fn lookup(State(st): State<AppState>, Path(id): Path<String>) -> Result<Response, ApiError> {
@@ -433,6 +524,9 @@ pub fn app(state: AppState) -> Router {
         .route("/v1/payments/{id}", get(lookup))
         .route("/v1/payments/{id}/cancel", post(cancel))
         .route("/v1/transactions/{txid}", get(transaction))
+        .route("/v1/accounts", post(ensure_account))
+        .route("/v1/accounts/{key}", get(account_status))
+        .route("/v1/accounts/{key}/faucet", post(faucet))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth));
     Router::new()
         .route("/healthz", get(healthz))

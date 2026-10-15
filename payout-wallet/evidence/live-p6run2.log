@@ -1,0 +1,55 @@
+[15:34:58] === hushush Phase 5/6 live flow run p6run2 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, stream 0.001 ZEC over 600s)
+[15:35:00] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4505265 sapling_activation=280000 branch_id=77190ad9
+[15:35:02] database hushush_live_p6run2 created
+[15:35:19] services up: wallet pid 57987, payroll-api pid 57994, web pid 57997
+[15:35:24] treasury total=13297167 spendable=13297167; carol total=1898333
+[15:35:24] === 1-2: employer, stream, worker link, worker joins
+[15:36:14] setup: {"streamId":"e1518c99-0768-4ed3-b419-de6da9d1632f","total_zec":"0.00100000","start_at":1792078574,"end_at":1792079174,"milestone_zats":20000,"company":"Live Testnet Co 9dac","faucet":{"payment_id":"407b3cd3-2996-41c1-ada4-48d37774913b","state":"broadcast","amount_zats":1000000,"txid":"c71f6a1edd66f567b2b9b32a836a0af6af6cad18dc9e51722e4793847c01987c"}}
+[15:36:17] invalid address: {"status":422,"error":"invalid_recipient","message":"not a valid Zcash address for this network"}
+[15:36:19] carol's address: {"status":200,"address_locked":true}
+[15:36:21] change to another address: {"status":409,"error":"conflict","message":"the payout address for this stream is locked"}
+[15:36:21] === 3: before the first milestone
+[15:36:23] early withdraw: {"statuses":[409],"created":0,"payout_ids":[],"states":["invalid_state"],"txid":null,"messages":["withdrawals unlock at each 20% of the stream's total (or after it ends)"]}
+[15:36:24] === 3b: the company's own payout wallet, funded from the treasury by the testnet faucet (Phase 6)
+[15:44:02] company wallet funded: {"spendable_zats":1000000,"funding_address":"utest1z24x6tulxpjjruj58qpzp8vfmj0udu6n76ayzr6tsthaua2qgnuljgn3gw360legf4ya6fgf0ynyv9jnfwqtauk4uwwead70cdkkvam73t0tcqgmf7h7au8j3qhwaamgadl0ttwqcthcp9rkdrfpku23cu96sfdne7eughxe8svukt9x"}
+[15:44:02] === 4: at 20%, six concurrent taps
+[15:44:04] milestone: {"withdrawable_zats":78166,"earned_zats":78166,"status":"active"}
+[15:44:49] 6 concurrent taps: {"statuses":[200,201,200,200,200,200],"created":1,"payout_ids":["962f6e21-fe2f-4bad-8143-2690e350df39"],"states":["submitted","submitted","reserved","reserved","reserved","reserved"],"amount_zats":78500,"txid":"41086bafcb6d3f2a60612630f1e6be3d2582c9220843043ae2a31aa5142b8b3d","messages":[]}
+one withdrawal created; the other five got the same withdrawal back
+[15:44:51] withdrawal 1: payout 962f6e21-fe2f-4bad-8143-2690e350df39, 78500 zats
+[15:44:51] === 5: the employer ends the stream early
+[15:45:13] end: {"status":"ended","earned_zats":89666,"available_zats":11166,"withdrawable_zats":null}
+[15:45:15] remainder withdraw while #1 is unfinished: {"statuses":[200],"created":0,"payout_ids":["962f6e21-fe2f-4bad-8143-2690e350df39"],"states":["submitted"],"amount_zats":78500,"txid":"41086bafcb6d3f2a60612630f1e6be3d2582c9220843043ae2a31aa5142b8b3d","messages":[]}
+[15:45:15] === 6: confirmations, then the remainder
+[15:45:16] payout 962f6e21: submitted 0/10
+[15:45:37] payout 962f6e21: submitted 1/10 mined 4505284
+[15:46:07] payout 962f6e21: submitted 2/10 mined 4505284
+[15:46:27] payout 962f6e21: submitted 3/10 mined 4505284
+[15:46:57] payout 962f6e21: submitted 4/10 mined 4505284
+[15:47:38] payout 962f6e21: submitted 5/10 mined 4505284
+[15:48:18] payout 962f6e21: submitted 6/10 mined 4505284
+[15:48:29] payout 962f6e21: submitted 9/10 mined 4505284
+[15:48:49] payout 962f6e21: confirmed 10/10 mined 4505284
+[15:49:30] remainder (< 20%) after the end, 2 taps: {"statuses":[201,200],"created":1,"payout_ids":["2193c6d0-e006-4a9b-87a0-274f69f811e8"],"states":["submitted","reserved"],"amount_zats":11166,"txid":"434eb6b56619dfc7594747e934379d8658f0b3f2daa91b8fb5fd72f883f3a935","messages":[]}
+[15:49:33] payout 2193c6d0: submitted 0/10
+[15:50:13] payout 2193c6d0: submitted 1/10 mined 4505299
+[15:50:34] payout 2193c6d0: submitted 2/10 mined 4505299
+[15:51:24] payout 2193c6d0: submitted 3/10 mined 4505299
+[15:51:34] payout 2193c6d0: submitted 4/10 mined 4505299
+[15:52:25] payout 2193c6d0: submitted 5/10 mined 4505299
+[15:52:35] payout 2193c6d0: submitted 6/10 mined 4505299
+[15:53:16] payout 2193c6d0: submitted 8/10 mined 4505299
+[15:55:07] payout 2193c6d0: submitted 9/10 mined 4505299
+[15:55:47] payout 2193c6d0: confirmed 11/10 mined 4505299
+[15:55:47] === verification
+[15:55:49] stream: {"status":"ended","balance":{"as_of":1792079749,"earned_zats":89666,"earned_zec":"0.00089666","reserved_zats":0,"reserved_zec":"0.00000000","claimed_zats":89666,"claimed_zec":"0.00089666","available_zats":0,"available_zec":"0.00000000"},"withdrawable_zats":null,"address_locked":true,"payouts":[{"id":"2193c6d0-e006-4a9b-87a0-274f69f811e8","state":"confirmed","amount_zats":11166,"txid":"434eb6b56619dfc7594747e934379d8658f0b3f2daa91b8fb5fd72f883f3a935","confirmations":11,"fee_zats":10000},{"id":"962f6e21-fe2f-4bad-8143-2690e350df39","state":"confirmed","amount_zats":78500,"txid":"41086bafcb6d3f2a60612630f1e6be3d2582c9220843043ae2a31aa5142b8b3d","confirmations":10,"fee_zats":10000}]}
+everything earned was withdrawn, in two confirmed payouts
+carol received exactly once: 11166 zats in 434eb6b56619dfc7594747e934379d8658f0b3f2daa91b8fb5fd72f883f3a935 memo 'hushush payout 2193c6d0-e006-4a9b-87a0-274f69f811e8'
+[15:55:58] treasury transactions carrying payout 2193c6d0-e006-4a9b-87a0-274f69f811e8's memo: 1
+carol received exactly once: 78500 zats in 41086bafcb6d3f2a60612630f1e6be3d2582c9220843043ae2a31aa5142b8b3d memo 'hushush payout 962f6e21-fe2f-4bad-8143-2690e350df39'
+[15:56:01] treasury transactions carrying payout 962f6e21-fe2f-4bad-8143-2690e350df39's memo: 1
+[15:56:02] carol total 1898333 → 1987999 (delta 89666, expected 89666)
+[15:56:29] transactions carrying the faucet top-up's memo: 1
+[15:56:29] treasury total 13297167 → 12287167 (delta 1010000, expected 1010000 = faucet top-up + its fee; withdrawals are NOT paid from it)
+[15:58:xx] (manual, after the script's KeyError on 'organization_id') company account 1d604755-5fed-4bd8-ab8b-e48a5b7f1aa4: GET /v1/accounts/{org} -> total_zats 890334 (expected 1000000 - 78500 - 11166 - 20000 = 890334): match
+[15:58:xx] treasury total 12287167 (unchanged since the run's treasury check)

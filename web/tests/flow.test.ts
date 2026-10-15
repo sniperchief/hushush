@@ -289,7 +289,7 @@ describe("withdraw", () => {
     expect((await mock("stats")).txs_built).toBe(before + 1);
   });
 
-  it("refuses when the treasury can't cover amount + fee; nothing is reserved", async () => {
+  it("refuses when the company's payout wallet can't cover amount + fee; nothing is reserved", async () => {
     const id = await readyStream("0.001", 10);
     await withdrawable(id);
     await mock("spendable", { zats: 1_000 });
@@ -318,7 +318,7 @@ describe("withdraw", () => {
 });
 
 describe("employer view", () => {
-  it("home lists streams with earned and withdrawn, payments with txids, and the shared treasury", async () => {
+  it("home lists streams with earned and withdrawn, payments with txids, and the company's own payout wallet", async () => {
     const id = await readyStream("0.001", 10);
     await withdrawable(id);
     const p = (await withdraw(worker, id)).body.payout as { id: string; txid: string };
@@ -328,7 +328,7 @@ describe("employer view", () => {
     expect(s.payouts[0]).toMatchObject({ id: p.id, txid: p.txid });
     expect(home.payouts_enabled).toBe(true);
     const w = await payroll.payoutWallet(employer.id, employer.companyId);
-    expect(w).toMatchObject({ network: "testnet", funding_address: "utest1mockfundingaddress" });
+    expect(w).toMatchObject({ network: "testnet", funding_address: expect.stringMatching(/^utest1mockaccount/) });
   });
 
   it("ending stops accrual and keeps what was earned; fixed-total streams can't be paused", async () => {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { api } from "@/lib/client-api";
+import { AuthAlert, authCard, hintClass, primaryButton, UnderlineField } from "./auth-ui";
 import { Alert, Button, Field, inputClass } from "./ui";
 
 /** Step 2 of employer sign-up: the company name. */
@@ -14,7 +15,7 @@ export function CompanyForm() {
   const [pending, setPending] = useState(false);
   return (
     <form
-      className="space-y-4"
+      className={authCard}
       onSubmit={async (e) => {
         e.preventDefault();
         setPending(true);
@@ -25,11 +26,14 @@ export function CompanyForm() {
         router.refresh();
       }}
     >
-      <Field label="Company name" hint="Workers see this when you send them a stream.">
-        <input name="name" required maxLength={100} autoComplete="organization" className={inputClass} />
-      </Field>
-      {error && <Alert>{error}</Alert>}
-      <Button type="submit" disabled={pending}>{pending ? "Saving…" : "Continue"}</Button>
+      <div className="flex flex-col gap-2">
+        <UnderlineField id="ob-company" label="Company name" name="name" required maxLength={100} autoComplete="organization" placeholder="Kestrel Collective" />
+        <p className={hintClass}>Workers see this when you send them a stream.</p>
+      </div>
+      {error && <AuthAlert tone="bad">{error}</AuthAlert>}
+      <button type="submit" disabled={pending} className={primaryButton}>
+        {pending ? "Saving…" : "Continue"}
+      </button>
     </form>
   );
 }
@@ -172,8 +176,9 @@ export function OfferActions({ offerId }: { offerId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="secondary"
+        <button
+          type="button"
+          className="h-[38px] cursor-pointer rounded-lg border border-espresso bg-transparent px-3.5 text-sm font-semi whitespace-nowrap text-espresso hover:bg-cream disabled:opacity-60"
           disabled={pending}
           onClick={async () => {
             setPending(true);
@@ -184,10 +189,11 @@ export function OfferActions({ offerId }: { offerId: string }) {
             setLink(r.data.link);
           }}
         >
-          New worker link
-        </Button>
-        <Button
-          variant="danger"
+          {pending ? "One moment…" : "New worker link"}
+        </button>
+        <button
+          type="button"
+          className="h-[38px] cursor-pointer rounded-lg border border-danger-line bg-danger-soft px-3.5 text-sm font-semi text-failed-ink disabled:opacity-60"
           disabled={pending}
           onClick={async () => {
             if (!confirm("Cancel this stream? The worker link stops working. Nothing is owed on it.")) return;
@@ -199,9 +205,13 @@ export function OfferActions({ offerId }: { offerId: string }) {
           }}
         >
           Cancel
-        </Button>
+        </button>
       </div>
-      {link && <WorkerLink url={link} />}
+      {link && (
+        <div className="rounded-[10px] border border-linen bg-cream p-3.5">
+          <WorkerLink url={link} />
+        </div>
+      )}
       {error && <Alert>{error}</Alert>}
     </div>
   );

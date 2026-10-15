@@ -23,6 +23,9 @@ const tones = {
   amber: "bg-warn-bg text-warn",
   red: "bg-bad-bg text-bad",
   accent: "bg-accent-bg text-accent-ink",
+  /** On its way: "Withdrawing", "Confirming n/10". */
+  withdrawing: "bg-withdrawn-soft text-withdrawn-ink",
+  paid: "bg-espresso text-cream",
 } as const;
 
 export function Badge({ children, tone = "neutral", title }: { children: ReactNode; tone?: keyof typeof tones; title?: string }) {

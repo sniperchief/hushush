@@ -665,6 +665,7 @@ fn app(state: AppState) -> Router {
         .route("/v1/claims/{id}/payout/quote", post(payouts::quote))
         .route("/v1/claims/{id}/payout", post(payouts::request))
         .route("/v1/orgs/{org}/payout-wallet", get(payouts::wallet_summary))
+        .route("/v1/orgs/{org}/payout-wallet/faucet", post(payouts::faucet))
         // Phase 5 flow
         .route("/v1/orgs/{org}/offers", post(flow::create_offer))
         .route("/v1/orgs/{org}/home", get(flow::employer_home))

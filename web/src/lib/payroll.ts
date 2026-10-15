@@ -112,6 +112,17 @@ export interface EmployerHome {
   payouts_enabled: boolean;
 }
 
+/** Testnet top-ups of a company's payout wallet from the shared treasury. */
+export interface FaucetSummary {
+  amount_zats: number;
+  amount_zec: string;
+  available: boolean;
+  /** When the next top-up is allowed (unix seconds), if waiting. */
+  next_at: number | null;
+  remaining: number;
+}
+
+/** The company's own payout wallet (Phase 6): withdrawals are paid from it. */
 export interface PayoutWalletSummary {
   network: "testnet";
   spendable_zats: number;
@@ -122,6 +133,16 @@ export interface PayoutWalletSummary {
   chain_tip: number | null;
   last_sync_at: number | null;
   required_confirmations: number;
+  faucet: FaucetSummary;
+}
+
+export interface FaucetResult {
+  payment_id: string;
+  state: "pending" | "failed" | "built" | "broadcast";
+  amount_zats: number;
+  amount_zec: string;
+  txid: string | null;
+  failure_reason: string | null;
 }
 
 /** An error returned by payroll-api, with its HTTP status and error code. */
@@ -175,6 +196,9 @@ export const payroll = {
   listOrgs: (actor: string) => call<Membership[]>("GET", "/v1/orgs", actor),
   createOrg: (actor: string, name: string) => call<{ id: string }>("POST", "/v1/orgs", actor, { name }),
   payoutWallet: (actor: string, org: string) => call<PayoutWalletSummary>("GET", `/v1/orgs/${enc(org)}/payout-wallet`, actor),
+  /** Testnet: tops the company's payout wallet up from the treasury (idempotent per key). */
+  faucet: (actor: string, org: string, idempotencyKey: string) =>
+    call<FaucetResult>("POST", `/v1/orgs/${enc(org)}/payout-wallet/faucet`, actor, { idempotency_key: idempotencyKey }),
 
   // ---- Phase 5 flow ----
   createOffer: (

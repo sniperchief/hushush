@@ -66,21 +66,27 @@ export class Browser {
     return new SoftPasskey({ origin: this.app, rpId: new URL(this.app).hostname });
   }
 
-  /** Passkey sign-up; returns the passkey (keep it to sign in again). */
+  /**
+   * Passkey sign-up, then the onboarding answer: "employer" = I pay a team,
+   * "worker" = I get paid (accounts have no type). Returns the passkey (keep
+   * it to sign in again).
+   */
   async signUp(kind, displayName, passkey = this.newPasskey()) {
-    const o = await this.post("/api/auth/passkey/register/options", { kind, displayName });
+    const o = await this.post("/api/auth/passkey/register/options", { displayName });
     if (o.status !== 200) throw new Error(`register/options ${o.status} ${o.text}`);
     const v = await this.post("/api/auth/passkey/register/verify", { response: passkey.register(o.json) });
     if (v.status !== 201) throw new Error(`register/verify ${v.status} ${v.text}`);
+    const i = await this.post("/api/account/intent", { intent: kind === "employer" ? "pay" : "get_paid" });
+    if (i.status !== 200) throw new Error(`account/intent ${i.status} ${i.text}`);
     return passkey;
   }
 
-  /** Passkey sign-in; returns the account kind. */
+  /** Passkey sign-in; returns true once signed in. */
   async signIn(passkey) {
     const o = await this.post("/api/auth/passkey/login/options");
     if (o.status !== 200) throw new Error(`login/options ${o.status} ${o.text}`);
     const v = await this.post("/api/auth/passkey/login/verify", { response: passkey.authenticate(o.json) });
     if (v.status !== 200) throw new Error(`login/verify ${v.status} ${v.text}`);
-    return v.json.kind;
+    return v.json.ok === true;
   }
 }

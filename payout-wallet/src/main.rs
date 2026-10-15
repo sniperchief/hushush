@@ -11,6 +11,9 @@
 //! | `WALLET_MAX_PAYMENT_ZATS` | `100000000` (1 TAZ) | per-payment cap |
 //! | `WALLET_MAX_FEE_ZATS` | `100000` | absolute fee cap |
 //! | `WALLET_SYNC_SECS` | `30` | background sync / rebroadcast interval |
+//! | `FAUCET_ZATS` | `1000000` (0.01 TAZ) | testnet top-up per grant from the treasury; 0 = off |
+//! | `FAUCET_COOLDOWN_SECS` | `86400` | minimum time between a company's top-ups |
+//! | `FAUCET_MAX_GRANTS` | `3` | top-ups per company, ever |
 //! | `HUSHUSH_DATA_DIR`, `HUSHUSH_SECRETS_DIR` | Phase 0 defaults | wallet + key locations (outside git) |
 
 use std::net::SocketAddr;
@@ -115,6 +118,7 @@ async fn run() -> anyhow::Result<()> {
 
     let intents_path = paths.dir.join("payout-intents.sqlite");
     let chain_ok = Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let ufvks: actor::SharedUfvks = Arc::default();
     let cfg = actor::ActorConfig {
         paths: paths.clone(),
         intents_path: intents_path.clone(),
@@ -122,6 +126,12 @@ async fn run() -> anyhow::Result<()> {
         max_payment_zats: env_or("WALLET_MAX_PAYMENT_ZATS", 100_000_000)?,
         max_fee_zats: env_or("WALLET_MAX_FEE_ZATS", 100_000)?,
         sync_interval: Duration::from_secs(env_or("WALLET_SYNC_SECS", 30)?),
+        faucet: actor::FaucetPolicy {
+            amount_zats: env_or("FAUCET_ZATS", 1_000_000)?,
+            cooldown_secs: env_or("FAUCET_COOLDOWN_SECS", 86_400)?,
+            max_grants: env_or("FAUCET_MAX_GRANTS", 3)?,
+        },
+        ufvks: ufvks.clone(),
         fault: std::env::var("WALLET_FAULT").ok(),
         chain_ok: chain_ok.clone(),
     };
@@ -133,12 +143,13 @@ async fn run() -> anyhow::Result<()> {
 
     tracing::info!(wallet = %name, lightwalletd = %url, "starting payout wallet (TESTNET); syncing and recovering");
     let (actor_tx, ready) = actor::spawn(cfg)?;
+    tracing::info!(treasury = %ready.treasury.expose_uuid(), "treasury account (ZIP 32 index 0)");
     let state = http::AppState {
         token: Arc::new(token.into_bytes()),
         actor: actor_tx,
         reader: Arc::new(Mutex::new(IntentStore::open(&intents_path)?)),
         client: chain::connect_with_retry(&url).await?,
-        ufvks: Arc::new(ready.ufvks),
+        ufvks,
         wallet_db: paths.data_db.clone(),
         chain_ok,
     };

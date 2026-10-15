@@ -169,6 +169,9 @@ export const mock = async (path: string, body: unknown = {}) =>
     txs_built: number;
     submits: number;
     tip: number;
+    /** Balances: the treasury and each company account (by organization id). */
+    treasury: number;
+    accounts: Record<string, number>;
   }>;
 
 export async function waitFor<T>(get: () => Promise<T>, ok: (v: T) => boolean, ms = 15_000): Promise<T> {

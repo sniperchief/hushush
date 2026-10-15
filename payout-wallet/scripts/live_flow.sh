@@ -18,8 +18,14 @@
 #   6. first withdrawal confirmed (LIVE confirmations) → remainder withdrawn →
 #      confirmed
 #   Then: carol's wallet shows each withdrawal exactly once with its memo; the
-#   treasury holds exactly one transaction per payout memo; treasury and carol
-#   accounting; server-rendered pages.
+#   wallet holds exactly one transaction per payout memo; treasury, company
+#   account and carol accounting; server-rendered pages.
+#
+# Phase 6: the company pays from its OWN account in the payout wallet. Setup
+# asks the testnet faucet to fund it from the treasury (FAUCET_ZATS), and the
+# run waits for that top-up to become spendable before the first withdrawal.
+# The treasury then changes only by the top-up + its fee; the company account
+# pays the withdrawals and their fees.
 #
 # Prerequisites: as live_e2e.sh (docs/PHASE3_PAYOUTS.md §7) — funded
 # `treasury`, `carol`, `cargo build` in payroll-api and payout-wallet,
@@ -82,7 +88,7 @@ done
 powershell -NoProfile -Command "Add-Type -Name P -Namespace W -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern uint SetThreadExecutionState(uint f);'; [void][W.P]::SetThreadExecutionState(0x80000001); while (\$true) { Start-Sleep 60 }" >/dev/null 2>&1 &
 AWAKE_PID=$!
 
-log "=== hushush Phase 5 live flow run $RUN_ID (TESTNET, $LWD, $CONF confirmations, stream $LIVE_TOTAL ZEC over ${LIVE_SECS}s)"
+log "=== hushush Phase 5/6 live flow run $RUN_ID (TESTNET, $LWD, $CONF confirmations, stream $LIVE_TOTAL ZEC over ${LIVE_SECS}s)"
 log "lightwalletd: $("$CLI" info)"
 (cd "$ROOT/web" && node -e "
 const pg=require('pg');const c=new pg.Client({connectionString:process.env.DATABASE_URL});
@@ -109,7 +115,9 @@ TREAS0=$(wstatus | jget "d['total_zats']")
 log "treasury total=$TREAS0 spendable=$(wstatus | jget "d['spendable_zats']"); carol total=$CAROL_BEFORE"
 
 log "=== 1-2: employer, stream, worker link, worker joins"
-log "setup: $(LF setup "$LIVE_TOTAL" "$LIVE_SECS")"
+SETUP=$(LF setup "$LIVE_TOTAL" "$LIVE_SECS"); log "setup: $SETUP"
+FAUCET_ID=$(echo "$SETUP" | jget "d['faucet']['payment_id']"); FAUCET_AMT=$(echo "$SETUP" | jget "d['faucet']['amount_zats']")
+[ "$(echo "$SETUP" | jget "d['faucet']['state']")" = broadcast ] || die "faucet top-up was not broadcast"
 R=$(LF address utest1thisisnotarealunifiedaddressatall); log "invalid address: $R"
 [ "$(echo "$R" | jget "d['status']")" = 422 ] || die "the real wallet did not refuse an invalid address"
 R=$(LF address "$CAROL"); log "carol's address: $R"
@@ -120,6 +128,10 @@ R=$(LF address "$ALICE"); log "change to another address: $R"
 log "=== 3: before the first milestone"
 R=$(LF withdraw 1); log "early withdraw: $R"
 [ "$(echo "$R" | jget "d['statuses']")" = "[409]" ] || die "withdraw before 20% was not refused"
+
+log "=== 3b: the company's own payout wallet, funded from the treasury by the testnet faucet (Phase 6)"
+NEED=$(python -c "print(round(float('$LIVE_TOTAL')*1e8) + 40000)")
+log "company wallet funded: $(LF wait-funded "$NEED" 1500)"
 
 log "=== 4: at 20%, six concurrent taps"
 log "milestone: $(LF wait-withdrawable $((LIVE_SECS + 60)))"
@@ -177,9 +189,16 @@ CAROL_AFTER=$("$CLI" balance carol | jget "d['total']")
 log "carol total $CAROL_BEFORE → $CAROL_AFTER (delta $((CAROL_AFTER - CAROL_BEFORE)), expected $((A1 + A2)))"
 [ $((CAROL_AFTER - CAROL_BEFORE)) -eq $((A1 + A2)) ] || die "carol delta wrong"
 sleep 25
+FAUCET_FEE=$(curl -s -H "Authorization: Bearer $WALLET_API_TOKEN" "http://127.0.0.1:7979/v1/payments/$FAUCET_ID" | jget "d['fee_zats']")
+N_TX=$(memo_count treasury "$FAUCET_ID"); log "transactions carrying the faucet top-up's memo: $N_TX"
+[ "$N_TX" = 1 ] || die "faucet top-up has $N_TX transactions"
 TREAS1=$(wstatus | jget "d['total_zats']")
-log "treasury total $TREAS0 → $TREAS1 (delta $((TREAS0 - TREAS1)), expected $((A1 + A2 + TOTAL_FEES)) = withdrawals + fees)"
-[ $((TREAS0 - TREAS1)) -eq $((A1 + A2 + TOTAL_FEES)) ] || die "treasury accounting wrong"
+log "treasury total $TREAS0 → $TREAS1 (delta $((TREAS0 - TREAS1)), expected $((FAUCET_AMT + FAUCET_FEE)) = faucet top-up + its fee; withdrawals are NOT paid from it)"
+[ $((TREAS0 - TREAS1)) -eq $((FAUCET_AMT + FAUCET_FEE)) ] || die "treasury accounting wrong"
+ORG=$(echo "$S" | jget "d['organization_id']")
+COMPANY=$(curl -s -H "Authorization: Bearer $WALLET_API_TOKEN" "http://127.0.0.1:7979/v1/accounts/$ORG" | jget "d['total_zats']")
+log "company account total $COMPANY (expected $((FAUCET_AMT - A1 - A2 - TOTAL_FEES)) = top-up − withdrawals − their fees)"
+[ "$COMPANY" -eq $((FAUCET_AMT - A1 - A2 - TOTAL_FEES)) ] || die "company account accounting wrong"
 log "pages: $(LF pages "$CAROL" "${TXIDS[@]}")"
 log "paid txids: ${TXIDS[*]}"
-log "PASS: Phase 5 flow live on testnet — passkey accounts, worker link, locked address, milestone + remainder withdrawals, exactly once"
+log "PASS: Phase 5/6 flow live on testnet — passkey accounts, worker link, locked address, company payout account funded by the faucet, milestone + remainder withdrawals from it, exactly once"

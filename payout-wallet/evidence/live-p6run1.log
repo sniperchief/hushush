@@ -1,0 +1,17 @@
+[15:22:29] === hushush Phase 5/6 live flow run p6run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, stream 0.001 ZEC over 600s)
+[15:22:32] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4505239 sapling_activation=280000 branch_id=77190ad9
+[15:22:36] database hushush_live_p6run1 created
+[15:22:53] services up: wallet pid 57459, payroll-api pid 57464, web pid 57473
+[15:23:09] treasury total=14307167 spendable=14307167; carol total=1832833
+[15:23:09] === 1-2: employer, stream, worker link, worker joins
+[15:24:06] setup: {"streamId":"35ab7a5c-17eb-4505-8136-c39b6b0281a9","total_zec":"0.00100000","start_at":1792077845,"end_at":1792078445,"milestone_zats":20000,"company":"Live Testnet Co 7e05","faucet":{"payment_id":"428a9fef-5102-442c-8eb9-6ac73adf9505","state":"broadcast","amount_zats":1000000,"txid":"87aaec4e8ef92969955564118a10c3cfc8f1f09b64d03340607afb1f6c270ef9"}}
+[15:24:09] invalid address: {"status":422,"error":"invalid_recipient","message":"not a valid Zcash address for this network"}
+[15:24:12] carol's address: {"status":200,"address_locked":true}
+[15:24:14] change to another address: {"status":409,"error":"conflict","message":"the payout address for this stream is locked"}
+[15:24:14] === 3: before the first milestone
+[15:24:16] early withdraw: {"statuses":[409],"created":0,"payout_ids":[],"states":["invalid_state"],"txid":null,"messages":["withdrawals unlock at each 20% of the stream's total (or after it ends)"]}
+[15:24:17] === 3b: the company's own payout wallet, funded from the treasury by the testnet faucet (Phase 6)
+[15:30:34] company wallet funded: {"spendable_zats":1000000,"funding_address":"utest1r4ea2x9wz5zesaheuwckg4ta6qy4s4z4dg8h5095pga3af9l3f08vn4cuglusypkardae5d2d7t7cc8k08gzsvhgke8yp38dqf2qfnwjaj7ggk72s770x9sfzq53zuypyf0rq4hs6rzjj9y2u7u4a0jn2ad044vlk8c4hhxwwcnsm6rx"}
+[15:30:34] === 4: at 20%, six concurrent taps
+[15:30:36] milestone: {"withdrawable_zats":65166,"earned_zats":65166,"status":"active"}
+[15:31:20] 6 concurrent taps: {"statuses":[200,201,200,409,200,409],"created":1,"payout_ids":["a6f342b6-1758-4229-9221-adcbaf7dfe0f"],"states":["reserved","submitted","reserved","insufficient_wallet_balance","reserved","insufficient_wallet_balance"],"amount_zats":65500,"txid":"ef26f34525978f7bcb6e802954969af1d1aeac544bc410788342106f375cd50d","messages":["The company's payout wallet can't cover this withdrawal yet: could not propose payment: Insufficient balance (have 0, need 75500 including fee); 924500 zats are waiting for confirmations and will become spendable shortly"]}

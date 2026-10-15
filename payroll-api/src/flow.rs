@@ -22,7 +22,7 @@ use hushush_payroll::{
 };
 
 use crate::payouts::{
-    AddressReq, PayoutView, blocking, clean_address, enabled, quote_view, wallet_err,
+    AddressReq, OrgWallet, PayoutView, blocking, clean_address, enabled, quote_view, wallet_err,
 };
 use crate::{ApiError, ApiResult, AppState, BalanceView, actor, err, require_actor, with_db};
 
@@ -343,7 +343,7 @@ pub async fn set_address(
     let fingerprint = recipient_fingerprint(&id, &address);
     if !f.address_locked {
         let (po2, addr2) = (po.clone(), address.clone());
-        let q = blocking(move || po2.wallet.quote(&addr2, 1).map_err(wallet_err)).await?;
+        let q = blocking(move || po2.wallet.quote(&addr2, 1, None).map_err(wallet_err)).await?;
         if !q.valid_recipient {
             return Err(err(
                 StatusCode::UNPROCESSABLE_ENTITY,
@@ -419,22 +419,41 @@ pub async fn withdraw(
         )
     })?;
     let amount = f.listing.balance.available;
+    // Paid from the organization's own payout account (Phase 6).
+    let org = f.listing.stream.organization_id.clone();
 
     // Quote only a withdrawal that can happen; otherwise let the engine answer
     // (a repeat returns its payout; anything else gets the precise reason).
     let (fee, max_fee) = if f.withdrawable_now().is_some() {
-        let (po2, addr2) = (po.clone(), address.clone());
-        let q = blocking(move || po2.wallet.quote(&addr2, amount).map_err(wallet_err)).await?;
+        let (po2, addr2, org2) = (po.clone(), address.clone(), org.clone());
+        let q = blocking(move || {
+            po2.wallet.ensure_account(&org2).map_err(wallet_err)?;
+            po2.wallet.quote(&addr2, amount, Some(&org2)).map_err(wallet_err)
+        })
+        .await?;
         let fee = q.fee_zats.unwrap_or_default();
         match (q.valid_recipient, q.sufficient, po.policy.max_fee_for(fee)) {
             (true, true, Some(m)) => (fee, m),
             _ => {
+                // A concurrent tap may have just started this stream's
+                // withdrawal, and its transaction spent the notes the quote
+                // needed (their change is still confirming). Then this
+                // request is a repeat: answer with that withdrawal, as the
+                // engine would, not with "insufficient balance".
+                let (a3, id3) = (a.clone(), id.clone());
+                let now_f = with_db(&st, move |db| db.flow_stream(&a3, &id3)).await?;
+                if let Some(p) = now_f.open_payout() {
+                    return Ok((
+                        StatusCode::OK,
+                        Json(json!({ "payout": PayoutView::new(p, need), "duplicate": true })),
+                    ));
+                }
                 let v = quote_view("", amount, &q, &po.policy);
                 return Err(ApiError(
                     StatusCode::CONFLICT,
                     json!({
                         "error": "insufficient_wallet_balance",
-                        "message": v.reason.clone().unwrap_or_else(|| "The payout wallet cannot cover this withdrawal and its fee right now.".into()),
+                        "message": v.reason.clone().map(|r| format!("The company's payout wallet can't cover this withdrawal yet: {r}")).unwrap_or_else(|| "The company's payout wallet can't cover this withdrawal and its fee right now.".into()),
                         "quote": v,
                     }),
                 ));
@@ -475,7 +494,8 @@ pub async fn withdraw(
             return Ok((out.payout, true));
         }
         tracing::info!(payout_id = %out.payout.id, stream_id = %id, amount_zats = out.payout.amount_zats, "withdrawal reserved; submitting to wallet");
-        let p = submit_payout(&mut db, &po.wallet, &po.policy, &out.payout, &address)
+        let wallet = OrgWallet { wallet: &po.wallet, org: &org };
+        let p = submit_payout(&mut db, &wallet, &po.policy, &out.payout, &address)
             .map_err(ApiError::from)?;
         tracing::info!(payout_id = %p.id, state = p.state.as_str(), txid = ?p.txid, "withdrawal submission recorded");
         Ok((p, false))

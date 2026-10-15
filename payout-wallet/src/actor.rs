@@ -8,14 +8,28 @@
 //! `sync::run`, `wallet::enhance`, `payment::propose_shielded_payment`,
 //! `payment::build` (upstream `create_proposed_transactions`, bundled
 //! prover) and `payment::broadcast`. Nothing here implements cryptography.
+//!
+//! Accounts (Phase 6): the wallet's ZIP 32 account 0 is the *treasury*. Each
+//! company gets its own account (1, 2, …) from the same seed, registered
+//! under an opaque key (its organization id) and named `org:<key>` in the
+//! wallet DB, so it can be found again after a crash and recovered from the
+//! mnemonic. One scan of the chain covers every account. A payment is paid
+//! only from the account its request names; the treasury also tops up
+//! company accounts on testnet (the faucet), within `FaucetPolicy`.
 
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
 use anyhow::Context;
 use serde::Serialize;
 use tokio::sync::{mpsc, oneshot};
-use zcash_client_backend::data_api::{WalletRead, wallet::ConfirmationsPolicy};
+use zcash_client_backend::data_api::{
+    Account as _, AccountBirthday, WalletRead, WalletWrite, wallet::ConfirmationsPolicy,
+};
+use zcash_client_backend::proto::service;
 use zcash_client_sqlite::AccountUuid;
+use zcash_keys::keys::UnifiedFullViewingKey;
 use zcash_protocol::{consensus::BlockHeight, value::Zatoshis};
 
 use hushush_wallet_proof::{NETWORK, config::WalletPaths, payment, remote, secrets, sync, wallet};
@@ -24,6 +38,18 @@ use crate::chain;
 use crate::intents::{Intent, IntentState, IntentStore, memo_for, now};
 use crate::policy::{self, pool_name};
 
+/// Viewing keys of every account, shared with the HTTP side for verification.
+pub type SharedUfvks = Arc<RwLock<HashMap<AccountUuid, UnifiedFullViewingKey>>>;
+
+/// Testnet top-ups from the treasury to a company account.
+#[derive(Clone, Debug)]
+pub struct FaucetPolicy {
+    /// 0 disables the faucet.
+    pub amount_zats: i64,
+    pub cooldown_secs: i64,
+    pub max_grants: i64,
+}
+
 pub struct ActorConfig {
     pub paths: WalletPaths,
     pub intents_path: std::path::PathBuf,
@@ -31,11 +57,44 @@ pub struct ActorConfig {
     pub max_payment_zats: i64,
     pub max_fee_zats: i64,
     pub sync_interval: Duration,
+    pub faucet: FaucetPolicy,
+    pub ufvks: SharedUfvks,
     /// Test-only crash point (feature `fault-injection`).
     pub fault: Option<String>,
     /// False while lightwalletd fails its network/branch check; lookups then
     /// refuse to report chain status, so the payroll side never decides on it.
     pub chain_ok: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
+/// A company's payout account.
+#[derive(Debug, Serialize)]
+pub struct AccountView {
+    pub key: String,
+    pub funding_address: String,
+    /// True when this call created the account.
+    pub created: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FaucetView {
+    pub amount_zats: i64,
+    pub available: bool,
+    /// When the next top-up is allowed (unix seconds), if waiting.
+    pub next_at: Option<i64>,
+    pub remaining: i64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AccountStatusView {
+    pub network: &'static str,
+    pub key: String,
+    pub funding_address: String,
+    pub spendable_zats: u64,
+    pub pending_zats: u64,
+    pub total_zats: u64,
+    pub chain_tip: Option<u32>,
+    pub last_sync_at: Option<i64>,
+    pub faucet: FaucetView,
 }
 
 #[derive(Debug, Serialize)]
@@ -79,6 +138,8 @@ pub struct QuoteView {
 
 pub struct SubmitReq {
     pub payment_id: String,
+    /// Account key that pays; `None` = the treasury.
+    pub account: Option<String>,
     pub address: String,
     pub amount_zats: i64,
     pub max_fee_zats: i64,
@@ -88,6 +149,10 @@ pub struct SubmitReq {
 pub enum CmdError {
     /// Payment id reused with different parameters.
     Conflict(String),
+    /// No account is registered under this key.
+    UnknownAccount(String),
+    /// A policy limit (e.g. the faucet's) refuses the request; nothing happened.
+    Refused(String),
     Internal(anyhow::Error),
 }
 
@@ -102,6 +167,7 @@ type Reply<T> = oneshot::Sender<Result<T, CmdError>>;
 pub enum Cmd {
     Status(Reply<StatusView>),
     Quote {
+        account: Option<String>,
         address: String,
         amount_zats: i64,
         reply: Reply<QuoteView>,
@@ -114,12 +180,26 @@ pub enum Cmd {
         payment_id: String,
         reply: Reply<Intent>,
     },
+    /// Creates the account for `key` if it doesn't exist yet (idempotent).
+    EnsureAccount {
+        key: String,
+        reply: Reply<AccountView>,
+    },
+    AccountStatus {
+        key: String,
+        reply: Reply<AccountStatusView>,
+    },
+    /// Testnet top-up of `key`'s account from the treasury (idempotent per id).
+    Faucet {
+        key: String,
+        payment_id: String,
+        reply: Reply<Intent>,
+    },
 }
 
 /// Facts the HTTP side needs, produced once the actor is ready.
 pub struct Ready {
-    pub account: AccountUuid,
-    pub ufvks: std::collections::HashMap<AccountUuid, zcash_keys::keys::UnifiedFullViewingKey>,
+    pub treasury: AccountUuid,
 }
 
 struct Actor {
@@ -127,10 +207,27 @@ struct Actor {
     db: wallet::Db,
     client: remote::Client,
     intents: IntentStore,
-    account: AccountUuid,
+    /// ZIP 32 account 0: the shared demo treasury and faucet source.
+    treasury: AccountUuid,
     funding_address: String,
     last_sync_at: Option<i64>,
     last_sync_error: Option<String>,
+}
+
+/// Wallet DB name of a company account (found again by name after a crash).
+fn account_name(key: &str) -> String {
+    format!("org:{key}")
+}
+
+/// The account derived at ZIP 32 index 0 (the treasury).
+fn treasury_account(db: &wallet::Db) -> anyhow::Result<AccountUuid> {
+    for id in db.get_account_ids()? {
+        let a = db.get_account(id)?.context("account vanished")?;
+        if a.source().key_derivation().map(|d| u32::from(d.account_index())) == Some(0) {
+            return Ok(id);
+        }
+    }
+    anyhow::bail!("wallet has no ZIP 32 account 0 (the treasury)")
 }
 
 enum BuildError {
@@ -177,15 +274,12 @@ pub fn spawn(cfg: ActorConfig) -> anyhow::Result<(mpsc::Sender<Cmd>, Ready)> {
                         return;
                     }
                 };
+                if let Err(e) = actor.refresh_ufvks() {
+                    let _ = ready_tx.send(Err(e));
+                    return;
+                }
                 let ready = Ready {
-                    account: actor.account,
-                    ufvks: match actor.db.get_unified_full_viewing_keys() {
-                        Ok(u) => u,
-                        Err(e) => {
-                            let _ = ready_tx.send(Err(e.into()));
-                            return;
-                        }
-                    },
+                    treasury: actor.treasury,
                 };
                 let _ = ready_tx.send(Ok(ready));
                 actor.run(rx).await;
@@ -201,8 +295,8 @@ impl Actor {
     async fn start(cfg: ActorConfig) -> anyhow::Result<Self> {
         let mut client = chain::connect_with_retry(&cfg.lightwalletd_url).await?;
         let mut db = wallet::open(&cfg.paths.data_db)?;
-        let account = wallet::sole_account(&db)?;
-        let funding_address = wallet::receive_address(&mut db, account)?.encode(&NETWORK);
+        let treasury = treasury_account(&db)?;
+        let funding_address = wallet::receive_address(&mut db, treasury)?.encode(&NETWORK);
         let intents = IntentStore::open(&cfg.intents_path)?;
         sync::run(&mut client, &mut db).await?;
         wallet::enhance(&mut db, &mut client).await?;
@@ -211,7 +305,7 @@ impl Actor {
             db,
             client,
             intents,
-            account,
+            treasury,
             funding_address,
             last_sync_at: Some(now()),
             last_sync_error: None,
@@ -242,11 +336,16 @@ impl Actor {
                 let _ = reply.send(self.status().map_err(CmdError::from));
             }
             Cmd::Quote {
+                account,
                 address,
                 amount_zats,
                 reply,
             } => {
-                let _ = reply.send(self.quote(&address, amount_zats).map_err(CmdError::from));
+                let r = match self.resolve(account.as_deref()) {
+                    Ok(acct) => self.quote(acct, &address, amount_zats).map_err(CmdError::from),
+                    Err(e) => Err(e),
+                };
+                let _ = reply.send(r);
             }
             Cmd::Submit { req, reply } => {
                 let _ = reply.send(self.submit(req).await);
@@ -254,7 +353,176 @@ impl Actor {
             Cmd::Cancel { payment_id, reply } => {
                 let _ = reply.send(self.cancel(&payment_id).await.map_err(CmdError::from));
             }
+            Cmd::EnsureAccount { key, reply } => {
+                let _ = reply.send(self.ensure_account(&key).await.map_err(CmdError::from));
+            }
+            Cmd::AccountStatus { key, reply } => {
+                let _ = reply.send(self.account_status(&key));
+            }
+            Cmd::Faucet {
+                key,
+                payment_id,
+                reply,
+            } => {
+                let _ = reply.send(self.faucet(&key, &payment_id).await);
+            }
         }
+    }
+
+    // ---- accounts -----------------------------------------------------------------
+
+    /// The account that pays for `key` (`None` = the treasury).
+    fn resolve(&self, key: Option<&str>) -> Result<AccountUuid, CmdError> {
+        let Some(key) = key else {
+            return Ok(self.treasury);
+        };
+        let uuid = self
+            .intents
+            .account_for(key)?
+            .ok_or_else(|| CmdError::UnknownAccount(key.to_string()))?;
+        Ok(AccountUuid::from_uuid(
+            uuid::Uuid::parse_str(&uuid).context("bad account uuid in registry")?,
+        ))
+    }
+
+    fn refresh_ufvks(&self) -> anyhow::Result<()> {
+        let u = self.db.get_unified_full_viewing_keys()?;
+        *self
+            .cfg
+            .ufvks
+            .write()
+            .map_err(|_| anyhow::anyhow!("ufvk lock poisoned"))? = u;
+        Ok(())
+    }
+
+    /// Finds or creates `key`'s account. Creation derives the next ZIP 32
+    /// account from the wallet seed, with a birthday at the current tip (a new
+    /// address can't have received anything earlier), so nothing is rescanned.
+    async fn ensure_account(&mut self, key: &str) -> anyhow::Result<AccountView> {
+        let mut created = false;
+        let uuid = match self.intents.account_for(key)? {
+            Some(u) => AccountUuid::from_uuid(uuid::Uuid::parse_str(&u)?),
+            None => {
+                // Created before a crash but never registered? Find it by name.
+                let name = account_name(key);
+                let mut found = None;
+                for id in self.db.get_account_ids()? {
+                    if self.db.get_account(id)?.and_then(|a| a.name().map(|n| n == name)) == Some(true) {
+                        found = Some(id);
+                    }
+                }
+                let id = match found {
+                    Some(id) => id,
+                    None => {
+                        let tip = remote::chain_tip(&mut self.client).await?;
+                        let ts = self
+                            .client
+                            .get_tree_state(service::BlockId {
+                                height: u64::from(tip.saturating_sub(1)),
+                                ..Default::default()
+                            })
+                            .await?
+                            .into_inner();
+                        let birthday = AccountBirthday::from_treestate(ts, None)
+                            .map_err(|e| anyhow::anyhow!("bad tree state: {e:?}"))?;
+                        let paths = &self.cfg.paths;
+                        let mnemonic = secrets::load_mnemonic(&paths.encrypted_mnemonic, &paths.identity)
+                            .context("could not unlock the wallet seed")?;
+                        let seed = secrets::seed_from_mnemonic(&mnemonic);
+                        drop(mnemonic);
+                        let (id, usk) = self.db.create_account(&name, &seed, &birthday, None)?;
+                        drop((usk, seed));
+                        created = true;
+                        tracing::info!(account_key = key, birthday = u32::from(birthday.height()), "created a company payout account");
+                        id
+                    }
+                };
+                self.intents
+                    .insert_account(key, &id.expose_uuid().to_string())?;
+                self.refresh_ufvks()?;
+                id
+            }
+        };
+        Ok(AccountView {
+            key: key.to_string(),
+            funding_address: wallet::receive_address(&mut self.db, uuid)?.encode(&NETWORK),
+            created,
+        })
+    }
+
+    fn faucet_view(&self, key: &str) -> anyhow::Result<FaucetView> {
+        let f = &self.cfg.faucet;
+        let grants = self.intents.live_faucet_grants(key)?;
+        let remaining = (f.max_grants - grants.len() as i64).max(0);
+        let next_at = grants
+            .last()
+            .map(|t| t + f.cooldown_secs)
+            .filter(|t| *t > now());
+        Ok(FaucetView {
+            amount_zats: f.amount_zats,
+            available: f.amount_zats > 0 && remaining > 0 && next_at.is_none(),
+            next_at: if remaining > 0 { next_at } else { None },
+            remaining,
+        })
+    }
+
+    fn account_status(&mut self, key: &str) -> Result<AccountStatusView, CmdError> {
+        let acct = self.resolve(Some(key))?;
+        let b = wallet::balance(&self.db, acct)?;
+        Ok(AccountStatusView {
+            network: "testnet",
+            key: key.to_string(),
+            funding_address: wallet::receive_address(&mut self.db, acct)?.encode(&NETWORK),
+            spendable_zats: b.as_ref().map_or(0, |b| b.spendable_total),
+            pending_zats: b
+                .as_ref()
+                .map_or(0, |b| b.pending_change + b.pending_spendability),
+            total_zats: b.as_ref().map_or(0, |b| b.total),
+            chain_tip: b.as_ref().map(|b| b.chain_tip_height),
+            last_sync_at: self.last_sync_at,
+            faucet: self.faucet_view(key)?,
+        })
+    }
+
+    /// Sends the faucet amount from the treasury to `key`'s account, within
+    /// the cooldown and lifetime limits. A repeat of the same id returns it.
+    async fn faucet(&mut self, key: &str, payment_id: &str) -> Result<Intent, CmdError> {
+        if let Some(i) = self.intents.get(payment_id)? {
+            return match self.intents.faucet_grant(payment_id)? {
+                Some(k) if k == key => Ok(i),
+                _ => Err(CmdError::Conflict(
+                    "payment id was already used for something else".into(),
+                )),
+            };
+        }
+        let f = self.cfg.faucet.clone();
+        if f.amount_zats <= 0 {
+            return Err(CmdError::Refused("The test TAZ faucet is turned off.".into()));
+        }
+        let to = self.ensure_account(key).await?;
+        let v = self.faucet_view(key)?;
+        if v.remaining == 0 {
+            return Err(CmdError::Refused(
+                "This company has used all its test TAZ top-ups.".into(),
+            ));
+        }
+        if let Some(t) = v.next_at {
+            return Err(CmdError::Refused(format!(
+                "The next test TAZ top-up is available in {} minutes.",
+                ((t - now()) as f64 / 60.0).ceil() as i64
+            )));
+        }
+        self.intents
+            .insert_faucet_grant(payment_id, key, f.amount_zats)?;
+        tracing::info!(account_key = key, payment_id, amount_zats = f.amount_zats, "faucet top-up from the treasury");
+        self.submit(SubmitReq {
+            payment_id: payment_id.to_string(),
+            account: None,
+            address: to.funding_address,
+            amount_zats: f.amount_zats,
+            max_fee_zats: self.cfg.max_fee_zats,
+        })
+        .await
     }
 
     // ---- background ------------------------------------------------------------
@@ -429,7 +697,7 @@ impl Actor {
     // ---- commands -----------------------------------------------------------------
 
     fn balances(&self) -> anyhow::Result<Option<wallet::BalanceReport>> {
-        wallet::balance(&self.db, self.account)
+        wallet::balance(&self.db, self.treasury)
     }
 
     fn status(&mut self) -> anyhow::Result<StatusView> {
@@ -458,8 +726,8 @@ impl Actor {
         })
     }
 
-    fn quote(&mut self, address: &str, amount_zats: i64) -> anyhow::Result<QuoteView> {
-        let b = self.balances()?;
+    fn quote(&mut self, account: AccountUuid, address: &str, amount_zats: i64) -> anyhow::Result<QuoteView> {
+        let b = wallet::balance(&self.db, account)?;
         let spendable = b.as_ref().map_or(0, |b| b.spendable_total);
         let pending = b
             .as_ref()
@@ -493,7 +761,7 @@ impl Actor {
         match payment::propose_shielded_payment(
             &mut self.db,
             &NETWORK,
-            self.account,
+            account,
             to,
             Zatoshis::from_u64(amount_zats as u64)?,
             memo,
@@ -535,6 +803,7 @@ impl Actor {
         self.intents.insert_failed(
             payment_id,
             None,
+            None,
             0,
             0,
             &memo_for(payment_id),
@@ -553,7 +822,8 @@ impl Actor {
         if let Some(i) = self.intents.get(id)? {
             let same = i.address.as_deref() == Some(address)
                 && i.amount_zats == req.amount_zats
-                && i.max_fee_zats == req.max_fee_zats;
+                && i.max_fee_zats == req.max_fee_zats
+                && i.account == req.account;
             if i.address.is_some() && !same {
                 return Err(CmdError::Conflict(
                     "payment id was already used with different parameters".into(),
@@ -570,10 +840,13 @@ impl Actor {
             return Ok(self.adopt(id, b).await?);
         }
 
+        // The paying account must exist; an unknown one is an error, not a payment.
+        let account = self.resolve(req.account.as_deref())?;
         let memo = memo_for(id);
         let reject = |this: &mut Self, reason: String| -> Result<Intent, CmdError> {
             this.intents.insert_failed(
                 id,
+                req.account.as_deref(),
                 Some(address),
                 req.amount_zats,
                 req.max_fee_zats,
@@ -599,7 +872,7 @@ impl Actor {
 
         // Durable record BEFORE any wallet work.
         self.intents
-            .insert_pending(id, address, req.amount_zats, req.max_fee_zats, &memo)?;
+            .insert_pending(id, req.account.as_deref(), address, req.amount_zats, req.max_fee_zats, &memo)?;
         self.fault_point("crash_before_build");
         tracing::info!(
             payment_id = id,
@@ -608,7 +881,7 @@ impl Actor {
         );
 
         let built = match self
-            .build(address, req.amount_zats, req.max_fee_zats, &memo)
+            .build(account, address, req.amount_zats, req.max_fee_zats, &memo)
             .await
         {
             Ok(b) => {
@@ -652,6 +925,7 @@ impl Actor {
 
     async fn build(
         &mut self,
+        account: AccountUuid,
         address: &str,
         amount: i64,
         max_fee: i64,
@@ -668,7 +942,7 @@ impl Actor {
         let proposal = payment::propose_shielded_payment(
             &mut self.db,
             &NETWORK,
-            self.account,
+            account,
             to,
             value,
             memo,
@@ -688,7 +962,7 @@ impl Actor {
         let seed = secrets::seed_from_mnemonic(&mnemonic);
         drop(mnemonic);
         let usk =
-            wallet::spending_key(&self.db, self.account, &seed).map_err(|e| NoTx(e.to_string()))?;
+            wallet::spending_key(&self.db, account, &seed).map_err(|e| NoTx(e.to_string()))?;
         drop(seed);
         // Proving is CPU-bound; this thread exists for it.
         let res = payment::build(&mut self.db, &NETWORK, &usk, &proposal);

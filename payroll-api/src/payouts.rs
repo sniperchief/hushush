@@ -7,6 +7,11 @@
 //!
 //! The destination address is accepted from the claimant, passed to the
 //! wallet, fingerprinted, and dropped. It is never stored here or logged.
+//!
+//! Phase 6: every organization pays from its own account in the payout
+//! wallet, keyed by its organization id (created on first use). Its managers
+//! fund it; on testnet they can also top it up from the treasury (faucet).
+//! Withdrawals are quoted and paid from that account only (`OrgWallet`).
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -222,27 +227,82 @@ impl HttpWallet {
         }
     }
 
-    pub fn quote(&self, address: &str, amount_zats: i64) -> Result<WalletQuote, WalletError> {
+    /// A real-proposal quote from `account` (an organization id), or from the
+    /// treasury when `None`.
+    pub fn quote(
+        &self,
+        address: &str,
+        amount_zats: i64,
+        account: Option<&str>,
+    ) -> Result<WalletQuote, WalletError> {
         self.read(
             &self.long,
             "POST",
             "/v1/quotes",
-            Some(json!({ "address": address, "amount_zats": amount_zats })),
+            Some(json!({ "address": address, "amount_zats": amount_zats, "account": account })),
         )?
         .ok_or_else(|| WalletError::Unavailable("quote endpoint missing".into()))
     }
 
-    pub fn status(&self) -> Result<serde_json::Value, WalletError> {
-        self.read(&self.short, "GET", "/v1/status", None)?
-            .ok_or_else(|| WalletError::Unavailable("status endpoint missing".into()))
+    /// Creates `org`'s payout account if it doesn't exist yet (idempotent).
+    pub fn ensure_account(&self, org: &str) -> Result<serde_json::Value, WalletError> {
+        // Creating an account unlocks the seed and reads the chain: long timeout.
+        self.call(&self.long, "POST", "/v1/accounts", Some(json!({ "key": org })))?
+            .ok_or_else(|| WalletError::Unavailable("accounts endpoint missing".into()))
+    }
+
+    pub fn account_status(&self, org: &str) -> Result<serde_json::Value, WalletError> {
+        self.read(&self.short, "GET", &format!("/v1/accounts/{org}"), None)?
+            .ok_or_else(|| WalletError::Unavailable("account status endpoint missing".into()))
+    }
+
+    /// Testnet top-up of `org`'s account from the treasury (idempotent per id).
+    pub fn faucet(&self, org: &str, payment_id: &str) -> Result<WalletPayment, WalletError> {
+        self.call(
+            &self.long,
+            "POST",
+            &format!("/v1/accounts/{org}/faucet"),
+            Some(json!({ "payment_id": payment_id })),
+        )?
+        .ok_or_else(|| WalletError::Unavailable("faucet endpoint missing".into()))
+    }
+}
+
+impl HttpWallet {
+    fn submit_from(&self, req: &WalletSubmit, account: Option<&str>) -> Result<WalletPayment, WalletError> {
+        let mut body = serde_json::to_value(req).expect("serializable");
+        if let Some(a) = account {
+            body["account"] = json!(a);
+        }
+        self.call(&self.long, "POST", "/v1/payments", Some(body))?
+            .ok_or_else(|| WalletError::Unavailable("payments endpoint missing".into()))
+    }
+}
+
+/// The payout wallet as seen by one organization: payments are paid from
+/// that organization's own account. Lookups and fences are by payment id
+/// and need no account (the reconciler never submits).
+pub struct OrgWallet<'a> {
+    pub wallet: &'a HttpWallet,
+    pub org: &'a str,
+}
+
+impl WalletApi for OrgWallet<'_> {
+    fn submit(&self, req: &WalletSubmit) -> Result<WalletPayment, WalletError> {
+        self.wallet.submit_from(req, Some(self.org))
+    }
+    fn lookup(&self, payment_id: &str) -> Result<Option<WalletPayment>, WalletError> {
+        self.wallet.lookup(payment_id)
+    }
+    fn cancel(&self, payment_id: &str) -> Result<WalletPayment, WalletError> {
+        self.wallet.cancel(payment_id)
     }
 }
 
 impl WalletApi for HttpWallet {
+    /// Pays from the treasury (the Phase 3 claims path).
     fn submit(&self, req: &WalletSubmit) -> Result<WalletPayment, WalletError> {
-        let body = serde_json::to_value(req).expect("serializable");
-        self.call(&self.long, "POST", "/v1/payments", Some(body))?
-            .ok_or_else(|| WalletError::Unavailable("payments endpoint missing".into()))
+        self.submit_from(req, None)
     }
     fn lookup(&self, payment_id: &str) -> Result<Option<WalletPayment>, WalletError> {
         self.call(
@@ -430,7 +490,7 @@ pub async fn quote(
     let q = blocking(move || {
         let q = po
             .wallet
-            .quote(&address, c.amount_zats)
+            .quote(&address, c.amount_zats, None)
             .map_err(wallet_err)?;
         Ok(quote_view(&c.id, c.amount_zats, &q, &po.policy))
     })
@@ -510,7 +570,8 @@ pub async fn request(
         }
     };
     let (po2, addr2) = (po.clone(), address.clone());
-    let q = blocking(move || po2.wallet.quote(&addr2, c.amount_zats).map_err(wallet_err)).await?;
+    // The Phase 3 claims path (no longer used by the web app) pays from the treasury.
+    let q = blocking(move || po2.wallet.quote(&addr2, c.amount_zats, None).map_err(wallet_err)).await?;
     if !q.valid_recipient {
         return Err(err(
             StatusCode::UNPROCESSABLE_ENTITY,
@@ -582,6 +643,15 @@ pub async fn request(
 }
 
 #[derive(Serialize)]
+pub struct FaucetSummary {
+    pub amount_zats: i64,
+    pub amount_zec: String,
+    pub available: bool,
+    pub next_at: Option<i64>,
+    pub remaining: i64,
+}
+
+#[derive(Serialize)]
 pub struct WalletSummary {
     pub network: &'static str,
     pub spendable_zats: i64,
@@ -592,9 +662,22 @@ pub struct WalletSummary {
     pub chain_tip: Option<i64>,
     pub last_sync_at: Option<i64>,
     pub required_confirmations: i64,
+    pub faucet: FaucetSummary,
 }
 
-/// Payout wallet balance and funding address, for the organization's managers.
+/// Wallet errors for manager-facing calls: policy refusals keep their
+/// (user-facing) message; anything else is "unavailable".
+fn wallet_refusal(e: WalletError) -> ApiError {
+    match e {
+        WalletError::Refused { code, message } if code == "refused" => {
+            err(StatusCode::CONFLICT, "faucet_refused", message)
+        }
+        e => wallet_err(e),
+    }
+}
+
+/// The organization's own payout wallet (created on first view): balance,
+/// funding address and faucet availability, for its managers.
 pub async fn wallet_summary(
     State(st): State<AppState>,
     h: HeaderMap,
@@ -613,8 +696,14 @@ pub async fn wallet_summary(
         ));
     }
     let need = po.policy.required_confirmations;
-    let s = blocking(move || po.wallet.status().map_err(wallet_err)).await?;
+    let s = blocking(move || {
+        po.wallet.ensure_account(&org).map_err(wallet_err)?;
+        po.wallet.account_status(&org).map_err(wallet_err)
+    })
+    .await?;
     let n = |k: &str| s[k].as_i64().unwrap_or_default();
+    let f = &s["faucet"];
+    let faucet_amount = f["amount_zats"].as_i64().unwrap_or_default();
     Ok(Json(WalletSummary {
         network: "testnet",
         spendable_zats: n("spendable_zats"),
@@ -628,7 +717,61 @@ pub async fn wallet_summary(
         chain_tip: s["chain_tip"].as_i64(),
         last_sync_at: s["last_sync_at"].as_i64(),
         required_confirmations: need,
+        faucet: FaucetSummary {
+            amount_zats: faucet_amount,
+            amount_zec: format_zec(faucet_amount),
+            available: f["available"].as_bool().unwrap_or(false),
+            next_at: f["next_at"].as_i64(),
+            remaining: f["remaining"].as_i64().unwrap_or_default(),
+        },
     }))
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FaucetReq {
+    /// A fresh lowercase hyphenated UUID per top-up; a retry reuses it.
+    idempotency_key: String,
+}
+
+/// Testnet only: tops the organization's payout wallet up from the shared
+/// treasury, within the wallet's faucet limits.
+pub async fn faucet(
+    State(st): State<AppState>,
+    h: HeaderMap,
+    Path(org): Path<String>,
+    Json(r): Json<FaucetReq>,
+) -> ApiResult<serde_json::Value> {
+    let a = actor(&st, &h)?;
+    require_actor(&a)?;
+    let po = enabled(&st)?;
+    let o2 = org.clone();
+    with_db(&st, move |db| db.require_payroll_manager(&a, &o2)).await?;
+    if !po.orgs.allows(&org) {
+        return Err(err(
+            StatusCode::FORBIDDEN,
+            "forbidden",
+            "Payouts are not enabled for this organization.",
+        ));
+    }
+    let key = r.idempotency_key;
+    if uuid::Uuid::parse_str(&key).map(|u| u.hyphenated().to_string()) != Ok(key.clone()) {
+        return Err(err(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "validation",
+            "idempotency_key must be a lowercase hyphenated UUID.",
+        ));
+    }
+    let p = blocking(move || po.wallet.faucet(&org, &key).map_err(wallet_refusal)).await?;
+    tracing::info!(payment_id = %p.payment_id, state = ?p.state, "faucet top-up requested");
+    Ok(Json(json!({
+        "payment_id": p.payment_id,
+        "state": p.state,
+        "amount_zats": p.amount_zats,
+        "amount_zec": format_zec(p.amount_zats),
+        "txid": p.txid,
+        "failure_reason": p.failure_reason,
+    })))
 }
 
 // ---- worker ---------------------------------------------------------------------------
@@ -724,7 +867,7 @@ mod tests {
         .unwrap();
         for _ in 0..3 {
             let q = w
-                .quote("utest1x", 1)
+                .quote("utest1x", 1, None)
                 .expect("each call must open a fresh connection");
             assert_eq!(q.fee_zats, Some(10_000));
         }

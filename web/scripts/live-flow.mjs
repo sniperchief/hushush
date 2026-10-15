@@ -4,7 +4,8 @@
 // state through the app (as the worker). Passkeys come from a SOFTWARE
 // authenticator.
 //
-//   node scripts/live-flow.mjs setup <total-zec> <seconds>   → stream id
+//   node scripts/live-flow.mjs setup <total-zec> <seconds>   → stream id (and asks the faucet to fund the company)
+//   node scripts/live-flow.mjs wait-funded <zats> <timeout-secs> → the company wallet's spendable balance
 //   node scripts/live-flow.mjs address <address>             → HTTP status + body
 //   node scripts/live-flow.mjs withdraw [n]                  → n concurrent taps
 //   node scripts/live-flow.mjs wait-withdrawable <timeout-secs>
@@ -50,6 +51,10 @@ switch (cmd) {
     await boss.signUp("employer", "Live Employer");
     let r = await boss.post("/api/company", { name: `Live Testnet Co ${randomUUID().slice(0, 4)}` });
     if (r.status !== 201) die(`company ${r.status} ${r.text}`);
+    // Phase 6: the company pays from its own wallet; fund it from the treasury (testnet faucet).
+    r = await boss.post("/api/company/faucet", { idempotencyKey: randomUUID() });
+    if (r.status !== 201) die(`faucet ${r.status} ${r.text}`);
+    const faucet = { payment_id: r.json.payment_id, state: r.json.state, amount_zats: r.json.amount_zats, txid: r.json.txid };
     r = await boss.post("/api/streams", { workerName: "Carol", totalZec: total, startAt: null, endAt: Math.floor(Date.now() / 1000) + Number(secs) });
     if (r.status !== 201) die(`stream ${r.status} ${r.text}`);
     const link = new URL(r.json.link);
@@ -62,7 +67,22 @@ switch (cmd) {
     const streamId = r.json.streamId;
     writeFileSync(STATE, JSON.stringify({ streamId, boss: boss.session, worker: worker.session }));
     const s = await show();
-    out({ streamId, total_zec: s.total_zec, start_at: s.start_at, end_at: s.end_at, milestone_zats: s.milestone_zats, company: s.organization_name });
+    out({ streamId, total_zec: s.total_zec, start_at: s.start_at, end_at: s.end_at, milestone_zats: s.milestone_zats, company: s.organization_name, faucet });
+    break;
+  }
+  case "wait-funded": {
+    const [zats = "1", secs = "900"] = args;
+    const until = Date.now() + Number(secs) * 1000;
+    for (;;) {
+      const r = await browser(state().boss).get("/api/company/wallet");
+      if (r.status !== 200) die(`wallet ${r.status} ${r.text}`);
+      if (r.json.spendable_zats >= Number(zats)) {
+        out({ spendable_zats: r.json.spendable_zats, funding_address: r.json.funding_address });
+        break;
+      }
+      if (Date.now() > until) die(`company wallet not funded in time (spendable ${r.json.spendable_zats}, pending ${r.json.pending_zats})`);
+      await sleep(10_000);
+    }
     break;
   }
   case "address": {
@@ -128,7 +148,7 @@ switch (cmd) {
   }
   case "show": {
     const s = await show();
-    out({ status: s.status, balance: s.balance, withdrawable_zats: s.withdrawable_zats, address_locked: s.address_locked, payouts: s.payouts.map((p) => ({ id: p.id, state: p.state, amount_zats: p.amount_zats, txid: p.txid, confirmations: p.confirmations, fee_zats: p.fee_zats })) });
+    out({ organization_id: s.organization_id, status: s.status, balance: s.balance, withdrawable_zats: s.withdrawable_zats, address_locked: s.address_locked, payouts: s.payouts.map((p) => ({ id: p.id, state: p.state, amount_zats: p.amount_zats, txid: p.txid, confirmations: p.confirmations, fee_zats: p.fee_zats })) });
     break;
   }
   case "pages": {
@@ -143,7 +163,7 @@ switch (cmd) {
       worker_sees_locked_address: w.html.includes("Locked for the life of this stream") && w.html.includes(address),
       employer_home_200: e.status === 200,
       employer_sees_payments: txids.every((t) => e.html.includes(t.slice(0, 10))),
-      employer_sees_shared_treasury: e.html.includes("Shared testnet demo treasury"),
+      employer_sees_payout_wallet: e.html.includes("Payout wallet"),
       employer_never_sees_address: !e.html.includes(address) && !ed.html.includes(address) && ed.html.includes("set and locked by the worker"),
       worker_txids_shown: txids.every((t) => w.html.includes(t.slice(0, 10))),
     };

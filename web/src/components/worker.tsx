@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/client-api";
 import type { FlowStream } from "@/lib/payroll";
 import { Alert, Button, Field, cx, inputClass } from "./ui";
@@ -56,25 +56,31 @@ function LiveFigures({ s }: { s: FlowStream }) {
 
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-line bg-accent-bg p-4 sm:col-span-2">
-          <div className="text-xs font-medium uppercase tracking-wide text-ink-soft">Available to withdraw</div>
-          <div className="mt-1 font-mono text-2xl font-semibold tabular-nums sm:text-3xl">
-            {zec(available > BigInt(0) ? available : BigInt(0))} <span className="text-base font-normal text-ink-soft">ZEC</span>
-          </div>
-          <div className="mt-1 text-xs text-ink-soft">
-            Earned {zec(earned)} of {zec(total)} ZEC{active ? " · ticking every second" : " · stream ended"}
-          </div>
-        </div>
-        <div className="rounded-xl border border-line p-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-ink-soft">Withdrawn</div>
-          <div className="mt-1 font-mono text-lg font-semibold tabular-nums">
-            {zec(withdrawn)} <span className="text-sm font-normal text-ink-soft">ZEC</span>
-          </div>
-          {held > BigInt(0) && <div className="mt-1 text-xs text-ink-soft">{zec(held)} ZEC on its way</div>}
-        </div>
+      <div className="flex flex-col gap-1.5 rounded-[10px] border border-honey bg-honey-soft px-[18px] py-4">
+        <span className="text-xs font-semi tracking-[.1em] text-bark uppercase">Available to withdraw</span>
+        <span className="mono text-[28px] leading-[1.1] font-medium tracking-[-0.6px] break-all sm:text-[32px]">
+          {zec(available > BigInt(0) ? available : BigInt(0))} <span className="font-landing text-[15px] font-normal tracking-normal text-bark">ZEC</span>
+        </span>
+        <span className="text-[13px] text-bark">
+          Earned <span className="mono text-espresso">{zec(earned)}</span> of {zec(total)} ZEC{active ? " · ticking every second" : " · stream ended"}
+        </span>
       </div>
       <Progress total={total} earned={earned} withdrawn={withdrawn} held={held} />
+      <div className="flex flex-col gap-1.5 text-[13.5px]">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-bark">Withdrawn</span>
+          <span className="mono">{zec(withdrawn)} ZEC</span>
+        </div>
+        {held > BigInt(0) && (
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="inline-flex items-center gap-[7px] text-bark">
+              <i aria-hidden="true" className="stripe-held inline-block size-2.5 rounded-[3px]" />
+              On its way
+            </span>
+            <span className="mono">{zec(held)} ZEC</span>
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -82,23 +88,23 @@ function LiveFigures({ s }: { s: FlowStream }) {
 function Progress({ total, earned, withdrawn, held }: { total: bigint; earned: bigint; withdrawn: bigint; held: bigint }) {
   const pct = (v: bigint) => (total > BigInt(0) ? Number((v * BigInt(10_000)) / total) / 100 : 0);
   return (
-    <div className="space-y-1.5">
+    <div className="flex flex-col gap-1.5">
       <div
-        className="relative h-3 overflow-hidden rounded-full bg-muted"
+        className="relative h-3 overflow-hidden rounded-md bg-mist"
         role="progressbar"
         aria-label="Earned so far"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.floor(pct(earned))}
       >
-        <div className="absolute inset-y-0 left-0 bg-accent/40" style={{ width: `${pct(earned)}%` }} />
-        <div className="absolute inset-y-0 left-0 bg-ok" style={{ width: `${pct(withdrawn)}%` }} />
-        <div className="absolute inset-y-0 bg-accent" style={{ left: `${pct(withdrawn)}%`, width: `${pct(held)}%` }} />
+        <div className="absolute inset-y-0 left-0 bg-earned" style={{ width: `${pct(earned)}%` }} />
+        <div className="absolute inset-y-0 left-0 bg-withdrawn" style={{ width: `${pct(withdrawn)}%` }} />
+        <div className="stripe-held absolute inset-y-0" style={{ left: `${pct(withdrawn)}%`, width: `${pct(held)}%` }} />
         {[20, 40, 60, 80].map((m) => (
-          <div key={m} className="absolute inset-y-0 w-px bg-surface" style={{ left: `${m}%` }} aria-hidden />
+          <div key={m} className="absolute inset-y-0 w-[3px] bg-paper" style={{ left: `calc(${m}% - 1.5px)` }} aria-hidden />
         ))}
       </div>
-      <div className="flex justify-between text-[11px] text-ink-faint" aria-hidden>
+      <div className="mono flex justify-between text-[11px] text-axis" aria-hidden>
         {[0, 20, 40, 60, 80, 100].map((m) => (
           <span key={m}>{m}%</span>
         ))}
@@ -107,8 +113,12 @@ function Progress({ total, earned, withdrawn, held }: { total: bigint; earned: b
   );
 }
 
-/** Live balance, progress with 20% milestones, and the Withdraw action. */
-export function WorkerStreamPanel({ s }: { s: FlowStream }) {
+/**
+ * Live balance, progress with 20% milestones, and the Withdraw action.
+ * `address` is shown above the button (the home page's locked pill or "Set it" row);
+ * `quietAddressHint` drops the hint when that row already says to set an address.
+ */
+export function WorkerStreamPanel({ s, address, quietAddressHint = false }: { s: FlowStream; address?: ReactNode; quietAddressHint?: boolean }) {
   const router = useRouter();
   const open = s.payouts.find((p) => p.state === "reserved" || p.state === "submitted" || p.state === "requires_reconciliation");
   // The server decides; pages refresh often enough to pick up a new milestone.
@@ -127,14 +137,17 @@ export function WorkerStreamPanel({ s }: { s: FlowStream }) {
   else if (s.status === "ended") hint = "Everything has been withdrawn.";
   else hint = `Unlocks when ${zec(BigInt(s.milestone_zats))} ZEC (20% of the total) is available.`;
 
+  const showHint = !(quietAddressHint && s.payouts_enabled && !s.address_locked);
+
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-4">
       <LiveFigures key={s.balance.as_of} s={s} />
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-ink-soft">{hint}</p>
-        <Button
+      {address}
+      <div className="flex flex-col gap-2.5">
+        <button
+          type="button"
           disabled={!unlocked || pending || Boolean(open)}
-          className="sm:min-w-40"
+          className="btn-amber h-[46px] w-full cursor-pointer rounded-lg text-[15px] font-semi transition-[transform,background-color] duration-150 active:scale-[.98] disabled:cursor-not-allowed disabled:bg-mist disabled:text-axis disabled:shadow-none disabled:active:scale-100 motion-reduce:transition-none"
           onClick={async () => {
             setPending(true);
             setError(undefined);
@@ -146,10 +159,13 @@ export function WorkerStreamPanel({ s }: { s: FlowStream }) {
           }}
         >
           {pending ? "Sending… (≈1 min)" : "Withdraw"}
-        </Button>
+        </button>
+        {showHint && <p className="m-0 text-center text-[13.5px] leading-[1.45] text-bark">{hint}</p>}
       </div>
       {pending && (
-        <Alert tone="neutral">Building your shielded transaction. This takes about a minute — it will never be sent twice, even if you tap again or reload.</Alert>
+        <div role="status" className="rounded-lg border border-linen bg-cream px-3.5 py-3 text-[13.5px] leading-[1.45] text-bark">
+          Building your shielded transaction. This takes about a minute — it will never be sent twice, even if you tap again or reload.
+        </div>
       )}
       {error && <Alert>{error}</Alert>}
     </div>

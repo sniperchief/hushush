@@ -59,6 +59,9 @@ pub fn create(
     Ok((db, account, usk))
 }
 
+/// The wallet's account for the CLI: its only account, or — when the payout
+/// service has added company accounts (Phase 6) — the primary one, derived at
+/// ZIP 32 index 0.
 pub fn sole_account<DbT: WalletRead<AccountId = AccountUuid>>(db: &DbT) -> anyhow::Result<AccountUuid>
 where
     DbT::Error: std::error::Error + Send + Sync + 'static,
@@ -67,7 +70,15 @@ where
     match ids.as_slice() {
         [one] => Ok(*one),
         [] => Err(anyhow!("wallet has no accounts")),
-        _ => Err(anyhow!("wallet has {} accounts; Phase 0 expects one", ids.len())),
+        many => {
+            for id in many {
+                let a = db.get_account(*id)?.context("account vanished")?;
+                if a.source().key_derivation().map(|d| u32::from(d.account_index())) == Some(0) {
+                    return Ok(*id);
+                }
+            }
+            Err(anyhow!("wallet has {} accounts and none at ZIP 32 index 0", many.len()))
+        }
     }
 }
 

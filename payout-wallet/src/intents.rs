@@ -15,6 +15,11 @@
 //!
 //! This database lives next to the wallet DB, outside the repository. It holds
 //! destination addresses (needed to verify payments); it holds no keys.
+//!
+//! Phase 6 adds per-company payout accounts: `wallet_accounts` maps an opaque
+//! account key (the payroll organization id) to its account in the wallet DB,
+//! and each intent records which account pays it (`account`, NULL = the
+//! treasury, account 0). `faucet_grants` logs testnet top-ups from the treasury.
 
 use std::path::Path;
 
@@ -55,6 +60,8 @@ impl IntentState {
 #[derive(Clone, Debug)]
 pub struct Intent {
     pub payment_id: String,
+    /// Account key that pays this payment; `None` = the treasury.
+    pub account: Option<String>,
     /// `None` only for fences (cancelled before the wallet saw a request).
     pub address: Option<String>,
     pub amount_zats: i64,
@@ -157,11 +164,31 @@ BEFORE DELETE ON payment_intents
 BEGIN
     SELECT RAISE(ABORT, 'payment intents cannot be deleted');
 END;
+
+CREATE TABLE IF NOT EXISTS wallet_accounts (
+    key          TEXT    PRIMARY KEY CHECK (length(key) BETWEEN 1 AND 64),
+    account_uuid TEXT    NOT NULL UNIQUE,
+    created_at   INTEGER NOT NULL
+) STRICT;
+
+CREATE TRIGGER IF NOT EXISTS wallet_accounts_immutable
+BEFORE UPDATE ON wallet_accounts
+BEGIN
+    SELECT RAISE(ABORT, 'wallet accounts are immutable');
+END;
+
+CREATE TABLE IF NOT EXISTS faucet_grants (
+    payment_id  TEXT    PRIMARY KEY CHECK (length(payment_id) = 36),
+    key         TEXT    NOT NULL REFERENCES wallet_accounts (key),
+    amount_zats INTEGER NOT NULL CHECK (amount_zats > 0),
+    created_at  INTEGER NOT NULL
+) STRICT;
+CREATE INDEX IF NOT EXISTS faucet_grants_key ON faucet_grants (key, created_at);
 ";
 
 const COLS: &str = "payment_id, address, amount_zats, max_fee_zats, memo, state, failure_reason, \
      txid, raw_tx, fee_zats, expiry_height, created_at, updated_at, broadcast_attempts, \
-     last_broadcast_error";
+     last_broadcast_error, account";
 
 fn from_row(r: &Row<'_>) -> rusqlite::Result<Intent> {
     let state: String = r.get(5)?;
@@ -185,6 +212,7 @@ fn from_row(r: &Row<'_>) -> rusqlite::Result<Intent> {
         updated_at: r.get(12)?,
         broadcast_attempts: r.get(13)?,
         last_broadcast_error: r.get(14)?,
+        account: r.get(15)?,
     })
 }
 
@@ -204,7 +232,79 @@ impl IntentStore {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "synchronous", "FULL")?;
         conn.execute_batch(SCHEMA)?;
+        // Phase 6: which account pays each intent (older rows: NULL = treasury).
+        let has_account = conn
+            .prepare("SELECT 1 FROM pragma_table_info('payment_intents') WHERE name = 'account'")?
+            .exists([])?;
+        if !has_account {
+            conn.execute_batch(
+                "ALTER TABLE payment_intents ADD COLUMN account TEXT;
+                 CREATE TRIGGER IF NOT EXISTS payment_intents_account_immutable
+                 BEFORE UPDATE OF account ON payment_intents
+                 BEGIN SELECT RAISE(ABORT, 'payment intent terms are immutable'); END;",
+            )?;
+        }
         Ok(Self { conn })
+    }
+
+    // ---- accounts and faucet grants -------------------------------------------------
+
+    /// The wallet account (UUID string) registered for `key`.
+    pub fn account_for(&self, key: &str) -> anyhow::Result<Option<String>> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT account_uuid FROM wallet_accounts WHERE key = ?1",
+                [key],
+                |r| r.get(0),
+            )
+            .optional()?)
+    }
+
+    pub fn insert_account(&self, key: &str, account_uuid: &str) -> anyhow::Result<()> {
+        self.conn.execute(
+            "INSERT INTO wallet_accounts (key, account_uuid, created_at) VALUES (?1, ?2, ?3)",
+            params![key, account_uuid, now()],
+        )?;
+        Ok(())
+    }
+
+    /// Creation times of `key`'s faucet grants that did not fail (a failed
+    /// grant sent nothing, so it doesn't count against the limits).
+    pub fn live_faucet_grants(&self, key: &str) -> anyhow::Result<Vec<i64>> {
+        let mut q = self.conn.prepare(
+            "SELECT g.created_at FROM faucet_grants g
+             LEFT JOIN payment_intents i ON i.payment_id = g.payment_id
+             WHERE g.key = ?1 AND (i.state IS NULL OR i.state <> 'failed')
+             ORDER BY g.created_at",
+        )?;
+        let rows = q.query_map([key], |r| r.get(0))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// The account key a faucet payment id was granted to, if it is one.
+    pub fn faucet_grant(&self, payment_id: &str) -> anyhow::Result<Option<String>> {
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT key FROM faucet_grants WHERE payment_id = ?1",
+                [payment_id],
+                |r| r.get(0),
+            )
+            .optional()?)
+    }
+
+    pub fn insert_faucet_grant(
+        &self,
+        payment_id: &str,
+        key: &str,
+        amount: i64,
+    ) -> anyhow::Result<()> {
+        self.conn.execute(
+            "INSERT INTO faucet_grants (payment_id, key, amount_zats, created_at) VALUES (?1, ?2, ?3, ?4)",
+            params![payment_id, key, amount, now()],
+        )?;
+        Ok(())
     }
 
     pub fn get(&self, id: &str) -> anyhow::Result<Option<Intent>> {
@@ -239,6 +339,7 @@ impl IntentStore {
     pub fn insert_pending(
         &self,
         id: &str,
+        account: Option<&str>,
         address: &str,
         amount: i64,
         max_fee: i64,
@@ -247,18 +348,20 @@ impl IntentStore {
         let t = now();
         self.conn.execute(
             "INSERT INTO payment_intents (payment_id, address, amount_zats, max_fee_zats, memo,
-                 state, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, 'pending', ?6, ?6)",
-            params![id, address, amount, max_fee, memo, t],
+                 state, created_at, updated_at, account)
+             VALUES (?1, ?2, ?3, ?4, ?5, 'pending', ?6, ?6, ?7)",
+            params![id, address, amount, max_fee, memo, t, account],
         )?;
         Ok(())
     }
 
     /// Records a payment id as failed without ever building anything. With
     /// `address = None` this is a fence.
+    #[allow(clippy::too_many_arguments)]
     pub fn insert_failed(
         &self,
         id: &str,
+        account: Option<&str>,
         address: Option<&str>,
         amount: i64,
         max_fee: i64,
@@ -268,8 +371,8 @@ impl IntentStore {
         let t = now();
         self.conn.execute(
             "INSERT INTO payment_intents (payment_id, address, amount_zats, max_fee_zats, memo,
-                 state, failure_reason, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, 'failed', ?6, ?7, ?7)",
+                 state, failure_reason, created_at, updated_at, account)
+             VALUES (?1, ?2, ?3, ?4, ?5, 'failed', ?6, ?7, ?7, ?8)",
             params![
                 id,
                 address,
@@ -277,7 +380,8 @@ impl IntentStore {
                 max_fee.max(0),
                 memo,
                 truncate(reason),
-                t
+                t,
+                account
             ],
         )?;
         Ok(())
@@ -381,7 +485,7 @@ mod tests {
     #[test]
     fn lifecycle_pending_built_broadcast() {
         let (_d, s) = store();
-        s.insert_pending(ID, "utest1x", 5, 10, &memo_for(ID))
+        s.insert_pending(ID, None, "utest1x", 5, 10, &memo_for(ID))
             .unwrap();
         assert_eq!(s.count_unfinished().unwrap(), 1);
         s.mark_built(ID, &"a".repeat(64), b"raw", Some(10), Some(100))
@@ -399,9 +503,9 @@ mod tests {
     #[test]
     fn one_row_per_payment_id_and_forward_only() {
         let (_d, s) = store();
-        s.insert_pending(ID, "utest1x", 5, 10, "m").unwrap();
-        assert!(s.insert_pending(ID, "utest1x", 5, 10, "m").is_err());
-        assert!(s.insert_failed(ID, None, 0, 0, "m", "fence").is_err());
+        s.insert_pending(ID, None, "utest1x", 5, 10, "m").unwrap();
+        assert!(s.insert_pending(ID, None, "utest1x", 5, 10, "m").is_err());
+        assert!(s.insert_failed(ID, None, None, 0, 0, "m", "fence").is_err());
         s.mark_failed(ID, "insufficient funds").unwrap();
         // Failed is final: it can never be built afterwards.
         assert!(
@@ -433,14 +537,14 @@ mod tests {
     #[test]
     fn fences_and_write_once_transactions() {
         let (_d, s) = store();
-        s.insert_failed(ID, None, 0, 0, "m", "cancelled").unwrap();
+        s.insert_failed(ID, None, None, 0, 0, "m", "cancelled").unwrap();
         let i = s.get(ID).unwrap().unwrap();
         assert_eq!(
             (i.state, i.recipient_fingerprint()),
             (IntentState::Failed, String::new())
         );
         let id2 = "22222222-2222-2222-2222-222222222222";
-        s.insert_pending(id2, "utest1x", 5, 10, "m").unwrap();
+        s.insert_pending(id2, None, "utest1x", 5, 10, "m").unwrap();
         s.mark_built(id2, &"a".repeat(64), b"raw", None, None)
             .unwrap();
         let e = s
@@ -460,9 +564,85 @@ mod tests {
         let p = d.path().join("i.sqlite");
         IntentStore::open(&p)
             .unwrap()
-            .insert_pending(ID, "utest1x", 5, 10, "m")
+            .insert_pending(ID, None, "utest1x", 5, 10, "m")
             .unwrap();
         let s = IntentStore::open(&p).unwrap();
         assert_eq!(s.in_state(IntentState::Pending).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn accounts_are_registered_once_and_immutable() {
+        let (_d, s) = store();
+        assert_eq!(s.account_for("org-1").unwrap(), None);
+        s.insert_account("org-1", "uuid-a").unwrap();
+        assert_eq!(s.account_for("org-1").unwrap().as_deref(), Some("uuid-a"));
+        assert!(s.insert_account("org-1", "uuid-b").is_err());
+        assert!(s.insert_account("org-2", "uuid-a").is_err());
+        let e = s
+            .conn
+            .execute_batch("UPDATE wallet_accounts SET account_uuid = 'x'")
+            .unwrap_err()
+            .to_string();
+        assert!(e.contains("immutable"), "{e}");
+    }
+
+    #[test]
+    fn intents_record_their_paying_account() {
+        let (_d, s) = store();
+        s.insert_pending(ID, Some("org-1"), "utest1x", 5, 10, "m")
+            .unwrap();
+        assert_eq!(
+            s.get(ID).unwrap().unwrap().account.as_deref(),
+            Some("org-1")
+        );
+        let id2 = "22222222-2222-2222-2222-222222222222";
+        s.insert_pending(id2, None, "utest1x", 5, 10, "m").unwrap();
+        assert_eq!(s.get(id2).unwrap().unwrap().account, None);
+        let e = s
+            .conn
+            .execute_batch(&format!(
+                "UPDATE payment_intents SET account = 'org-2' WHERE payment_id = '{ID}'"
+            ))
+            .unwrap_err()
+            .to_string();
+        assert!(e.contains("immutable"), "{e}");
+    }
+
+    #[test]
+    fn an_older_intent_store_gains_the_account_column() {
+        let d = tempfile::tempdir().unwrap();
+        let p = d.path().join("i.sqlite");
+        {
+            // A Phase 3–5 store: the original table without `account`.
+            let c = Connection::open(&p).unwrap();
+            let old = SCHEMA.split("CREATE TABLE IF NOT EXISTS wallet_accounts").next().unwrap();
+            c.execute_batch(old).unwrap();
+            c.execute(
+                "INSERT INTO payment_intents (payment_id, address, amount_zats, max_fee_zats, memo, state, created_at, updated_at)
+                 VALUES (?1, 'utest1x', 5, 10, 'm', 'pending', 1, 1)",
+                [ID],
+            )
+            .unwrap();
+        }
+        let s = IntentStore::open(&p).unwrap();
+        assert_eq!(s.get(ID).unwrap().unwrap().account, None);
+        IntentStore::open(&p).unwrap(); // reopening is a no-op
+    }
+
+    #[test]
+    fn failed_faucet_grants_do_not_count() {
+        let (_d, s) = store();
+        s.insert_account("org-1", "uuid-a").unwrap();
+        let a = "33333333-3333-3333-3333-333333333333";
+        let b = "44444444-4444-4444-4444-444444444444";
+        for id in [a, b] {
+            s.insert_faucet_grant(id, "org-1", 100).unwrap();
+            s.insert_pending(id, None, "utest1x", 100, 10, "m").unwrap();
+        }
+        assert_eq!(s.live_faucet_grants("org-1").unwrap().len(), 2);
+        s.mark_failed(b, "insufficient funds").unwrap();
+        assert_eq!(s.live_faucet_grants("org-1").unwrap().len(), 1);
+        assert_eq!(s.faucet_grant(a).unwrap().as_deref(), Some("org-1"));
+        assert_eq!(s.faucet_grant(ID).unwrap(), None);
     }
 }

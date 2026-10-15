@@ -25,7 +25,7 @@ const now = () => Math.floor(Date.now() / 1000);
 // ---- employer -----------------------------------------------------------------
 const boss = new Browser(APP);
 let r = await boss.get("/");
-expect(r.status === 200 && r.html.includes("I&#x27;m an employer"), `landing page offers employer sign-up (HTTP ${r.status})`);
+expect(r.status === 200 && r.html.includes("Payroll, kept private.") && r.html.includes('href="/signup"'), `landing page offers sign-up (HTTP ${r.status})`);
 const bossKey = await boss.signUp("employer", "Smoke Boss");
 log("employer signed up with a passkey (no password, no e-mail)");
 r = await boss.get("/app");
@@ -33,7 +33,7 @@ expect(r.status === 200 && r.html.includes("Name your company"), "employer is as
 r = await boss.post("/api/company", { name: "Smoke Testnet Co" });
 expect(r.status === 201, "company created");
 r = await boss.get("/app");
-expect(r.html.includes("Smoke Testnet Co") && r.html.includes("Shared testnet demo treasury"), "employer home shows the company and the shared-treasury label");
+expect(r.html.includes("Smoke Testnet Co") && r.html.includes("Payout wallet") && r.html.includes("Get test TAZ"), "employer home shows the company and its own payout wallet with the faucet");
 r = await boss.post("/api/streams", { workerName: "Wanda", totalZec: "0.5", startAt: null, endAt: now() + 120 });
 expect(r.status === 201 && /\/join\/[A-Za-z0-9_-]{43}$/.test(r.json.link), `stream created; worker link ${r.json?.link}`);
 const link = new URL(r.json.link);
@@ -41,9 +41,9 @@ const offerId = r.json.offer.id;
 r = await boss.get("/app");
 expect(r.html.includes("Waiting for the worker to join") && r.html.includes("Wanda"), "employer home lists the stream as waiting for the worker");
 
-// The employer opening the worker link in THEIR browser gets no worker UI.
-r = await boss.get(link.pathname);
-expect(r.html.includes("signed in as an employer") && !r.html.includes("Accept this stream"), "employer opening the worker link is told to send it on (no worker UI)");
+// The employer can't accept their own company's worker link (payroll refuses).
+r = await boss.post(`/api/join${link.pathname.slice("/join".length)}`);
+expect(r.status === 403, "employer can't accept their own worker link");
 
 // ---- worker (another browser) -------------------------------------------------
 const wanda = new Browser(APP);
@@ -106,10 +106,10 @@ expect(r.status === 409, "a joined stream cannot be cancelled (only ended)");
 
 // ---- sessions -------------------------------------------------------------------
 const again = new Browser(APP);
-expect((await again.signIn(wandaKey)) === "worker", "worker signs in again on another browser with the same passkey");
+expect(await again.signIn(wandaKey), "worker signs in again on another browser with the same passkey");
 expect((await again.get("/app")).html.includes("Smoke Testnet Co"), "and sees the stream");
 const bossAgain = new Browser(APP);
-expect((await bossAgain.signIn(bossKey)) === "employer", "employer signs in again with their passkey");
+expect(await bossAgain.signIn(bossKey), "employer signs in again with their passkey");
 r = await again.post("/api/auth/logout");
 expect(r.status === 200, "logout");
 r = await again.get("/app");

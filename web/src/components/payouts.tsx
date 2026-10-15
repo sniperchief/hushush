@@ -24,13 +24,13 @@ export function PayoutBadge({ p }: { p: PayoutView }) {
     case "submitted": {
       const n = Math.min(p.confirmations, p.required_confirmations);
       return (
-        <Badge tone="accent" title="On the network; it counts as paid after enough confirmations.">
+        <Badge tone="withdrawing" title="On the network; it counts as paid after enough confirmations.">
           Confirming {n}/{p.required_confirmations}
         </Badge>
       );
     }
     case "confirmed":
-      return <Badge tone="green">Paid ✓</Badge>;
+      return <Badge tone="paid">Paid ✓</Badge>;
     case "failed":
       return <Badge tone="red" title="No ZEC was sent. The amount is available again.">Not sent</Badge>;
     case "requires_reconciliation":

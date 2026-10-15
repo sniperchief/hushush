@@ -123,6 +123,55 @@ table {
   --shadow-pill: 0 6px 16px rgba(38, 27, 7, 0.18);
 
   --ease-deck: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Sign up, sign in and onboarding (same palette). */
+  --color-placeholder: #a39d91;
+  --color-honey-soft: #fff6e0; /* success message background */
+  --color-failed-line: #f3b4a8;
+  --shadow-card: 0 1px 2px rgba(38, 27, 7, 0.04), 0 12px 32px rgba(38, 27, 7, 0.06);
+  --shadow-float: 0 24px 48px rgba(38, 27, 7, 0.08);
+  --shadow-lift: 0 12px 24px rgba(38, 27, 7, 0.1);
+  /* Pulse around the fingerprint while waiting for a passkey. */
+  --animate-ring: ring 1.4s ease-out infinite;
+  /* Dashboards: chart and progress colours. */
+  --color-earned: #d08a00; /* amber-deep, readable on white */
+  --color-withdrawn: #7a5cc8;
+  --color-withdrawn-light: #c9b8ef; /* stripes: on its way */
+  --color-withdrawn-soft: #ece5fa; /* "Withdrawing", "Confirming n/10" badges */
+  --color-withdrawn-ink: #4b3591;
+  --color-axis: #8f897e; /* chart axis labels only */
+  --color-danger-line: #e9b4a9;
+  --color-danger-soft: #fdf1ee;
+  /* Pulsing "live" dot on the worker dashboard. */
+  --animate-live: live 1.6s ease-out infinite;
+
+  @keyframes live {
+    0% {
+      box-shadow: 0 0 0 0 rgba(249, 166, 0, 0.55);
+    }
+    100% {
+      box-shadow: 0 0 0 8px rgba(249, 166, 0, 0);
+    }
+  }
+
+  /* Dotted pay streams in the onboarding illustrations. */
+  --animate-flow: flow 1.2s linear infinite;
+
+  @keyframes ring {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+  @keyframes flow {
+    to {
+      stroke-dashoffset: -28;
+    }
+  }
 }
 
 @utility mono {
@@ -190,4 +239,20 @@ table {
 }
 .landing .rail::-webkit-scrollbar {
   display: none;
+}
+
+/*
+ * Redesigned auth and onboarding screens are light-only. While one is on the
+ * page, paint the whole page cream even under a dark system theme (the older
+ * app screens keep their dark mode until they are restyled).
+ */
+html:has(.force-light),
+html:has(.force-light) body {
+  background: var(--color-cream);
+  color-scheme: light;
+}
+
+/* Money on its way (reserved or broadcast, not yet confirmed). */
+@utility stripe-held {
+  background: repeating-linear-gradient(-45deg, var(--color-withdrawn) 0 4px, var(--color-withdrawn-light) 4px 8px);
 }
