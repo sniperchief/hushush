@@ -10,7 +10,7 @@ import {
   type RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { randomBytes } from "node:crypto";
-import { createAccount, createSession, type AccountKind } from "./auth";
+import { createAccount, createSession } from "./auth";
 import { hashToken, newToken } from "./crypto";
 import { db } from "./db";
 import { env } from "./env";
@@ -59,13 +59,11 @@ async function consumeChallenge<P>(handle: string | undefined, purpose: "registe
 }
 
 interface RegisterPayload {
-  kind: AccountKind;
   displayName: string;
   webauthnUserId: string;
 }
 
 export async function registrationOptions(
-  kind: AccountKind,
   displayName: string,
 ): Promise<{ options: PublicKeyCredentialCreationOptionsJSON; handle: string }> {
   const userID = randomBytes(32);
@@ -78,7 +76,7 @@ export async function registrationOptions(
     attestationType: "none",
     authenticatorSelection: { residentKey: "required", userVerification: "required" },
   });
-  const payload: RegisterPayload = { kind, displayName, webauthnUserId: userID.toString("base64url") };
+  const payload: RegisterPayload = { displayName, webauthnUserId: userID.toString("base64url") };
   return { options, handle: await storeChallenge("register", options.challenge, payload) };
 }
 
@@ -86,7 +84,7 @@ export async function registrationOptions(
 export async function verifyRegistration(
   handle: string | undefined,
   response: RegistrationResponseJSON,
-): Promise<{ userId: string; kind: AccountKind; session: { token: string; expiresAt: Date } }> {
+): Promise<{ userId: string; session: { token: string; expiresAt: Date } }> {
   const { challenge, payload } = await consumeChallenge<RegisterPayload>(handle, "register");
   let verified;
   try {
@@ -111,7 +109,7 @@ export async function verifyRegistration(
   let userId: string;
   try {
     await client.query("BEGIN");
-    userId = await createAccount(client, payload.kind, payload.displayName);
+    userId = await createAccount(client, payload.displayName);
     await client.query(
       `INSERT INTO passkeys (credential_id, user_id, webauthn_user_id, public_key, counter, transports, device_type, backed_up)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
@@ -137,7 +135,7 @@ export async function verifyRegistration(
   } finally {
     client.release();
   }
-  return { userId, kind: payload.kind, session: await createSession(userId) };
+  return { userId, session: await createSession(userId) };
 }
 
 export async function authenticationOptions(): Promise<{ options: PublicKeyCredentialRequestOptionsJSON; handle: string }> {
@@ -150,18 +148,16 @@ export async function authenticationOptions(): Promise<{ options: PublicKeyCrede
 export async function verifyAuthentication(
   handle: string | undefined,
   response: AuthenticationResponseJSON,
-): Promise<{ userId: string; kind: AccountKind; session: { token: string; expiresAt: Date } }> {
+): Promise<{ userId: string; session: { token: string; expiresAt: Date } }> {
   const { challenge } = await consumeChallenge<object>(handle, "login");
   const { rows } = await db().query<{
     user_id: string;
-    kind: AccountKind;
     webauthn_user_id: string;
     public_key: Buffer;
     counter: string;
     transports: string[];
   }>(
-    `SELECT p.user_id, a.kind, p.webauthn_user_id, p.public_key, p.counter, p.transports
-     FROM passkeys p JOIN accounts a ON a.user_id = p.user_id WHERE p.credential_id = $1`,
+    `SELECT user_id, webauthn_user_id, public_key, counter, transports FROM passkeys WHERE credential_id = $1`,
     [String(response?.id ?? "")],
   );
   const pk = rows[0];
@@ -193,5 +189,5 @@ export async function verifyAuthentication(
     [verified.authenticationInfo.newCounter, response.id, pk.counter],
   );
   if (!rowCount) throw authFailed();
-  return { userId: pk.user_id, kind: pk.kind, session: await createSession(pk.user_id) };
+  return { userId: pk.user_id, session: await createSession(pk.user_id) };
 }

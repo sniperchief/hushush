@@ -94,9 +94,12 @@ describe("worker link", () => {
     expect(again.status).toBe(200);
     expect(again.body).toMatchObject({ streamId: id, duplicate: true });
     expect((await join(other, c.token)).status).toBe(409);
-    const asEmployer = await join(employer, c.token);
+    expect((await join(employer, c.token)).status).toBe(409); // used links work for nobody else
+    // The paying company's own managers can't accept its (unused) links: payroll refuses.
+    const fresh = await createStream(employer, "0.001", 3600);
+    const asEmployer = await join(employer, fresh.token);
     expect(asEmployer.status).toBe(403);
-    expect(asEmployer.body.error).toBe("wrong_account");
+    expect(asEmployer.body.message).toMatch(/own worker link/);
     expect((await join(worker, "not-a-token")).status).toBe(404);
     expect((await join(worker, "A".repeat(43))).status).toBe(404);
 

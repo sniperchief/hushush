@@ -9,7 +9,7 @@ const schema = z.object({ response: z.custom<AuthenticationResponseJSON>((v) => 
 export const POST = mutation(async (req) => {
   const { response } = await readJson(req, schema);
   const r = await verifyAuthentication(req.cookies.get(ceremonyCookieName())?.value, response);
-  const res = json({ kind: r.kind });
+  const res = json({ ok: true });
   clearCookie(res, ceremonyCookieName());
   setSessionCookie(res, r.session.token, r.session.expiresAt);
   return res;

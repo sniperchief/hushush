@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { BackupEmailForm } from "@/components/email-login";
 import { CompanyForm, OfferActions } from "@/components/employer";
+import { IntentQuestion, SwitchIntent } from "@/components/onboarding";
 import { PayoutBadge, Txid } from "@/components/payouts";
 import { Alert, Badge, Card, CardTitle, Empty } from "@/components/ui";
 import { AutoRefresh, WorkerStreamPanel } from "@/components/worker";
 import type { SessionUser } from "@/lib/auth";
 import { employerCompany, type Company } from "@/lib/company";
+import { accountEmail } from "@/lib/email-login";
 import { compactZec, formatTime } from "@/lib/format";
 import { PayrollApiError, payroll, type FlowStream, type PayoutWalletSummary } from "@/lib/payroll";
 import { requirePageUser } from "@/lib/session";
@@ -14,7 +17,8 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const user = await requirePageUser("/app");
-  return user.kind === "employer" ? <EmployerHome user={user} /> : <WorkerHome user={user} />;
+  if (!user.intent) return <IntentQuestion name={user.displayName} />;
+  return user.intent === "pay" ? <EmployerHome user={user} /> : <WorkerHome user={user} />;
 }
 
 // ---- employer ----------------------------------------------------------------
@@ -42,15 +46,18 @@ async function EmployerHome({ user }: { user: SessionUser }) {
       <div className="mx-auto max-w-md space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Name your company</h1>
-          <p className="mt-1 text-sm text-ink-soft">Step 2 of 2. One employer account runs one company.</p>
+          <p className="mt-1 text-sm text-ink-soft">The people you pay will see this name. Paying people yourself? Use your own name.</p>
         </div>
         <Card>
           <CompanyForm />
         </Card>
+        <p className="text-center">
+          <SwitchIntent to="get_paid">I&apos;m here to get paid instead</SwitchIntent>
+        </p>
       </div>
     );
   }
-  const [home, wallet] = await Promise.all([payroll.employerHome(user.id, company.id), treasury(user, company)]);
+  const [home, wallet, email] = await Promise.all([payroll.employerHome(user.id, company.id), treasury(user, company), accountEmail(user.id)]);
   const waiting = home.offers.filter((o) => o.status === "open");
   const payments = home.streams
     .flatMap((s) => s.payouts.map((p) => ({ p, worker: s.worker_name, streamId: s.id })))
@@ -63,6 +70,9 @@ async function EmployerHome({ user }: { user: SessionUser }) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{company.name}</h1>
           <p className="mt-1 text-sm text-ink-soft">Streams you pay, and the treasury they&apos;re paid from.</p>
+          <div className="mt-1">
+            <SwitchIntent to="get_paid">Get paid through hushush →</SwitchIntent>
+          </div>
         </div>
         <Link href="/app/streams/new" className="inline-flex min-h-10 items-center rounded-xl bg-ink px-4 text-sm font-medium text-surface hover:opacity-90">
           New stream
@@ -183,6 +193,20 @@ async function EmployerHome({ user }: { user: SessionUser }) {
           </ul>
         )}
       </Card>
+
+      <Card>
+        <CardTitle>Sign-in email</CardTitle>
+        <p className="mb-4 text-sm text-ink-soft">
+          {email ? (
+            <>
+              You can get a sign-in link at <span className="font-medium text-ink">{email}</span>, for example if you lose your passkey.
+            </>
+          ) : (
+            "Add an email so you can still sign in with an email link if you lose your passkey."
+          )}
+        </p>
+        <BackupEmailForm current={email} />
+      </Card>
     </div>
   );
 }
@@ -197,9 +221,12 @@ async function WorkerHome({ user }: { user: SessionUser }) {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Hi {user.displayName}</h1>
         <p className="mt-1 text-sm text-ink-soft">What you&apos;re earning, live.</p>
+        <div className="mt-1">
+          <SwitchIntent to="pay">Start paying people →</SwitchIntent>
+        </div>
       </div>
       {streams.length === 0 ? (
-        <Empty>No streams yet. Open the worker link your employer sent you.</Empty>
+        <Empty>Nobody is paying you through hushush yet. When someone does, they&apos;ll send you a link. Open it to start receiving pay.</Empty>
       ) : (
         streams.map((s) => (
           <Card key={s.id}>

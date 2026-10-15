@@ -19,6 +19,8 @@ export default async function StreamPage({ params }: Props) {
   const inFlight = s.payouts.some((p) => p.state === "reserved" || p.state === "submitted" || p.state === "requires_reconciliation");
   const ended = s.status === "ended";
   const pct = Math.floor((s.balance.earned_zats * 100) / s.total_zats);
+  // The same account can pay on some streams and be paid on others.
+  const beingPaid = s.recipient_user_id === user.id;
 
   const header = (
     <div>
@@ -27,7 +29,7 @@ export default async function StreamPage({ params }: Props) {
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {user.kind === "worker" ? s.organization_name : s.worker_name} · {compactZec(s.total_zec)} ZEC
+          {beingPaid ? s.organization_name : s.worker_name} · {compactZec(s.total_zec)} ZEC
         </h1>
         {ended ? <Badge>Ended</Badge> : <Badge tone="green">● Active</Badge>}
       </div>
@@ -38,7 +40,7 @@ export default async function StreamPage({ params }: Props) {
     </div>
   );
 
-  if (user.kind === "worker") {
+  if (beingPaid) {
     return (
       <div className="space-y-6">
         <AutoRefresh seconds={inFlight ? 5 : 15} />

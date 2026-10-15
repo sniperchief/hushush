@@ -16,13 +16,12 @@ export default async function AppShellLayout({ children }: { children: ReactNode
           {user ? (
             <div className="flex min-w-0 items-center gap-2 text-sm">
               <span className="hidden truncate text-ink-soft sm:inline">{user.displayName}</span>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-ink-soft">{user.kind === "employer" ? "Employer" : "Worker"}</span>
               <LogoutButton />
             </div>
           ) : (
             <nav className="flex items-center gap-1 text-sm">
               <Link href="/login" className="rounded-lg px-3 py-2 hover:bg-muted">Sign in</Link>
-              <Link href="/signup" className="rounded-lg bg-ink px-3 py-2 text-surface hover:opacity-90">Employer sign-up</Link>
+              <Link href="/signup" className="rounded-lg bg-ink px-3 py-2 text-surface hover:opacity-90">Sign up</Link>
             </nav>
           )}
         </div>

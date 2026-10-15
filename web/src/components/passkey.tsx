@@ -6,8 +6,6 @@ import { useState, useSyncExternalStore } from "react";
 import { api } from "@/lib/client-api";
 import { Alert, Button, Field, inputClass } from "./ui";
 
-type Kind = "employer" | "worker";
-
 function passkeyError(e: unknown): string {
   const name = (e as { name?: string })?.name;
   if (name === "NotAllowedError" || name === "AbortError") return "The passkey prompt was closed. Try again when you're ready.";
@@ -18,7 +16,7 @@ function passkeyError(e: unknown): string {
 const noSubscribe = () => () => {};
 
 /** WebAuthn support (assumed during server rendering). */
-function useWebAuthnSupport(): boolean {
+export function useWebAuthnSupport(): boolean {
   return useSyncExternalStore(noSubscribe, browserSupportsWebAuthn, () => true);
 }
 
@@ -30,7 +28,15 @@ async function joinAndOpen(token: string): Promise<{ ok: true; path: string } | 
 }
 
 /** Sign-up with a passkey: name, then Face ID / fingerprint / Windows Hello. */
-export function PasskeySignUp({ kind, defaultName = "", joinToken }: { kind: Kind; defaultName?: string; joinToken?: string }) {
+export function PasskeySignUp({
+  defaultName = "",
+  joinToken,
+  onNameChange,
+}: {
+  defaultName?: string;
+  joinToken?: string;
+  onNameChange?: (name: string) => void;
+}) {
   const router = useRouter();
   const supported = useWebAuthnSupport();
   const [error, setError] = useState<string>();
@@ -47,7 +53,6 @@ export function PasskeySignUp({ kind, defaultName = "", joinToken }: { kind: Kin
         setPending(true);
         setError(undefined);
         const opts = await api<Parameters<typeof startRegistration>[0]["optionsJSON"]>("/api/auth/passkey/register/options", "POST", {
-          kind,
           displayName,
         });
         if (!opts.ok || !opts.data) {
@@ -79,15 +84,23 @@ export function PasskeySignUp({ kind, defaultName = "", joinToken }: { kind: Kin
         router.refresh();
       }}
     >
-      <Field label="Your name" hint={kind === "worker" ? "Shown to the company paying you." : "Shown to the people you pay."}>
-        <input name="displayName" required maxLength={100} defaultValue={defaultName} autoComplete="name" className={inputClass} />
+      <Field label="Your name" hint={joinToken ? "Shown to the company paying you." : "Shown to the people you pay or who pay you."}>
+        <input
+          name="displayName"
+          required
+          maxLength={100}
+          defaultValue={defaultName}
+          onChange={(e) => onNameChange?.(e.target.value)}
+          autoComplete="name"
+          className={inputClass}
+        />
       </Field>
       {error && <Alert>{error}</Alert>}
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Waiting for your passkey…" : "Sign up with a passkey"}
       </Button>
       <p className="text-xs text-ink-soft">
-        Your device creates a passkey protected by Face ID, your fingerprint, Windows Hello or your device PIN. No password, no e-mail.
+        Your device creates a passkey protected by Face ID, your fingerprint, Windows Hello or your device PIN. No password.
       </p>
     </form>
   );
@@ -134,17 +147,12 @@ export function PasskeySignIn({
             setPending(false);
             return setError(passkeyError(err));
           }
-          const v = await api<{ kind: Kind }>("/api/auth/passkey/login/verify", "POST", { response });
-          if (!v.ok || !v.data) {
+          const v = await api("/api/auth/passkey/login/verify", "POST", { response });
+          if (!v.ok) {
             setPending(false);
             return setError(v.error);
           }
           if (joinToken) {
-            if (v.data.kind !== "worker") {
-              // Signed in, but as an employer: the join page explains what to do.
-              router.refresh();
-              return setPending(false);
-            }
             const j = await joinAndOpen(joinToken);
             if (!j.ok) {
               setPending(false);

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NewStreamPage() {
   const user = await requirePageUser("/app/streams/new");
-  if (user.kind !== "employer" || !(await employerCompany(user))) redirect("/app");
+  if (!(await employerCompany(user))) redirect("/app");
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>

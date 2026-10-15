@@ -7,32 +7,34 @@ import * as regVerify from "@/app/api/auth/passkey/register/verify/route";
 import * as loginOptions from "@/app/api/auth/passkey/login/options/route";
 import * as logoutRoute from "@/app/api/auth/logout/route";
 import * as companyRoute from "@/app/api/company/route";
+import * as intentRoute from "@/app/api/account/intent/route";
 import * as streamsRoute from "@/app/api/streams/route";
+import * as joinRoute from "@/app/api/join/[token]/route";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { authenticate, call, newPasskey, register, signIn, signUp } from "./support/helpers";
+import { authenticate, call, createStream, join, newEmployer, newPasskey, register, signIn, signUp } from "./support/helpers";
+import { payroll } from "@/lib/payroll";
 
 const tokenOf = (cookie: string) => cookie.split("=")[1];
 
 describe("passkey sign-up", () => {
-  it("creates an employer or worker account and signs it in; no password or e-mail", async () => {
-    for (const kind of ["employer", "worker"] as const) {
-      const { verify } = await register(kind, `New ${kind}`);
-      expect(verify.status).toBe(201);
-      expect(verify.body).toEqual({ kind });
-      const cookie = verify.res.headers.getSetCookie().find((c) => c.startsWith("hh_session="))!;
-      expect(cookie).toMatch(/HttpOnly/i);
-      expect(cookie).toMatch(/SameSite=lax/i);
-      const u = await getSessionUser(cookie.split(";")[0]!.split("=")[1]);
-      expect(u).toMatchObject({ kind, displayName: `New ${kind}` });
-      // The payroll user has only a reserved, undeliverable placeholder e-mail.
-      const { rows } = await db().query("SELECT email FROM users WHERE id = $1", [u!.id]);
-      expect(rows[0].email).toMatch(/^u-[0-9a-f-]{36}@users\.hushush\.invalid$/);
-    }
+  it("creates an account for anyone and signs it in; no password or e-mail", async () => {
+    const { verify } = await register("New person");
+    expect(verify.status).toBe(201);
+    expect(verify.body).toEqual({ ok: true });
+    const cookie = verify.res.headers.getSetCookie().find((c) => c.startsWith("hh_session="))!;
+    expect(cookie).toMatch(/HttpOnly/i);
+    expect(cookie).toMatch(/SameSite=lax/i);
+    const u = await getSessionUser(cookie.split(";")[0]!.split("=")[1]);
+    // No account type; the onboarding question hasn't been answered yet.
+    expect(u).toEqual({ id: u!.id, displayName: "New person", intent: null });
+    // The payroll user has only a reserved, undeliverable placeholder e-mail.
+    const { rows } = await db().query("SELECT email FROM users WHERE id = $1", [u!.id]);
+    expect(rows[0].email).toMatch(/^u-[0-9a-f-]{36}@users\.hushush\.invalid$/);
   });
 
   it("asks the authenticator for a discoverable, user-verified passkey", async () => {
-    const o = await call(regOptions.POST, "POST", {}, { body: { kind: "worker", displayName: "W" } });
+    const o = await call(regOptions.POST, "POST", {}, { body: { displayName: "W" } });
     expect(o.body).toMatchObject({
       rp: { id: "localhost", name: "hushush" },
       attestation: "none",
@@ -45,7 +47,7 @@ describe("passkey sign-up", () => {
   });
 
   it("stores only the public key and hashes of challenge handles", async () => {
-    const { options, passkey } = await register("worker", "Hash Check");
+    const { options, passkey } = await register("Hash Check");
     const handle = options.cookies.hh_webauthn!;
     const { rows: ch } = await db().query("SELECT handle_hash FROM webauthn_challenges WHERE handle_hash = encode(sha256($1::bytea), 'hex')", [handle]);
     expect(ch).toHaveLength(1);
@@ -57,13 +59,13 @@ describe("passkey sign-up", () => {
 
   it("rejects a response for another origin, a wrong challenge, or without user verification", async () => {
     const before = Number((await db().query("SELECT count(*) FROM accounts")).rows[0].count);
-    const wrongOrigin = await register("worker", "X", newPasskey(), (r) => {
+    const wrongOrigin = await register("X", newPasskey(), (r) => {
       const cd = JSON.parse(Buffer.from(String((r.response as Record<string, string>).clientDataJSON), "base64url").toString());
       cd.origin = "https://evil.example";
       (r.response as Record<string, string>).clientDataJSON = Buffer.from(JSON.stringify(cd)).toString("base64url");
     });
     expect(wrongOrigin.verify.status).toBe(401);
-    const wrongChallenge = await register("worker", "X", newPasskey(), (r) => {
+    const wrongChallenge = await register("X", newPasskey(), (r) => {
       const cd = JSON.parse(Buffer.from(String((r.response as Record<string, string>).clientDataJSON), "base64url").toString());
       cd.challenge = Buffer.from("not the challenge").toString("base64url");
       (r.response as Record<string, string>).clientDataJSON = Buffer.from(JSON.stringify(cd)).toString("base64url");
@@ -71,14 +73,14 @@ describe("passkey sign-up", () => {
     expect(wrongChallenge.verify.status).toBe(401);
     const noUv = newPasskey();
     noUv.userVerified = false;
-    expect((await register("worker", "X", noUv)).verify.status).toBe(401);
+    expect((await register("X", noUv)).verify.status).toBe(401);
     const after = Number((await db().query("SELECT count(*) FROM accounts")).rows[0].count);
     expect(after).toBe(before);
   });
 
   it("challenges are single-use and need their cookie", async () => {
     const pk = newPasskey();
-    const o = await call(regOptions.POST, "POST", {}, { body: { kind: "worker", displayName: "Once" } });
+    const o = await call(regOptions.POST, "POST", {}, { body: { displayName: "Once" } });
     const response = pk.register(o.body);
     const cookie = `hh_webauthn=${o.cookies.hh_webauthn}`;
     expect((await call(regVerify.POST, "POST", {}, { body: { response } })).status).toBe(401); // no cookie
@@ -89,16 +91,15 @@ describe("passkey sign-up", () => {
 
   it("one passkey belongs to one account", async () => {
     const pk = newPasskey();
-    expect((await register("worker", "First", pk)).verify.status).toBe(201);
-    const again = await register("employer", "Second", pk);
+    expect((await register("First", pk)).verify.status).toBe(201);
+    const again = await register("Second", pk);
     expect(again.verify.status).toBe(409);
     expect(again.verify.body.error).toBe("passkey_exists");
   });
 
-  it("validates the name and account kind", async () => {
-    expect((await call(regOptions.POST, "POST", {}, { body: { kind: "worker", displayName: "  " } })).status).toBe(422);
-    expect((await call(regOptions.POST, "POST", {}, { body: { kind: "admin", displayName: "A" } })).status).toBe(422);
-    expect((await call(regOptions.POST, "POST", {}, { body: { kind: "worker", displayName: "x".repeat(101) } })).status).toBe(422);
+  it("validates the name", async () => {
+    expect((await call(regOptions.POST, "POST", {}, { body: { displayName: "  " } })).status).toBe(422);
+    expect((await call(regOptions.POST, "POST", {}, { body: { displayName: "x".repeat(101) } })).status).toBe(422);
   });
 });
 
@@ -107,7 +108,7 @@ describe("passkey sign-in", () => {
     const u = await signUp("worker", "Returning");
     const again = await signIn(u);
     expect(again.cookie).not.toBe(u.cookie);
-    expect(await getSessionUser(tokenOf(again.cookie))).toMatchObject({ id: u.id, kind: "worker" });
+    expect(await getSessionUser(tokenOf(again.cookie))).toMatchObject({ id: u.id, intent: "get_paid" });
     const { rows } = await db().query("SELECT counter, last_used_at FROM passkeys WHERE credential_id = $1", [u.passkey.id]);
     expect(Number(rows[0].counter)).toBe(1);
     expect(rows[0].last_used_at).toBeTruthy();
@@ -156,19 +157,56 @@ describe("sessions", () => {
   });
 });
 
-describe("account kinds never share screens or powers", () => {
-  it("workers can't create companies or streams; employers can't own two companies", async () => {
-    const w = await signUp("worker", "Just Working");
-    const r = await call(companyRoute.POST, "POST", {}, { cookie: w.cookie, body: { name: "Sneaky" } });
-    expect(r.status).toBe(403);
-    expect(r.body.error).toBe("wrong_account");
-    const s = await call(streamsRoute.POST, "POST", {}, { cookie: w.cookie, body: { workerName: "x", totalZec: "1", startAt: null, endAt: 9_999_999_999 } });
-    expect(s.status).toBe(403);
+describe("one kind of account", () => {
+  it("the onboarding answer picks a starting screen, can change, and is validated", async () => {
+    const { verify } = await register("Undecided");
+    const cookie = `hh_session=${verify.cookies.hh_session}`;
+    const token = tokenOf(cookie);
+    for (const intent of ["get_paid", "pay", "get_paid"] as const) {
+      const r = await call(intentRoute.POST, "POST", {}, { cookie, body: { intent } });
+      expect(r.status).toBe(200);
+      expect((await getSessionUser(token))!.intent).toBe(intent);
+    }
+    expect((await call(intentRoute.POST, "POST", {}, { cookie, body: { intent: "admin" } })).status).toBe(422);
+    expect((await call(intentRoute.POST, "POST", {}, { body: { intent: "pay" } })).status).toBe(401);
+  });
 
-    const e = await signUp("employer", "Boss");
-    expect((await call(companyRoute.POST, "POST", {}, { cookie: e.cookie, body: { name: "One" } })).status).toBe(201);
-    const two = await call(companyRoute.POST, "POST", {}, { cookie: e.cookie, body: { name: "Two" } });
+  it("someone who gets paid can start paying people; still one company per account", async () => {
+    const w = await signUp("worker", "Getting Paid");
+    // Paying needs a company first, whatever the onboarding answer was.
+    const s = await call(streamsRoute.POST, "POST", {}, { cookie: w.cookie, body: { workerName: "x", totalZec: "1", startAt: null, endAt: 9_999_999_999 } });
+    expect(s.status).toBe(409);
+    expect(s.body.error).toBe("no_company");
+    expect((await call(companyRoute.POST, "POST", {}, { cookie: w.cookie, body: { name: "My Studio" } })).status).toBe(201);
+    const s2 = await call(streamsRoute.POST, "POST", {}, {
+      cookie: w.cookie,
+      body: { workerName: "Helper", totalZec: "0.001", startAt: null, endAt: Math.floor(Date.now() / 1000) + 3600 },
+    });
+    expect(s2.status, JSON.stringify(s2.body)).toBe(201);
+    const two = await call(companyRoute.POST, "POST", {}, { cookie: w.cookie, body: { name: "Two" } });
     expect(two.status).toBe(409);
+  });
+
+  it("joining from a worker link answers the onboarding question, unless already answered", async () => {
+    const boss = await newEmployer("Link Boss");
+    const { verify } = await register("Fresh Worker");
+    const cookie = `hh_session=${verify.cookies.hh_session}`;
+    const c = await createStream(boss, "0.001", 3600);
+    const r = await call(joinRoute.POST, "POST", { token: c.token }, { cookie });
+    expect(r.status, JSON.stringify(r.body)).toBe(201);
+    expect((await getSessionUser(tokenOf(cookie)))!.intent).toBe("get_paid");
+  });
+
+  it("someone who pays their own team can also be paid by another company", async () => {
+    const studio = await newEmployer("Studio Owner", "Studio");
+    const client = await newEmployer("Client", "Client Co");
+    const c = await createStream(client, "0.001", 3600);
+    const j = await join(studio, c.token);
+    expect(j.status, JSON.stringify(j.body)).toBe(201);
+    expect((await payroll.workerStreams(studio.id)).map((s) => s.id)).toContain(j.body.streamId);
+    // Still starts on the paying screen, and still owns its company.
+    expect((await getSessionUser(tokenOf(studio.cookie)))!.intent).toBe("pay");
+    expect((await payroll.listOrgs(studio.id)).some((o) => o.role === "owner" && o.organization_name === "Studio")).toBe(true);
   });
 });
 
@@ -179,13 +217,13 @@ describe("CSRF and request hygiene", () => {
       const r = await call(companyRoute.POST, "POST", {}, { cookie: u.cookie, body: { name: "X" }, origin });
       expect(r.status).toBe(403);
       expect(r.body.error).toBe("bad_origin");
-      const o = await call(regOptions.POST, "POST", {}, { body: { kind: "worker", displayName: "W" }, origin });
+      const o = await call(regOptions.POST, "POST", {}, { body: { displayName: "W" }, origin });
       expect(o.status).toBe(403);
     }
   });
 
   it("requires JSON bodies", async () => {
-    const r = await call(regOptions.POST, "POST", {}, { body: "kind=worker&displayName=W", contentType: "application/x-www-form-urlencoded" });
+    const r = await call(regOptions.POST, "POST", {}, { body: "displayName=W", contentType: "application/x-www-form-urlencoded" });
     expect(r.status).toBe(415);
   });
 });

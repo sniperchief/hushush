@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { requireKind } from "@/lib/auth";
 import { json, mutation, readJson, requireUser } from "@/lib/http";
 import { payroll } from "@/lib/payroll";
 
@@ -13,7 +12,6 @@ const schema = z.object({ idempotencyKey: z.string().min(8).max(128).regex(/^[\x
  */
 export const POST = mutation(async (req, { params }: Ctx) => {
   const user = await requireUser(req);
-  requireKind(user, "worker");
   const { streamId } = await params;
   const { idempotencyKey } = await readJson(req, schema);
   const r = await payroll.withdraw(user.id, streamId, idempotencyKey);

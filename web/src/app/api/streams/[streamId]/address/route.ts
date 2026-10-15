@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { requireKind } from "@/lib/auth";
 import { json, mutation, readJson, requireUser } from "@/lib/http";
 import { payroll } from "@/lib/payroll";
 
@@ -20,7 +19,6 @@ const schema = z.object({
 /** Sets the stream's payout address. Once: it is then locked for the life of the stream. */
 export const POST = mutation(async (req, { params }: Ctx) => {
   const user = await requireUser(req);
-  requireKind(user, "worker");
   const { streamId } = await params;
   const { address } = await readJson(req, schema);
   return json(await payroll.setAddress(user.id, streamId, address));

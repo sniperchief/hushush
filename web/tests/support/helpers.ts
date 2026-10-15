@@ -10,6 +10,7 @@ import * as regVerify from "@/app/api/auth/passkey/register/verify/route";
 import * as loginOptions from "@/app/api/auth/passkey/login/options/route";
 import * as loginVerify from "@/app/api/auth/passkey/login/verify/route";
 import * as companyRoute from "@/app/api/company/route";
+import * as intentRoute from "@/app/api/account/intent/route";
 import * as streamsRoute from "@/app/api/streams/route";
 import * as joinRoute from "@/app/api/join/[token]/route";
 import * as addressRoute from "@/app/api/streams/[streamId]/address/route";
@@ -68,8 +69,8 @@ export interface TestUser {
 export const newPasskey = () => new SoftPasskey({ origin: ORIGIN, rpId: RP_ID });
 
 /** Runs the registration ceremony; returns the raw verify result. */
-export async function register(kind: Kind, name: string, passkey = newPasskey(), tamper?: (r: Record<string, unknown>) => void) {
-  const o = await call(regOptions.POST, "POST", {}, { body: { kind, displayName: name } });
+export async function register(name: string, passkey = newPasskey(), tamper?: (r: Record<string, unknown>) => void) {
+  const o = await call(regOptions.POST, "POST", {}, { body: { displayName: name } });
   expect(o.status, JSON.stringify(o.body)).toBe(200);
   const response = passkey.register(o.body) as Record<string, unknown>;
   tamper?.(response);
@@ -92,10 +93,16 @@ async function userOf(cookie: string): Promise<string> {
   return u!.id;
 }
 
+/**
+ * Signs up and answers the onboarding question: "employer" = I pay a team,
+ * "worker" = I get paid. (Accounts have no type; this is only where they start.)
+ */
 export async function signUp(kind: Kind, name: string = kind): Promise<TestUser> {
-  const { verify, passkey } = await register(kind, name);
+  const { verify, passkey } = await register(name);
   expect(verify.status, JSON.stringify(verify.body)).toBe(201);
   const cookie = `hh_session=${verify.cookies.hh_session}`;
+  const i = await call(intentRoute.POST, "POST", {}, { cookie, body: { intent: kind === "employer" ? "pay" : "get_paid" } });
+  expect(i.status, JSON.stringify(i.body)).toBe(200);
   return { id: await userOf(cookie), kind, name, cookie, passkey };
 }
 

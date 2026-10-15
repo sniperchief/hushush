@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { LogoutButton } from "@/components/forms/logout-button";
 import { JoinButton } from "@/components/join-button";
 import { PasskeySignIn, PasskeySignUp } from "@/components/passkey";
-import { Alert, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { linkHashOf } from "@/lib/company";
 import { compactZec, formatTime } from "@/lib/format";
 import { PayrollApiError, payroll, type LinkPreview } from "@/lib/payroll";
@@ -50,7 +49,7 @@ export default async function JoinPage({ params }: Props) {
   if (preview.status === "bound") {
     // Binding is idempotent for the worker who owns it (it returns their
     // stream) and refused for anyone else, so this reveals nothing.
-    if (user?.kind === "worker") {
+    if (user) {
       let streamId: string | null = null;
       try {
         streamId = (await payroll.bindLink(user.id, hash)).stream_id;
@@ -76,20 +75,7 @@ export default async function JoinPage({ params }: Props) {
         <p className="mt-3 text-xs text-ink-faint">Zcash testnet: TAZ has no monetary value.</p>
       </Card>
 
-      {user?.kind === "employer" ? (
-        <Card>
-          <Alert tone="amber">
-            You&apos;re signed in as an employer ({user.displayName}). This link is for the worker being paid — send it to them. To accept it
-            yourself with a worker account, sign out first.
-          </Alert>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/app" className="inline-flex min-h-10 items-center rounded-xl bg-ink px-4 text-sm font-medium text-surface">
-              Back to my company
-            </Link>
-            <LogoutButton redirectTo={`/join/${token}`} />
-          </div>
-        </Card>
-      ) : user?.kind === "worker" ? (
+      {user ? (
         <Card>
           <p className="mb-4 text-sm text-ink-soft">Signed in as {user.displayName}.</p>
           <JoinButton token={token} />
@@ -98,10 +84,10 @@ export default async function JoinPage({ params }: Props) {
         <>
           <Card>
             <h2 className="mb-4 text-base font-semibold tracking-tight">New to hushush? Sign up</h2>
-            <PasskeySignUp kind="worker" defaultName={preview.worker_name} joinToken={token} />
+            <PasskeySignUp defaultName={preview.worker_name} joinToken={token} />
           </Card>
           <Card>
-            <h2 className="mb-3 text-base font-semibold tracking-tight">Already have a worker account?</h2>
+            <h2 className="mb-3 text-base font-semibold tracking-tight">Already have an account?</h2>
             <PasskeySignIn joinToken={token} variant="secondary" />
           </Card>
         </>

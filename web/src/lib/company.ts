@@ -9,9 +9,8 @@ export interface Company {
   name: string;
 }
 
-/** The employer's company (MVP: one employer account = one company). */
+/** The company this account owns, if it pays people (MVP: at most one per account). */
 export async function employerCompany(user: SessionUser): Promise<Company | null> {
-  if (user.kind !== "employer") return null;
   const o = (await payroll.listOrgs(user.id)).find((m) => m.role === "owner");
   return o ? { id: o.organization_id, name: o.organization_name } : null;
 }
