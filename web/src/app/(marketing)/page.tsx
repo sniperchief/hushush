@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Banner, FinalCta, Footer, Header, Hero } from "@/components/landing/chrome";
 import { Employers, Workers } from "@/components/landing/features";
 import { HowItWorks } from "@/components/landing/how";
@@ -12,21 +11,22 @@ export const metadata = {
   description: "Private streaming payroll for remote teams, freelancers, DAOs, and organizations that pay employees in ZEC.",
 };
 
+/** The homepage, for everyone. Signed-in visitors get "Go to dashboard" instead of sign-up / sign-in. */
 export default async function Home() {
-  if (await currentUser()) redirect("/app");
+  const signedIn = (await currentUser()) !== null;
   return (
     <div className="landing min-h-dvh overflow-x-clip bg-cream font-landing text-[15px] leading-[1.25] tracking-[-0.15px] text-espresso sm:text-base sm:tracking-[-0.16px]">
       <Banner />
-      <Header />
+      <Header signedIn={signedIn} />
       <main>
-        <Hero />
+        <Hero signedIn={signedIn} />
         <ProductBand />
         <Problem />
         <Workers />
         <Employers />
         <HowItWorks />
         <Privacy />
-        <FinalCta />
+        <FinalCta signedIn={signedIn} />
       </main>
       <Footer />
     </div>

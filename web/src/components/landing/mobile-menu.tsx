@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { NAV_GROUPS } from "./nav";
 import { Wordmark } from "./ui";
-
-const LINKS = [
-  { href: "#how", label: "How it works" },
-  { href: "#employers", label: "For employers" },
-  { href: "#workers", label: "For workers" },
-  { href: "#privacy", label: "Privacy" },
-];
 
 const ease = "duration-300 ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none";
 
@@ -25,7 +19,7 @@ function MenuIcon({ open }: { open: boolean }) {
  * Phone navigation: a full-screen dialog that slides in from the right, the
  * side the menu button is on. Locks page scroll and keeps focus inside while open.
  */
-export function MobileMenu() {
+export function MobileMenu({ signedIn = false }: { signedIn?: boolean }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -110,39 +104,57 @@ export function MobileMenu() {
           </button>
         </div>
 
-        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-4 pt-4">
-          <ul className="m-0 list-none p-0">
-            {LINKS.map((l, i) => (
-              <li
-                key={l.href}
-                style={{ transitionDelay: open ? `${120 + i * 40}ms` : "0ms" }}
-                className={`border-b border-linen transition-[opacity,transform] ${ease} ${open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}`}
-              >
-                <a
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="flex min-h-16 items-center justify-between text-[28px] font-semi tracking-[-0.5px] text-espresso no-underline"
-                >
-                  {l.label}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-bark">
-                    <path d="m9 6 6 6-6 6" />
-                  </svg>
-                </a>
-              </li>
-            ))}
-          </ul>
+        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-4 pt-2">
+          {NAV_GROUPS.map((g, gi) => (
+            <section key={g.label} aria-labelledby={`menu-${g.label}`} className="pt-4">
+              <h2 id={`menu-${g.label}`} className="m-0 pb-1 text-xs font-mid tracking-[0.08em] text-bark uppercase">
+                {g.label}
+              </h2>
+              <ul className="m-0 list-none p-0">
+                {g.items.map((l, i) => {
+                  const n = NAV_GROUPS.slice(0, gi).reduce((k, x) => k + x.items.length, 0) + i;
+                  return (
+                    <li
+                      key={l.href}
+                      style={{ transitionDelay: open ? `${120 + n * 40}ms` : "0ms" }}
+                      className={`border-b border-linen transition-[opacity,transform] ${ease} ${open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}`}
+                    >
+                      <a
+                        href={l.href}
+                        onClick={() => setOpen(false)}
+                        className="flex min-h-16 items-center justify-between text-[28px] font-semi tracking-[-0.5px] text-espresso no-underline"
+                      >
+                        {l.label}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-bark">
+                          <path d="m9 6 6 6-6 6" />
+                        </svg>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
         </nav>
 
         <div
           style={{ transitionDelay: open ? "280ms" : "0ms" }}
           className={`flex flex-col gap-2.5 px-4 pt-4 pb-[max(24px,env(safe-area-inset-bottom))] transition-opacity ${ease} ${open ? "opacity-100" : "opacity-0"}`}
         >
-          <Link href="/signup" className="btn-amber flex h-[52px] items-center justify-center rounded-lg text-base font-mid no-underline">
-            Get started
-          </Link>
-          <Link href="/login" className="btn-ghost flex h-[52px] items-center justify-center rounded-lg text-base font-mid no-underline">
-            Sign in
-          </Link>
+          {signedIn ? (
+            <Link href="/app" className="btn-amber flex h-[52px] items-center justify-center rounded-lg text-base font-mid no-underline">
+              Go to dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/signup" className="btn-amber flex h-[52px] items-center justify-center rounded-lg text-base font-mid no-underline">
+                Get started
+              </Link>
+              <Link href="/login" className="btn-ghost flex h-[52px] items-center justify-center rounded-lg text-base font-mid no-underline">
+                Sign in
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </>

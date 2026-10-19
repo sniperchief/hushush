@@ -23,8 +23,8 @@ export function ProfileMenu({ name, company, role }: { name: string; company?: s
     };
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
-    // Move focus into the menu so keyboard users land on Sign out.
-    root.current?.querySelector<HTMLElement>("[role=menu] button")?.focus();
+    // Move focus into the menu so keyboard users land on its first item.
+    root.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
     return () => {
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
@@ -69,7 +69,7 @@ export function ProfileMenu({ name, company, role }: { name: string; company?: s
               <div className="truncate text-[12.5px] text-bark">{company ? `${company} · paying` : "Getting paid"}</div>
             </div>
           </div>
-          <div className="p-1.5">
+          <div className="flex flex-col p-1.5">
             <LogoutButton className="flex h-10 w-full cursor-pointer items-center rounded-lg px-3 text-left text-sm text-failed-ink hover:bg-cream focus-visible:bg-cream disabled:opacity-60" role="menuitem" />
           </div>
         </div>

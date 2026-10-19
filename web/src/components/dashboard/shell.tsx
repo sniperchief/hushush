@@ -51,7 +51,7 @@ export function DashboardShell({ role, displayName, company, nav, account, tabs,
         <div className="min-[900px]:hidden">
           <MobileMenu>{sidebar}</MobileMenu>
         </div>
-        <Link href="/app" aria-label="hushush home" className="flex items-center">
+        <Link href="/" aria-label="hushush home" className="flex items-center">
           <Wordmark className="h-[22px] min-[900px]:h-[26px]" alt="" preload />
         </Link>
         {company && (

@@ -171,9 +171,11 @@ const workerSlides = [
 
 export function Workers() {
   return (
-    <section id="workers" className={`${containerClass} flex scroll-mt-4 flex-col gap-5 pt-2 pb-14 sm:gap-14 sm:pt-6 sm:pb-24`}>
+    <section id="earn" className={`${containerClass} flex scroll-mt-4 flex-col gap-5 pt-2 pb-14 sm:gap-14 sm:pt-6 sm:pb-24`}>
+      {/* Old anchor, kept so existing #workers links still land here. */}
+      <span id="workers" aria-hidden="true" className="block scroll-mt-4" />
       <SectionIntro
-        eyebrow="For workers"
+        eyebrow="Earn"
         title="Your pay, visible the moment you earn it."
         lead={
           <>
@@ -347,10 +349,12 @@ const employerSlides = [
 
 export function Employers() {
   return (
-    <section id="employers" className="scroll-mt-4 bg-espresso text-cream">
+    <section id="payroll" className="scroll-mt-4 bg-espresso text-cream">
+      {/* Old anchor, kept so existing #employers links still land here. */}
+      <span id="employers" aria-hidden="true" className="block scroll-mt-4" />
       <div className={`${containerClass} flex flex-col gap-5 py-14 sm:gap-14 sm:py-[104px]`}>
         <SectionIntro
-          eyebrow="For employers"
+          eyebrow="Payroll"
           eyebrowClass="bg-amber text-espresso"
           title="Run payroll like a ledger, not a guessing game."
           lead="Set it once, stay in control, and always know what's owed, reserved and paid."

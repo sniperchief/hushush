@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 export function Wordmark({ className, alt = "hushush", preload }: { className: string; alt?: string; preload?: boolean }) {
-  return <Image src="/hushush-wordmark.png" alt={alt} width={600} height={131} preload={preload} className={`block w-auto ${className}`} />;
+  return <Image src="/hushush-wordmark.png" alt={alt} width={600} height={131} preload={preload} className={`block w-auto object-contain object-left ${className}`} />;
 }
 
 export function Mark({ className }: { className: string }) {
