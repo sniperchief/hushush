@@ -102,8 +102,12 @@ pub trait StoreTx {
     fn insert_payout(&mut self, p: &Payout) -> Result<()>;
     /// `lock = true` must lock the row against concurrent writers.
     fn load_payout(&mut self, id: &str, lock: bool) -> Result<Option<Payout>>;
+    /// The payout of a stream claim (`claims.id`).
     fn payout_by_claim(&mut self, claim_id: &str, lock: bool) -> Result<Option<Payout>>;
     fn payouts_of_stream(&mut self, stream_id: &str) -> Result<Vec<Payout>>;
+    /// The payout of a vesting claim (`vesting_claims.id`).
+    fn payout_by_vesting_claim(&mut self, claim_id: &str, lock: bool) -> Result<Option<Payout>>;
+    fn payouts_of_vesting(&mut self, agreement_id: &str) -> Result<Vec<Payout>>;
     /// Writes every mutable field of `next`, but only if the row is still in
     /// `expected_state` and leased by `expected_lease_owner`. Returns rows
     /// updated (0 or 1).
@@ -151,4 +155,68 @@ pub trait StoreTx {
     /// [`PayrollError::Conflict`](crate::PayrollError::Conflict).
     fn insert_payout_address(&mut self, a: &PayoutAddress) -> Result<()>;
     fn payout_address(&mut self, stream_id: &str) -> Result<Option<PayoutAddress>>;
+
+    // ---- vesting -------------------------------------------------------------------
+
+    fn count_vesting_for_member(&mut self, org: &str, user: &str) -> Result<i64>;
+    /// Inserts a new `draft` agreement.
+    fn insert_vesting(&mut self, a: &VestingAgreement) -> Result<()>;
+    /// `lock = true` must lock the row against concurrent writers.
+    fn load_vesting(&mut self, id: &str, lock: bool) -> Result<Option<VestingAgreement>>;
+    /// Moves a `draft` agreement to `active`; returns rows updated (0 or 1).
+    fn activate_vesting_cas(&mut self, id: &str, actor: &str, now: i64) -> Result<usize>;
+    /// Moves an agreement from `from` to `cancelled`, freezing `vested`;
+    /// returns rows updated (0 or 1).
+    fn cancel_vesting_cas(
+        &mut self,
+        id: &str,
+        from: VestingStatus,
+        actor: &str,
+        now: i64,
+        vested: i64,
+    ) -> Result<usize>;
+    fn insert_vesting_event(
+        &mut self,
+        agreement_id: &str,
+        kind: &str,
+        actor: &str,
+        now: i64,
+        vested_after: i64,
+    ) -> Result<()>;
+    fn vesting_events_of(&mut self, agreement_id: &str) -> Result<Vec<VestingEvent>>;
+    fn list_vesting(&mut self, filter: VestingFilter<'_>) -> Result<Vec<VestingListedRow>>;
+
+    /// (reserved, settled) sums of the agreement's claims.
+    fn vesting_claim_sums(&mut self, agreement_id: &str) -> Result<(i64, i64)>;
+    fn vesting_claim_by_key(
+        &mut self,
+        agreement_id: &str,
+        key: &str,
+    ) -> Result<Option<VestingClaim>>;
+    fn insert_vesting_claim(
+        &mut self,
+        id: &str,
+        agreement_id: &str,
+        requested_by: &str,
+        key: &str,
+        amount: i64,
+        vested: i64,
+        now: i64,
+    ) -> Result<()>;
+    /// `lock = true` must lock the row against concurrent writers.
+    fn load_vesting_claim(&mut self, id: &str, lock: bool) -> Result<Option<VestingClaim>>;
+    /// Moves a `reserved` vesting claim to `to`; returns rows updated (0 or 1).
+    fn update_vesting_claim_cas(
+        &mut self,
+        id: &str,
+        to: ClaimStatus,
+        now: i64,
+        actor: &str,
+        settlement_ref: Option<&str>,
+    ) -> Result<usize>;
+    fn vesting_claims_of(&mut self, agreement_id: &str) -> Result<Vec<VestingClaim>>;
+    /// A second address for the same agreement is a
+    /// [`PayrollError::Conflict`](crate::PayrollError::Conflict).
+    fn insert_vesting_address(&mut self, a: &VestingPayoutAddress) -> Result<()>;
+    fn vesting_address(&mut self, agreement_id: &str) -> Result<Option<VestingPayoutAddress>>;
 }

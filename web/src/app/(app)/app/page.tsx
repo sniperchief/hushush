@@ -32,8 +32,9 @@ import {
 import { employerCompany, type Company } from "@/lib/company";
 import { accountEmail } from "@/lib/email-login";
 import { compactZec, formatTime } from "@/lib/format";
-import { PayrollApiError, payroll, type FlowStream, type PayoutWalletSummary } from "@/lib/payroll";
+import { PayrollApiError, payroll, type FlowStream, type PayoutWalletSummary, type VestingView } from "@/lib/payroll";
 import { requirePageUser } from "@/lib/session";
+import { pct, phaseLabel } from "@/lib/vesting";
 
 export const metadata = { title: "Home" };
 export const dynamic = "force-dynamic";
@@ -143,6 +144,34 @@ function SignInEmail({ email }: { email: string | null }) {
   );
 }
 
+// ---- vesting (both sides) -----------------------------------------------------
+
+function VestingTag({ v }: { v: VestingView }) {
+  const tone =
+    v.phase === "vesting"
+      ? "border border-linen"
+      : v.phase === "fully_vested"
+        ? "bg-espresso text-cream"
+        : v.phase === "draft"
+          ? "bg-honey-soft"
+          : v.phase === "cancelled"
+            ? "bg-mist"
+            : "border border-linen bg-cream";
+  return <span className={`inline-flex rounded-full px-2.5 py-[3px] text-[12.5px] font-semi whitespace-nowrap ${tone}`}>{phaseLabel(v.phase)}</span>;
+}
+
+/** Vested / paid / on its way, as parts of the total (server figures). */
+function VestingBar({ v }: { v: VestingView }) {
+  const b = v.balance;
+  return (
+    <div className="relative h-2 overflow-hidden rounded bg-mist" aria-hidden="true">
+      <span className="absolute inset-y-0 left-0 bg-earned" style={{ width: `${pct(b.vested_zats, b.total_zats)}%` }} />
+      <span className="absolute inset-y-0 left-0 bg-withdrawn" style={{ width: `${pct(b.paid_zats, b.total_zats)}%` }} />
+      <span className="stripe-held absolute inset-y-0" style={{ left: `${pct(b.paid_zats, b.total_zats)}%`, width: `${pct(b.reserved_zats, b.total_zats)}%` }} />
+    </div>
+  );
+}
+
 // ---- employer ----------------------------------------------------------------
 
 function StreamTag({ s }: { s: FlowStream }) {
@@ -195,7 +224,12 @@ function CompanyStep() {
 async function EmployerHome({ user }: { user: SessionUser }) {
   const company = await employerCompany(user);
   if (!company) return <CompanyStep />;
-  const [home, wallet, email] = await Promise.all([payroll.employerHome(user.id, company.id), treasury(user, company), accountEmail(user.id)]);
+  const [home, wallet, email, vesting] = await Promise.all([
+    payroll.employerHome(user.id, company.id),
+    treasury(user, company),
+    accountEmail(user.id),
+    payroll.orgVesting(user.id, company.id),
+  ]);
   const now = requestTime();
   const streams = home.streams;
   const waiting = home.offers.filter((o) => o.status === "open");
@@ -232,6 +266,7 @@ async function EmployerHome({ user }: { user: SessionUser }) {
     { href: "#overview", label: "Overview", icon: "overview", current: true },
     { href: "#streams", label: "Streams", icon: "streams", count: streams.length },
     { href: "#waiting", label: "Waiting to join", icon: "waiting", count: waiting.length, alert: true },
+    { href: "#vesting", label: "Vesting", icon: "vesting", count: vesting.length },
     { href: "#payments", label: "Payments", icon: "payments" },
     { href: "#wallet", label: "Payout wallet", icon: "treasury" },
   ];
@@ -511,6 +546,58 @@ async function EmployerHome({ user }: { user: SessionUser }) {
         )}
       </div>
 
+      {/* Vesting agreements (after streams: vesting is the additional option) */}
+      <Card
+        id="vesting"
+        title="Vesting"
+        className="max-sm:order-5"
+        aside={
+          <Link href="/app/vesting/new" className="text-sm font-semi whitespace-nowrap text-espresso underline decoration-amber-deep decoration-2 underline-offset-4">
+            New agreement →
+          </Link>
+        }
+      >
+        {vesting.length === 0 ? (
+          <EmptyBox>No vesting agreements. Grant someone in your company a ZEC allocation that vests over time, with an optional cliff.</EmptyBox>
+        ) : (
+          <ul className="m-0 flex list-none flex-col p-0">
+            {vesting.map((v) => (
+              <li key={v.id} className="flex flex-col gap-2 border-b border-mist py-3.5 first:pt-0 last:border-0 last:pb-0">
+                <div className="flex items-center justify-between gap-2.5">
+                  <Link href={`/app/vesting/${v.id}`} className="flex min-w-0 items-center gap-2.5 font-semi text-espresso no-underline hover:underline">
+                    <Avatar name={v.employee_display_name} />
+                    <span className="truncate">{v.employee_display_name}</span>
+                  </Link>
+                  <VestingTag v={v} />
+                </div>
+                <VestingBar v={v} />
+                <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-[12.5px] text-bark">
+                  <span>
+                    Vested <span className="mono text-espresso">{compactZec(v.balance.vested_zec)}</span> of <span className="mono">{compactZec(v.total_zec)}</span> ZEC
+                  </span>
+                  <span>
+                    Paid <span className="mono text-espresso">{compactZec(v.balance.paid_zec)}</span>
+                    {v.balance.reserved_zats > 0 && (
+                      <>
+                        {" "}
+                        · on its way <span className="mono">{compactZec(v.balance.reserved_zec)}</span>
+                      </>
+                    )}
+                  </span>
+                  <span>
+                    {v.status === "draft"
+                      ? v.activatable
+                        ? `Activate by ${formatTime(v.start_at)}`
+                        : "Start passed: discard and recreate"
+                      : `Ends ${formatTime(v.end_at)}`}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
       {/* Payments (full width) */}
       <Card id="payments" title="Payments" className="max-sm:order-6">
           {payments.length === 0 ? (
@@ -603,7 +690,7 @@ function WorkerStreamCard({ s }: { s: FlowStream }) {
 }
 
 async function WorkerHome({ user }: { user: SessionUser }) {
-  const [streams, email] = await Promise.all([payroll.workerStreams(user.id), accountEmail(user.id)]);
+  const [streams, email, vesting] = await Promise.all([payroll.workerStreams(user.id), accountEmail(user.id), payroll.myVesting(user.id)]);
   const now = requestTime();
   const missing = streams.filter((s) => !s.address_locked).length;
 
@@ -611,6 +698,7 @@ async function WorkerHome({ user }: { user: SessionUser }) {
     { href: "#overview", label: "Overview", icon: "overview", current: true },
     { href: "#streams", label: "My streams", icon: "streams", count: streams.length },
     { href: "#withdrawals", label: "Withdrawals", icon: "payments" },
+    { href: "#vesting", label: "Vesting", icon: "vesting", count: vesting.length },
     { href: "#streams", label: "Payout addresses", icon: "lock", count: missing, alert: true },
   ];
   const tabs: NavItem[] = [
@@ -649,9 +737,51 @@ async function WorkerHome({ user }: { user: SessionUser }) {
     </DashboardShell>
   );
 
+  const vestingSection =
+    vesting.length > 0 ? (
+      <Card id="vesting" title="Vesting">
+        <ul className="m-0 flex list-none flex-col p-0">
+          {vesting.map((v) => (
+            <li key={v.id} className="flex flex-col gap-2 border-b border-mist py-3.5 first:pt-0 last:border-0 last:pb-0">
+              <div className="flex items-center justify-between gap-2.5">
+                <span className="min-w-0 truncate font-semi">
+                  {v.organization_name} · <span className="mono font-medium">{compactZec(v.total_zec)}</span> ZEC
+                </span>
+                <VestingTag v={v} />
+              </div>
+              <VestingBar v={v} />
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[12.5px] text-bark">
+                <span>
+                  Vested <span className="mono text-espresso">{compactZec(v.balance.vested_zec)}</span> · paid{" "}
+                  <span className="mono text-espresso">{compactZec(v.balance.paid_zec)}</span>
+                  {v.balance.reserved_zats > 0 && (
+                    <>
+                      {" "}
+                      · on its way <span className="mono">{compactZec(v.balance.reserved_zec)}</span>
+                    </>
+                  )}
+                </span>
+                <span>
+                  Available <span className="mono font-semi text-espresso">{compactZec(v.balance.available_zec)}</span> ZEC
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[12.5px] text-bark">
+                <span>{rangeLabel(v.start_at, v.end_at)}</span>
+                <Link href={`/app/vesting/${v.id}`} className="text-sm font-semi whitespace-nowrap text-espresso underline decoration-amber-deep decoration-2 underline-offset-4">
+                  {v.balance.available_zats > 0 ? "Withdraw →" : "Details →"}
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    ) : null;
+
   if (streams.length === 0) {
     return shell(
-      <EmptyBox>Nobody is paying you through hushush yet. When someone does, they&apos;ll send you a link. Open it to start receiving pay.</EmptyBox>,
+      vestingSection ?? (
+        <EmptyBox>Nobody is paying you through hushush yet. When someone does, they&apos;ll send you a link. Open it to start receiving pay.</EmptyBox>
+      ),
     );
   }
 
@@ -727,6 +857,7 @@ async function WorkerHome({ user }: { user: SessionUser }) {
           </ul>
         )}
       </Card>
+      {vestingSection}
     </>,
   );
 }

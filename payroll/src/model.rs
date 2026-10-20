@@ -286,8 +286,14 @@ impl PayoutState {
 pub struct Payout {
     /// Also the wallet's payment id: the wallet builds at most one transaction per id.
     pub id: String,
+    /// What this payout pays: a stream claim or a vesting claim.
+    pub compensation_type: CompensationType,
+    /// The paid claim: a row of `claims` (stream) or of `vesting_claims`
+    /// (vesting), per `compensation_type`. One payout per claim, ever.
     pub claim_id: String,
-    pub stream_id: String,
+    /// The claim's source: a payroll stream or a vesting agreement, per
+    /// `compensation_type`.
+    pub source_id: String,
     pub requested_by: String,
     pub amount_zats: i64,
     /// Salted hash of the destination address. The address itself is not
@@ -371,6 +377,225 @@ impl StreamOffer {
             OfferStatus::Open
         }
     }
+}
+
+// ---- vesting compensation -----------------------------------------------------------
+
+/// Which kind of compensation a claim draws on. Stream claims live in
+/// `claims`, vesting claims in `vesting_claims`; the two never share a table
+/// or an id space.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CompensationType {
+    Stream,
+    Vesting,
+}
+
+impl CompensationType {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            CompensationType::Stream => "stream",
+            CompensationType::Vesting => "vesting",
+        }
+    }
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "stream" => Some(CompensationType::Stream),
+            "vesting" => Some(CompensationType::Vesting),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VestingMethod {
+    /// Linear over the duration, with an optional cliff (see [`crate::vesting`]).
+    Linear,
+}
+
+impl VestingMethod {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            VestingMethod::Linear => "linear",
+        }
+    }
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "linear" => Some(VestingMethod::Linear),
+            _ => None,
+        }
+    }
+}
+
+/// Stored status of a vesting agreement.
+///
+/// ```text
+/// draft ──activate──▶ active ──cancel──▶ cancelled
+///   ╰──────────────cancel (void)───────────▲
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VestingStatus {
+    /// Created by the employer; nothing vests and the employee can't see it.
+    Draft,
+    /// Vesting by its schedule.
+    Active,
+    /// Vesting stopped at `cancelled_at`; what had vested stays owed. Final.
+    Cancelled,
+}
+
+impl VestingStatus {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            VestingStatus::Draft => "draft",
+            VestingStatus::Active => "active",
+            VestingStatus::Cancelled => "cancelled",
+        }
+    }
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "draft" => Some(VestingStatus::Draft),
+            "active" => Some(VestingStatus::Active),
+            "cancelled" => Some(VestingStatus::Cancelled),
+            _ => None,
+        }
+    }
+}
+
+/// Where an agreement is at a given time (derived, never stored).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum VestingPhase {
+    Draft,
+    /// Active, before `start_at`.
+    NotStarted,
+    /// Active, started, before the cliff: nothing vested yet.
+    InCliff,
+    /// Active and partly vested.
+    Vesting,
+    /// Active and at or past the end: the whole allocation is vested.
+    FullyVested,
+    Cancelled,
+}
+
+/// The fixed terms of a vesting agreement. Immutable once created.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingTerms {
+    pub total_zats: i64,
+    pub start_at: i64,
+    pub duration_secs: i64,
+    /// 0 = no cliff. At most `duration_secs`.
+    pub cliff_secs: i64,
+    pub method: VestingMethod,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingAgreement {
+    pub id: String,
+    pub organization_id: String,
+    pub employee_user_id: String,
+    pub created_by: String,
+    pub terms: VestingTerms,
+    pub status: VestingStatus,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub activated_at: Option<i64>,
+    pub activated_by: Option<String>,
+    pub cancelled_at: Option<i64>,
+    pub cancelled_by: Option<String>,
+    /// Vested amount frozen at cancellation (0 for a voided draft).
+    pub vested_at_cancel_zats: Option<i64>,
+}
+
+/// Balances of one agreement at `as_of`, all in zatoshis.
+///
+/// Invariants: `vested + unvested = total`;
+/// `available = vested - reserved - paid >= 0`.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingBalance {
+    pub agreement_id: String,
+    pub as_of: i64,
+    pub phase: VestingPhase,
+    pub total: i64,
+    pub vested: i64,
+    /// Not (yet) vested. After cancellation this is forfeited for good.
+    pub unvested: i64,
+    /// Sum of claims in `reserved` state (held, not yet paid).
+    pub reserved: i64,
+    /// Sum of claims in `settled` state.
+    pub paid: i64,
+    pub available: i64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingClaim {
+    pub id: String,
+    /// Always [`CompensationType::Vesting`]; carried so API consumers never
+    /// have to infer a claim's kind from where it came from.
+    pub compensation_type: CompensationType,
+    pub agreement_id: String,
+    pub requested_by: String,
+    pub idempotency_key: String,
+    pub amount_zats: i64,
+    pub status: ClaimStatus,
+    pub vested_at_reservation_zats: i64,
+    pub created_at: i64,
+    pub resolved_at: Option<i64>,
+    pub settlement_ref: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingClaimOutcome {
+    pub claim: VestingClaim,
+    /// True when this request repeated an earlier one (same idempotency key).
+    pub duplicate: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VestingEvent {
+    pub kind: String,
+    pub actor_user_id: String,
+    pub occurred_at: i64,
+    pub vested_zats_after: i64,
+}
+
+/// An agreement with display context and its server-computed balance.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VestingListing {
+    pub agreement: VestingAgreement,
+    pub organization_name: String,
+    pub employee_display_name: String,
+    pub balance: VestingBalance,
+}
+
+/// Raw listing row as loaded by a backend (sums not yet turned into a balance).
+#[derive(Clone, Debug)]
+pub struct VestingListedRow {
+    pub agreement: VestingAgreement,
+    pub organization_name: String,
+    pub employee_display_name: String,
+    pub reserved: i64,
+    pub paid: i64,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum VestingFilter<'a> {
+    Organization(&'a str),
+    /// The employee's agreements that were ever activated.
+    Employee(&'a str),
+}
+
+/// A vesting agreement's payout address: set once by its employee, then
+/// locked. Same sealing and fingerprinting as [`PayoutAddress`], keyed by the
+/// agreement id.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VestingPayoutAddress {
+    pub agreement_id: String,
+    pub set_by: String,
+    pub address_fingerprint: String,
+    pub address_sealed: String,
+    pub set_at: i64,
 }
 
 /// A stream's payout address, set once by its recipient and locked for the

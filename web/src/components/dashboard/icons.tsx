@@ -8,6 +8,14 @@ const PATHS = {
       <path d="M3 16c3-3 6 3 9 0s6 3 9 0" />
     </>
   ),
+  // Vesting: an allocation filling up over time.
+  vesting: (
+    <>
+      <path d="M3 21h18" />
+      <path d="M5 21v-4M9 21v-7M13 21v-10M17 21V7" />
+      <path d="M4 10l5-4 4 2 7-5" />
+    </>
+  ),
   waiting: (
     <>
       <circle cx="9" cy="8" r="3.5" />

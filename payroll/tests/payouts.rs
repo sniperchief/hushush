@@ -1313,8 +1313,9 @@ fn sample_payout() -> Payout {
     Payout {
         recipient_fingerprint: recipient_fingerprint(&id, ADDR),
         id,
+        compensation_type: CompensationType::Stream,
         claim_id: "c".into(),
-        stream_id: "s".into(),
+        source_id: "s".into(),
         requested_by: "u".into(),
         amount_zats: 5_000,
         fee_estimate_zats: FEE,

@@ -28,6 +28,7 @@ pub mod payout;
 pub mod pg;
 pub mod sqlite;
 pub mod store;
+pub mod vesting;
 
 pub use engine::{MAX_RATE_PERIOD_SECS, Payroll};
 pub use error::{PayrollError, Result};
@@ -36,3 +37,4 @@ pub use model::*;
 pub use payout::{PayoutPolicy, PayoutTerms};
 pub use pg::PgPayrollDb;
 pub use sqlite::PayrollDb;
+pub use vesting::{NewVesting, VestingDetail, VestingWithdrawTerms};

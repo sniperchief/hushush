@@ -28,7 +28,7 @@ use hushush_payroll::payout::{
     PayoutPolicy, PayoutTerms, WalletApi, WalletError, WalletPayment, WalletSubmit,
     recipient_fingerprint, reconcile_due, submit_payout,
 };
-use hushush_payroll::{Payout, PayoutState, PayrollError};
+use hushush_payroll::{CompensationType, Payout, PayoutState, PayrollError};
 
 use crate::{ApiError, ApiResult, AppState, actor, err, require_actor, with_db};
 
@@ -247,8 +247,13 @@ impl HttpWallet {
     /// Creates `org`'s payout account if it doesn't exist yet (idempotent).
     pub fn ensure_account(&self, org: &str) -> Result<serde_json::Value, WalletError> {
         // Creating an account unlocks the seed and reads the chain: long timeout.
-        self.call(&self.long, "POST", "/v1/accounts", Some(json!({ "key": org })))?
-            .ok_or_else(|| WalletError::Unavailable("accounts endpoint missing".into()))
+        self.call(
+            &self.long,
+            "POST",
+            "/v1/accounts",
+            Some(json!({ "key": org })),
+        )?
+        .ok_or_else(|| WalletError::Unavailable("accounts endpoint missing".into()))
     }
 
     pub fn account_status(&self, org: &str) -> Result<serde_json::Value, WalletError> {
@@ -269,7 +274,11 @@ impl HttpWallet {
 }
 
 impl HttpWallet {
-    fn submit_from(&self, req: &WalletSubmit, account: Option<&str>) -> Result<WalletPayment, WalletError> {
+    fn submit_from(
+        &self,
+        req: &WalletSubmit,
+        account: Option<&str>,
+    ) -> Result<WalletPayment, WalletError> {
         let mut body = serde_json::to_value(req).expect("serializable");
         if let Some(a) = account {
             body["account"] = json!(a);
@@ -329,6 +338,8 @@ impl WalletApi for HttpWallet {
 #[derive(Serialize)]
 pub struct PayoutView {
     pub id: String,
+    /// stream | vesting: what `claim_id` refers to.
+    pub compensation_type: CompensationType,
     pub claim_id: String,
     /// reserved | submitted | confirmed | failed | requires_reconciliation.
     /// Only `confirmed` means paid.
@@ -355,6 +366,7 @@ impl PayoutView {
     pub fn new(p: &Payout, required_confirmations: i64) -> Self {
         Self {
             id: p.id.clone(),
+            compensation_type: p.compensation_type,
             claim_id: p.claim_id.clone(),
             state: p.state,
             amount_zats: p.amount_zats,
@@ -571,7 +583,12 @@ pub async fn request(
     };
     let (po2, addr2) = (po.clone(), address.clone());
     // The Phase 3 claims path (no longer used by the web app) pays from the treasury.
-    let q = blocking(move || po2.wallet.quote(&addr2, c.amount_zats, None).map_err(wallet_err)).await?;
+    let q = blocking(move || {
+        po2.wallet
+            .quote(&addr2, c.amount_zats, None)
+            .map_err(wallet_err)
+    })
+    .await?;
     if !q.valid_recipient {
         return Err(err(
             StatusCode::UNPROCESSABLE_ENTITY,
@@ -797,6 +814,7 @@ pub fn spawn_worker(st: AppState, po: Arc<Payouts>) {
                                     tracing::info!(
                                         payout_id = %p.id,
                                         claim_id = %p.claim_id,
+                                        compensation_type = p.compensation_type.as_str(),
                                         state = p.state.as_str(),
                                         confirmations = p.confirmations,
                                         txid = ?p.txid,

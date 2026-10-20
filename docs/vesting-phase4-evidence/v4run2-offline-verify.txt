@@ -1,0 +1,33 @@
+1. final server snapshots (GET /v1/vesting/{id} as the employee, logged 19:48:55-19:49:11Z)
+   A: active    payout failed    claim released total 100000000 = vested 2148148 + unvested 97851852; vested = paid 0 + reserved 0 + available 2148148
+   B1: active    payout confirmed claim settled  total 100000000 = vested 2150462 + unvested 97849538; vested = paid 20000 + reserved 0 + available 2130462
+   B2: active    payout confirmed claim settled  total 100000000 = vested 2153935 + unvested 97846065; vested = paid 20000 + reserved 0 + available 2133935
+   C: cancelled payout confirmed claim settled  total 100000000 = vested 1646990 + unvested 98353010; vested = paid 20000 + reserved 0 + available 1626990
+   E: cancelled payout confirmed claim settled  total 100000000 = vested 1799768 + unvested 98200232; vested = paid 20000 + reserved 0 + available 1779768
+2. cancellation freezes vesting (server values at cancel vs final snapshot)
+   C: at cancel vested 1646990 reserved 20000 paid 0 available 1626990 -> final vested 1646990 (unchanged 440 s later), paid 20000, available 1626990 (unchanged), forfeited/unvested 98353010
+   E: at cancel vested 1799768 reserved 20000 paid 0 available 1779768 -> final vested 1799768 (unchanged 321 s later), paid 20000, available 1779768 (unchanged), forfeited/unvested 98200232
+3. controls: A/B1/B2 (not cancelled) kept vesting: {'A': 2148148, 'B1': 2150462, 'B2': 2153935}
+ALL LOG CHECKS PASS
+bd9ab0b5 failed fee null max 20000 tx - h null | reserved > requires_reconciliation > failed | claim released ref==txid true stream refs null true
+2873eb22 confirmed fee 10000 max 20000 tx 4f290c10fcd8 h 4519633 | reserved > requires_reconciliation > submitted > confirmed | claim settled ref==txid true stream refs null true
+f6ef362b confirmed fee 10000 max 20000 tx f18f8d5467c1 h 4519645 | reserved > requires_reconciliation > submitted > confirmed | claim settled ref==txid true stream refs null true
+d91782bb confirmed fee 10000 max 20000 tx 3fc96b8f496f h 4519666 | reserved > requires_reconciliation > submitted > confirmed | claim settled ref==txid true stream refs null true
+f76cd89b confirmed fee 10000 max 20000 tx 87110fa2172b h 4519673 | reserved > submitted > confirmed | claim settled ref==txid true stream refs null true
+failed events on paid payouts: [ 'bd9ab0b5' ]
+agreements: [["723568df","cancelled","1799768"],["095da8af","active",null],["387e29cc","active",null],["77b1d214","active",null],["30067689","cancelled","1646990"]]
+stream claims 0 schema v 6
+4. wallets (Phase 0 CLI, carol synced)
+   A: carol received nothing; treasury-wallet txs with this memo: 0
+   B1: carol received [('4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03', 20000)]; treasury-wallet txs with this memo: 1
+   B2: carol received [('f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a', 20000)]; treasury-wallet txs with this memo: 1
+   C: carol received [('3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d', 20000)]; treasury-wallet txs with this memo: 1
+   E: carol received [('87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb', 20000)]; treasury-wallet txs with this memo: 1
+   carol total now 2097999 (before run 2,017,999; expected +80,000 = 2,097,999)
+WALLET CHECKS PASS
+V4 B1 crash_after_wallet_store | 4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03 | 4519633 | 65 | 10000 | ironwood=2 orchard=0 sapling=0/0 | same bytes | PASS
+V4 B2 crash_after_build | f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a | 4519645 | 54 | 10000 | ironwood=2 orchard=0 sapling=0/0 | same bytes | PASS
+V4 C crash_after_broadcast | 3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d | 4519666 | 33 | 10000 | ironwood=2 orchard=0 sapling=0/0 | same bytes | PASS
+V4 E cancelled in flight | 87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb | 4519673 | 26 | 10000 | ironwood=2 orchard=0 sapling=0/0 | same bytes | PASS
+V4 faucet top-up | a865055405c25775e2def63869e9b7c3664d682dcbcfeb6f5612799281aeab34 | 4519609 | 90 | 10000 | ironwood=2 orchard=0 sapling=0/0 | same bytes | PASS
+ALL PASS

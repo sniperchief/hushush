@@ -1,0 +1,31 @@
+2026-10-19T17:21:14+01:00
+   Compiling hushush-wallet-proof v0.1.0 (C:\Users\USER\Desktop\hushush\wallet-proof)
+error[E0786]: found invalid metadata files for crate `hushush_wallet_proof`
+  --> tests\mocked_chain.rs:27:5
+   |
+27 | use hushush_wallet_proof::{observer, payment};
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: failed to mmap file '\\?\C:\Users\USER\Desktop\hushush\wallet-proof\target\debug\deps\libhushush_wallet_proof-518e6c1d6e94f96b.rlib': The paging file is too small for this operation to complete. (os error 1455)
+
+error[E0786]: found invalid metadata files for crate `hushush_wallet_proof`
+  --> tests\recovery.rs:12:5
+   |
+12 | use hushush_wallet_proof::{NETWORK, config::WalletPaths, secrets, wallet};
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: failed to mmap file '\\?\C:\Users\USER\Desktop\hushush\wallet-proof\target\debug\deps\libhushush_wallet_proof-518e6c1d6e94f96b.rlib': The paging file is too small for this operation to complete. (os error 1455)
+
+For more information about this error, try `rustc --explain E0786`.
+error: could not compile `hushush-wallet-proof` (test "mocked_chain") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `hushush-wallet-proof` (test "recovery") due to 1 previous error
+error[E0463]: can't find crate for `age`
+  --> src\secrets.rs:10:5
+   |
+10 | use age::secrecy::ExposeSecret as _;
+   |     ^^^ can't find crate
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `hushush-wallet-proof` (lib test) due to 1 previous error
+EXIT 101

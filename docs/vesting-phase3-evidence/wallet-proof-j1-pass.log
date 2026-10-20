@@ -1,0 +1,45 @@
+2026-10-19T17:22:27+01:00
+     Running unittests src\lib.rs (target\debug\deps\hushush_wallet_proof-cde96e78474cd814.exe)
+test blockcache::tests::insert_read_tip_delete ... ok
+test blockcache::tests::with_blocks_respects_start_and_limit ... ok
+test payment::tests::memo_parsing ... ok
+test payment::tests::rejects_transparent_and_tex ... ok
+test payment::tests::accepts_shielded_unified_and_sapling ... ok
+test payment::tests::rejects_mainnet_addresses_and_garbage ... ok
+test secrets::tests::identity_is_never_overwritten ... ok
+test secrets::tests::rejects_bad_checksum ... ok
+test secrets::tests::mnemonic_round_trips_through_age ... ok
+test secrets::tests::wrong_identity_cannot_decrypt ... ok
+test wallet::tests::confirmation_counting ... ok
+test wallet::tests::txid_display_round_trip ... ok
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+     Running unittests src\main.rs (target\debug\deps\hushush_wallet_proof-044faecc68799147.exe)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+     Running tests\mocked_chain.rs (target\debug\deps\mocked_chain-38c0f3009aed41f6.exe)
+test mocked_insufficient_funds_is_rejected ... ok
+test mocked_ironwood_active_payment_from_ironwood_note has been running for over 60 seconds
+test mocked_nu7_active_payment_uses_v6_nu7_format has been running for over 60 seconds
+test mocked_orchard_to_orchard_payment has been running for over 60 seconds
+test mocked_sapling_funds_to_unified_recipient_reveals_pool_crossing has been running for over 60 seconds
+test mocked_sapling_funds_to_unified_recipient_reveals_pool_crossing ... ok
+test mocked_unconfirmed_funds_not_spendable_under_default_policy ... ok
+test mocked_orchard_to_orchard_payment ... ok
+test mocked_ironwood_active_payment_from_ironwood_note ... ok
+test mocked_nu7_active_payment_uses_v6_nu7_format ... ok
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 192.13s
+     Running tests\recovery.rs (target\debug\deps\recovery-d350c63854b7c077.exe)
+test rejects_bad_wallet_names ... ok
+test refuses_wallet_inside_git_repo ... ok
+test encrypted_mnemonic_plus_identity_recovers_spend_authority ... ok
+test wallet_state_persists_across_reopen ... ok
+test spending_key_requires_matching_seed ... ok
+test restore_from_mnemonic_reproduces_keys_and_address ... ok
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.99s
+     Running tests\testnet_live.rs (target\debug\deps\testnet_live-34659e7afbb53bf4.exe)
+test live_fresh_wallet_sync_and_persistence ... ignored, live testnet
+test live_observer_decodes_recent_transactions ... ignored, live testnet
+test live_server_is_testnet_and_current ... ignored, live testnet
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+EXIT 0
+2026-10-19T17:32:09+01:00

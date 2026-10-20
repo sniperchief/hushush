@@ -251,8 +251,9 @@ impl<B: Backend> Payroll<B> {
     }
 
     /// Removes a member. Owners may remove anyone except the last owner;
-    /// admins may remove plain members. Members with payroll streams (even
-    /// ended ones) are kept so payroll history stays intact.
+    /// admins may remove plain members. Members with payroll streams or
+    /// vesting agreements (even ended/cancelled ones) are kept so payroll
+    /// history stays intact.
     pub fn remove_member(&mut self, actor: &str, org: &str, user: &str) -> Result<()> {
         validate_id("organization", org)?;
         validate_id("user", user)?;
@@ -279,6 +280,11 @@ impl<B: Backend> Payroll<B> {
         if tx.count_streams_for_member(org, user)? > 0 {
             return Err(PayrollError::Conflict(
                 "member has payroll streams; end them instead of removing the member".into(),
+            ));
+        }
+        if tx.count_vesting_for_member(org, user)? > 0 {
+            return Err(PayrollError::Conflict(
+                "member has vesting agreements; cancel them instead of removing the member".into(),
             ));
         }
         tx.delete_member(org, user)?;

@@ -1,0 +1,99 @@
+{
+  "database": "hushush_live_v3run1 (fresh per run, local PostgreSQL 17)",
+  "payroll_schema_migrations": [
+    {
+      "version": "1",
+      "name": "0001_init"
+    },
+    {
+      "version": "2",
+      "name": "0002_payouts"
+    },
+    {
+      "version": "3",
+      "name": "0003_rls"
+    },
+    {
+      "version": "4",
+      "name": "0004_flow"
+    },
+    {
+      "version": "5",
+      "name": "0005_vesting"
+    },
+    {
+      "version": "6",
+      "name": "0006_vesting_payouts"
+    }
+  ],
+  "payouts": [
+    {
+      "id": "e43b1e7a-4a59-4861-8124-63548eccd661",
+      "compensation_type": "vesting",
+      "state": "confirmed",
+      "amount_zats": "30000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": "10000",
+      "max_fee_zats": "20000",
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "f21dc5e9-3cc9-43af-8ede-31035c4add64",
+      "vesting_agreement_id": "85df3a12-6170-4f0a-b47e-e513e31bb33b",
+      "txid": "8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93",
+      "mined_height": "4519265",
+      "created_at": "1792429219",
+      "submitted_at": "1792429258",
+      "resolved_at": "1792429534"
+    }
+  ],
+  "payout_events": [
+    {
+      "id": "1",
+      "payout_id": "e43b1e7a-4a59-4861-8124-63548eccd661",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792429219",
+      "detail": null
+    },
+    {
+      "id": "2",
+      "payout_id": "e43b1e7a-4a59-4861-8124-63548eccd661",
+      "from_state": "reserved",
+      "to_state": "submitted",
+      "occurred_at": "1792429258",
+      "detail": null
+    },
+    {
+      "id": "3",
+      "payout_id": "e43b1e7a-4a59-4861-8124-63548eccd661",
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792429534",
+      "detail": null
+    }
+  ],
+  "vesting_claims": [
+    {
+      "id": "f21dc5e9-3cc9-43af-8ede-31035c4add64",
+      "agreement_id": "85df3a12-6170-4f0a-b47e-e513e31bb33b",
+      "status": "settled",
+      "amount_zats": "30000",
+      "settlement_ref": "8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93",
+      "created_at": "1792429219",
+      "resolved_at": "1792429534"
+    }
+  ],
+  "vesting_events": [
+    {
+      "kind": "created",
+      "occurred_at": "1792428598",
+      "vested_zats_after": "0"
+    },
+    {
+      "kind": "activated",
+      "occurred_at": "1792428598",
+      "vested_zats_after": "0"
+    }
+  ],
+  "stream_claims_count": 0
+}

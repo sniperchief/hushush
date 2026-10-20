@@ -1,0 +1,14 @@
+2026-10-19T18:08:19+01:00
+     Running unittests src\lib.rs (C:/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Desktop-hushush/2ec8ddf4-3859-4aa6-ae4f-8807f4553746/scratchpad/wp-target\debug\deps\hushush_wallet_proof-cde96e78474cd814.exe)
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+     Running unittests src\main.rs (C:/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Desktop-hushush/2ec8ddf4-3859-4aa6-ae4f-8807f4553746/scratchpad/wp-target\debug\deps\hushush_wallet_proof-044faecc68799147.exe)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+     Running tests\mocked_chain.rs (C:/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Desktop-hushush/2ec8ddf4-3859-4aa6-ae4f-8807f4553746/scratchpad/wp-target\debug\deps\mocked_chain-38c0f3009aed41f6.exe)
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 164.76s
+     Running tests\recovery.rs (C:/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Desktop-hushush/2ec8ddf4-3859-4aa6-ae4f-8807f4553746/scratchpad/wp-target\debug\deps\recovery-d350c63854b7c077.exe)
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.55s
+     Running tests\testnet_live.rs (C:/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Desktop-hushush/2ec8ddf4-3859-4aa6-ae4f-8807f4553746/scratchpad/wp-target\debug\deps\testnet_live-34659e7afbb53bf4.exe)
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+EXIT 0
+2026-10-19T18:58:01+01:00

@@ -542,8 +542,9 @@ impl<B: Backend> Payroll<B> {
         let p = Payout {
             recipient_fingerprint: payout_fingerprint(&id),
             id,
+            compensation_type: CompensationType::Stream,
             claim_id,
-            stream_id: s.id.clone(),
+            source_id: s.id.clone(),
             requested_by: actor.to_string(),
             amount_zats: terms.amount_zats,
             fee_estimate_zats: terms.fee_estimate_zats,

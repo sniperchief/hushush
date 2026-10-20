@@ -1,0 +1,324 @@
+{
+  "database": "hushush_live_v4run2",
+  "schema_version": 6,
+  "payouts": [
+    {
+      "id": "bd9ab0b5-1656-4388-b128-14c81cb60f05",
+      "compensation_type": "vesting",
+      "state": "failed",
+      "amount_zats": "20000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": null,
+      "max_fee_zats": "20000",
+      "txid": null,
+      "mined_height": null,
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "23b6eb1a-e235-4921-9906-b79962c06dd7",
+      "vesting_agreement_id": "095da8af-d3b8-4b1b-9eae-3fedc2690f06",
+      "detail": "interrupted before a transaction was built",
+      "created_at": "1792437866",
+      "submitted_at": null,
+      "resolved_at": "1792437943"
+    },
+    {
+      "id": "2873eb22-9f59-4cac-a537-7c373539ac15",
+      "compensation_type": "vesting",
+      "state": "confirmed",
+      "amount_zats": "20000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": "10000",
+      "max_fee_zats": "20000",
+      "txid": "4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03",
+      "mined_height": "4519633",
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "1b692fe7-48b2-460c-89d0-1f9c6ec073c4",
+      "vesting_agreement_id": "387e29cc-98c4-4dcd-96a3-966b39fec515",
+      "detail": null,
+      "created_at": "1792437964",
+      "submitted_at": "1792438072",
+      "resolved_at": "1792438300"
+    },
+    {
+      "id": "f6ef362b-ca27-4288-9334-2d587b7a288f",
+      "compensation_type": "vesting",
+      "state": "confirmed",
+      "amount_zats": "20000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": "10000",
+      "max_fee_zats": "20000",
+      "txid": "f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a",
+      "mined_height": "4519645",
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "f930dd05-0516-4a28-8c9b-d83e4937883b",
+      "vesting_agreement_id": "77b1d214-3945-42ae-a3b8-64e6c9514180",
+      "detail": null,
+      "created_at": "1792438199",
+      "submitted_at": "1792438300",
+      "resolved_at": "1792438651"
+    },
+    {
+      "id": "d91782bb-8dc7-41f1-8345-1465ded155d2",
+      "compensation_type": "vesting",
+      "state": "confirmed",
+      "amount_zats": "20000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": "10000",
+      "max_fee_zats": "20000",
+      "txid": "3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d",
+      "mined_height": "4519666",
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "b220cc9a-e99b-45eb-ada8-c78a62d4534e",
+      "vesting_agreement_id": "30067689-79db-4495-9336-107e70020df0",
+      "detail": null,
+      "created_at": "1792438815",
+      "submitted_at": "1792438965",
+      "resolved_at": "1792439123"
+    },
+    {
+      "id": "f76cd89b-2f45-4add-9635-39ad307d716e",
+      "compensation_type": "vesting",
+      "state": "confirmed",
+      "amount_zats": "20000",
+      "fee_estimate_zats": "10000",
+      "fee_zats": "10000",
+      "max_fee_zats": "20000",
+      "txid": "87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb",
+      "mined_height": "4519673",
+      "claim_id": null,
+      "stream_id": null,
+      "vesting_claim_id": "da7ba545-599e-47e0-b7d3-ce497448b6fb",
+      "vesting_agreement_id": "723568df-6cc3-4e37-b3bb-67daff810af7",
+      "detail": null,
+      "created_at": "1792438977",
+      "submitted_at": "1792439027",
+      "resolved_at": "1792439326"
+    }
+  ],
+  "payout_events": [
+    {
+      "payout_id": "bd9ab0b5-1656-4388-b128-14c81cb60f05",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792437866",
+      "detail": null
+    },
+    {
+      "payout_id": "bd9ab0b5-1656-4388-b128-14c81cb60f05",
+      "from_state": "reserved",
+      "to_state": "requires_reconciliation",
+      "occurred_at": "1792437866",
+      "detail": "payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet"
+    },
+    {
+      "payout_id": "bd9ab0b5-1656-4388-b128-14c81cb60f05",
+      "from_state": "requires_reconciliation",
+      "to_state": "failed",
+      "occurred_at": "1792437943",
+      "detail": "interrupted before a transaction was built"
+    },
+    {
+      "payout_id": "2873eb22-9f59-4cac-a537-7c373539ac15",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792437964",
+      "detail": null
+    },
+    {
+      "payout_id": "2873eb22-9f59-4cac-a537-7c373539ac15",
+      "from_state": "reserved",
+      "to_state": "requires_reconciliation",
+      "occurred_at": "1792438013",
+      "detail": "payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet"
+    },
+    {
+      "payout_id": "2873eb22-9f59-4cac-a537-7c373539ac15",
+      "from_state": "requires_reconciliation",
+      "to_state": "submitted",
+      "occurred_at": "1792438072",
+      "detail": null
+    },
+    {
+      "payout_id": "f6ef362b-ca27-4288-9334-2d587b7a288f",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792438199",
+      "detail": null
+    },
+    {
+      "payout_id": "f6ef362b-ca27-4288-9334-2d587b7a288f",
+      "from_state": "reserved",
+      "to_state": "requires_reconciliation",
+      "occurred_at": "1792438248",
+      "detail": "payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet"
+    },
+    {
+      "payout_id": "f6ef362b-ca27-4288-9334-2d587b7a288f",
+      "from_state": "requires_reconciliation",
+      "to_state": "submitted",
+      "occurred_at": "1792438300",
+      "detail": null
+    },
+    {
+      "payout_id": "2873eb22-9f59-4cac-a537-7c373539ac15",
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792438300",
+      "detail": null
+    },
+    {
+      "payout_id": "f6ef362b-ca27-4288-9334-2d587b7a288f",
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792438651",
+      "detail": null
+    },
+    {
+      "payout_id": "d91782bb-8dc7-41f1-8345-1465ded155d2",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792438815",
+      "detail": null
+    },
+    {
+      "payout_id": "d91782bb-8dc7-41f1-8345-1465ded155d2",
+      "from_state": "reserved",
+      "to_state": "requires_reconciliation",
+      "occurred_at": "1792438866",
+      "detail": "payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet"
+    },
+    {
+      "payout_id": "d91782bb-8dc7-41f1-8345-1465ded155d2",
+      "from_state": "requires_reconciliation",
+      "to_state": "submitted",
+      "occurred_at": "1792438965",
+      "detail": null
+    },
+    {
+      "payout_id": "f76cd89b-2f45-4add-9635-39ad307d716e",
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792438977",
+      "detail": null
+    },
+    {
+      "payout_id": "f76cd89b-2f45-4add-9635-39ad307d716e",
+      "from_state": "reserved",
+      "to_state": "submitted",
+      "occurred_at": "1792439027",
+      "detail": null
+    },
+    {
+      "payout_id": "d91782bb-8dc7-41f1-8345-1465ded155d2",
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792439123",
+      "detail": null
+    },
+    {
+      "payout_id": "f76cd89b-2f45-4add-9635-39ad307d716e",
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792439326",
+      "detail": null
+    }
+  ],
+  "vesting_claims": [
+    {
+      "id": "23b6eb1a-e235-4921-9906-b79962c06dd7",
+      "agreement_id": "095da8af-d3b8-4b1b-9eae-3fedc2690f06",
+      "status": "released",
+      "amount_zats": "20000",
+      "settlement_ref": null,
+      "created_at": "1792437866",
+      "resolved_at": "1792437943"
+    },
+    {
+      "id": "1b692fe7-48b2-460c-89d0-1f9c6ec073c4",
+      "agreement_id": "387e29cc-98c4-4dcd-96a3-966b39fec515",
+      "status": "settled",
+      "amount_zats": "20000",
+      "settlement_ref": "4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03",
+      "created_at": "1792437964",
+      "resolved_at": "1792438300"
+    },
+    {
+      "id": "f930dd05-0516-4a28-8c9b-d83e4937883b",
+      "agreement_id": "77b1d214-3945-42ae-a3b8-64e6c9514180",
+      "status": "settled",
+      "amount_zats": "20000",
+      "settlement_ref": "f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a",
+      "created_at": "1792438199",
+      "resolved_at": "1792438651"
+    },
+    {
+      "id": "b220cc9a-e99b-45eb-ada8-c78a62d4534e",
+      "agreement_id": "30067689-79db-4495-9336-107e70020df0",
+      "status": "settled",
+      "amount_zats": "20000",
+      "settlement_ref": "3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d",
+      "created_at": "1792438815",
+      "resolved_at": "1792439123"
+    },
+    {
+      "id": "da7ba545-599e-47e0-b7d3-ce497448b6fb",
+      "agreement_id": "723568df-6cc3-4e37-b3bb-67daff810af7",
+      "status": "settled",
+      "amount_zats": "20000",
+      "settlement_ref": "87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb",
+      "created_at": "1792438977",
+      "resolved_at": "1792439326"
+    }
+  ],
+  "vesting_agreements": [
+    {
+      "id": "723568df-6cc3-4e37-b3bb-67daff810af7",
+      "status": "cancelled",
+      "total_zats": "100000000",
+      "start_at": "1792437475",
+      "activated_at": "1792437385",
+      "cancelled_at": "1792439030",
+      "vested_at_cancel_zats": "1799768"
+    },
+    {
+      "id": "095da8af-d3b8-4b1b-9eae-3fedc2690f06",
+      "status": "active",
+      "total_zats": "100000000",
+      "start_at": "1792437479",
+      "activated_at": "1792437389",
+      "cancelled_at": null,
+      "vested_at_cancel_zats": null
+    },
+    {
+      "id": "387e29cc-98c4-4dcd-96a3-966b39fec515",
+      "status": "active",
+      "total_zats": "100000000",
+      "start_at": "1792437481",
+      "activated_at": "1792437391",
+      "cancelled_at": null,
+      "vested_at_cancel_zats": null
+    },
+    {
+      "id": "77b1d214-3945-42ae-a3b8-64e6c9514180",
+      "status": "active",
+      "total_zats": "100000000",
+      "start_at": "1792437482",
+      "activated_at": "1792437392",
+      "cancelled_at": null,
+      "vested_at_cancel_zats": null
+    },
+    {
+      "id": "30067689-79db-4495-9336-107e70020df0",
+      "status": "cancelled",
+      "total_zats": "100000000",
+      "start_at": "1792437484",
+      "activated_at": "1792437394",
+      "cancelled_at": "1792438907",
+      "vested_at_cancel_zats": "1646990"
+    }
+  ],
+  "stream_claims": 0
+}

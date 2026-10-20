@@ -446,8 +446,9 @@ impl<B: Backend> Payroll<B> {
         let p = Payout {
             recipient_fingerprint: fingerprint(&id),
             id,
+            compensation_type: CompensationType::Stream,
             claim_id: c.id.clone(),
-            stream_id: c.stream_id.clone(),
+            source_id: c.stream_id.clone(),
             requested_by: actor.to_string(),
             amount_zats: c.amount_zats,
             fee_estimate_zats: terms.fee_estimate_zats,
@@ -503,7 +504,8 @@ impl<B: Backend> Payroll<B> {
         tx.payouts_of_stream(stream_id)
     }
 
-    /// One payout and its state history, for anyone who may view its stream.
+    /// One payout and its state history, for anyone who may view what it
+    /// pays (its stream, or its vesting agreement).
     pub fn payout_history(
         &mut self,
         actor: &str,
@@ -514,8 +516,16 @@ impl<B: Backend> Payroll<B> {
         let p = tx
             .load_payout(payout_id, false)?
             .ok_or(PayrollError::NotFound("payout"))?;
-        let s = load_stream(&mut tx, &p.stream_id, false)?;
-        require_can_view(&mut tx, actor, &s).map_err(|_| PayrollError::NotFound("payout"))?;
+        match p.compensation_type {
+            CompensationType::Stream => {
+                let s = load_stream(&mut tx, &p.source_id, false)?;
+                require_can_view(&mut tx, actor, &s)
+            }
+            CompensationType::Vesting => {
+                crate::vesting::require_can_view_id(&mut tx, actor, &p.source_id)
+            }
+        }
+        .map_err(|_| PayrollError::NotFound("payout"))?;
         let events = tx.payout_events_of(payout_id)?;
         Ok((p, events))
     }
@@ -638,8 +648,20 @@ impl<B: Backend> Payroll<B> {
             PayoutState::Failed if p.state != to => Some((ClaimStatus::Released, None)),
             _ => None,
         };
+        // The claim of the payout's own type: a stream claim or a vesting claim.
         if let Some((status, settlement_ref)) = claim_update
-            && tx.update_claim_cas(&n.claim_id, status, now, &n.requested_by, settlement_ref)? != 1
+            && match n.compensation_type {
+                CompensationType::Stream => {
+                    tx.update_claim_cas(&n.claim_id, status, now, &n.requested_by, settlement_ref)?
+                }
+                CompensationType::Vesting => tx.update_vesting_claim_cas(
+                    &n.claim_id,
+                    status,
+                    now,
+                    &n.requested_by,
+                    settlement_ref,
+                )?,
+            } != 1
         {
             return Err(PayrollError::InvalidState(
                 "claim was not reserved while its payout resolved".into(),

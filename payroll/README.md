@@ -11,3 +11,7 @@ cargo run --bin payroll-migrate -- <db.sqlite>     # apply schema migrations
 
 Schema, accrual formula, claim rules and test results:
 [../docs/PHASE1_PAYROLL.md](../docs/PHASE1_PAYROLL.md).
+
+Vesting compensation (agreements, schedule, claims, cancellation policy):
+[../docs/VESTING_PHASE1_ACCOUNTING.md](../docs/VESTING_PHASE1_ACCOUNTING.md)
+and payouts, API and UI: [../docs/VESTING_PHASE2_PAYOUTS.md](../docs/VESTING_PHASE2_PAYOUTS.md).

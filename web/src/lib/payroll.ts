@@ -30,8 +30,12 @@ export interface BalanceView {
   available_zec: string;
 }
 
+export type CompensationType = "stream" | "vesting";
+
 export interface PayoutView {
   id: string;
+  /** What `claim_id` refers to: a stream claim or a vesting claim. */
+  compensation_type: CompensationType;
   claim_id: string;
   state: PayoutState;
   amount_zats: number;
@@ -145,6 +149,117 @@ export interface FaucetResult {
   failure_reason: string | null;
 }
 
+export interface Member {
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: Role;
+  joined_at: number;
+}
+
+// ---- vesting ----
+
+export type VestingStatus = "draft" | "active" | "cancelled";
+/** Where an agreement is at `balance.as_of` (derived by the server). */
+export type VestingPhase = "draft" | "not_started" | "in_cliff" | "vesting" | "fully_vested" | "cancelled";
+export type ClaimStatus = "reserved" | "released" | "settled";
+
+export interface VestingBalanceView {
+  as_of: number;
+  total_zats: number;
+  total_zec: string;
+  vested_zats: number;
+  vested_zec: string;
+  unvested_zats: number;
+  unvested_zec: string;
+  /** Held for a withdrawal in progress; not paid. */
+  reserved_zats: number;
+  reserved_zec: string;
+  /** Paid: confirmed on chain. */
+  paid_zats: number;
+  paid_zec: string;
+  available_zats: number;
+  available_zec: string;
+}
+
+export interface VestingView {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  employee_user_id: string;
+  employee_display_name: string;
+  created_by: string;
+  method: "linear";
+  status: VestingStatus;
+  phase: VestingPhase;
+  total_zats: number;
+  total_zec: string;
+  start_at: number;
+  end_at: number;
+  duration_secs: number;
+  cliff_secs: number;
+  cliff_at: number;
+  /** What vests at once at the cliff (the cliff period's linear share); 0 without a cliff. */
+  cliff_vests_zats: number;
+  cliff_vests_zec: string;
+  created_at: number;
+  activated_at: number | null;
+  cancelled_at: number | null;
+  activatable: boolean;
+  cancellable: boolean;
+  balance: VestingBalanceView;
+}
+
+export interface VestingClaimView {
+  id: string;
+  compensation_type: "vesting";
+  amount_zats: number;
+  amount_zec: string;
+  status: ClaimStatus;
+  created_at: number;
+  resolved_at: number | null;
+  payout: PayoutView | null;
+}
+
+export interface VestingEvent {
+  kind: "created" | "activated" | "cancelled";
+  actor_user_id: string;
+  occurred_at: number;
+  vested_zats_after: number;
+}
+
+export interface VestingDetail {
+  agreement: VestingView;
+  viewer: "employee" | "manager";
+  events: VestingEvent[];
+  /** Newest first. */
+  claims: VestingClaimView[];
+  /** Newest first. */
+  payouts: PayoutView[];
+  address_locked: boolean;
+  /** The locked address — present only for the agreement's employee. */
+  address: string | null;
+  payouts_enabled: boolean;
+  /** Up to how much may be withdrawn now; null when nothing can be. */
+  withdrawable_zats: number | null;
+  withdrawable_zec: string | null;
+}
+
+/** A fee quote for a withdrawal. Nothing is reserved by quoting. */
+export interface QuoteView {
+  amount_zats: number;
+  amount_zec: string;
+  fee_zats: number | null;
+  fee_zec: string | null;
+  /** Debited from the organization's payout wallet (amount + fee). */
+  wallet_debit_zats: number | null;
+  valid_recipient: boolean;
+  sufficient: boolean;
+  reason: string | null;
+  network: "testnet";
+  required_confirmations: number;
+}
+
 /** An error returned by payroll-api, with its HTTP status and error code. */
 export class PayrollApiError extends Error {
   constructor(
@@ -222,6 +337,33 @@ export const payroll = {
   // returns that withdrawal (duplicate: true).
   withdraw: (actor: string, id: string, idempotencyKey: string) =>
     call<{ payout: PayoutView; duplicate: boolean }>("POST", `/v1/flow-streams/${enc(id)}/withdraw`, actor, {
+      idempotency_key: idempotencyKey,
+    }),
+
+  /** Members of an organization (owners/admins only). */
+  listMembers: (actor: string, org: string) => call<Member[]>("GET", `/v1/orgs/${enc(org)}/members`, actor),
+
+  // ---- vesting ----
+  orgVesting: (actor: string, org: string) => call<VestingView[]>("GET", `/v1/orgs/${enc(org)}/vesting`, actor),
+  /** Creates a draft (linear vesting). */
+  createVesting: (
+    actor: string,
+    org: string,
+    req: { employee_user_id: string; total_zec: string; start_at: number; duration_secs: number; cliff_secs: number | null },
+  ) => call<VestingView>("POST", `/v1/orgs/${enc(org)}/vesting`, actor, req),
+  myVesting: (actor: string) => call<VestingView[]>("GET", "/v1/me/vesting", actor),
+  vesting: (actor: string, id: string) => call<VestingDetail>("GET", `/v1/vesting/${enc(id)}`, actor),
+  activateVesting: (actor: string, id: string) => call<VestingView>("POST", `/v1/vesting/${enc(id)}/activate`, actor),
+  cancelVesting: (actor: string, id: string) => call<VestingView>("POST", `/v1/vesting/${enc(id)}/cancel`, actor),
+  setVestingAddress: (actor: string, id: string, address: string) =>
+    call<VestingDetail>("POST", `/v1/vesting/${enc(id)}/address`, actor, { address }),
+  vestingQuote: (actor: string, id: string, amountZec: string) =>
+    call<QuoteView>("POST", `/v1/vesting/${enc(id)}/quote`, actor, { amount_zec: amountZec }),
+  // Exactly-once: a repeat (same key and amount), or any request while a
+  // withdrawal is unfinished, returns that withdrawal (duplicate: true).
+  withdrawVesting: (actor: string, id: string, amountZec: string, idempotencyKey: string) =>
+    call<{ payout: PayoutView; duplicate: boolean }>("POST", `/v1/vesting/${enc(id)}/withdraw`, actor, {
+      amount_zec: amountZec,
       idempotency_key: idempotencyKey,
     }),
 };

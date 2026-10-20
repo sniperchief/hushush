@@ -428,7 +428,9 @@ pub async fn withdraw(
         let (po2, addr2, org2) = (po.clone(), address.clone(), org.clone());
         let q = blocking(move || {
             po2.wallet.ensure_account(&org2).map_err(wallet_err)?;
-            po2.wallet.quote(&addr2, amount, Some(&org2)).map_err(wallet_err)
+            po2.wallet
+                .quote(&addr2, amount, Some(&org2))
+                .map_err(wallet_err)
         })
         .await?;
         let fee = q.fee_zats.unwrap_or_default();

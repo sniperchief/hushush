@@ -1,0 +1,56 @@
+[2026-10-19T16:47:34Z] === hushush Vesting Phase 3 live run v3run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, agreement 0.05 ZEC over 1 day, withdraw 0.0003 ZEC)
+[2026-10-19T16:47:40Z] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4519232 sapling_activation=280000 branch_id=77190ad9
+[2026-10-19T16:47:40Z] network check: chain=test, NU7 testnet branch 77190ad9
+[2026-10-19T16:47:43Z] database hushush_live_v3run1 created (fresh; payroll-api migrates it on start)
+[2026-10-19T16:48:26Z] services up: wallet pid 124213, payroll-api pid 124246, web pid 124258
+[2026-10-19T16:48:27Z] payroll schema: {"vesting":true,"payout_cols":3}
+[2026-10-19T16:49:04Z] treasury total=12287167 spendable=12287167; carol total=1987999
+[2026-10-19T16:49:04Z] === 1: employer, faucet, employee membership, vesting agreement
+[2026-10-19T16:49:58Z] setup: {"agreementId":"85df3a12-6170-4f0a-b47e-e513e31bb33b","organizationId":"9585cb3b-738f-4596-aea1-ec747247ece4","status":"active","phase":"not_started","total_zats":5000000,"start_at":1792428688,"end_at":1792515088,"cliff_secs":0,"faucet":{"payment_id":"96f9b64c-6856-4b67-9e1a-185469ae9efd","state":"broadcast","amount_zats":1000000,"txid":"f9110c845d4309b2dd9dc5ab9cf22cc12e34f1cf663e6e4089e4aed576e424db"}}
+[2026-10-19T16:50:02Z] === 2: address and pre-start checks
+[2026-10-19T16:50:04Z] invalid address: {"status":422,"error":"invalid_recipient","message":"not a valid Zcash address for this network"}
+[2026-10-19T16:50:08Z] carol's address: status 200 locked True
+[2026-10-19T16:50:10Z] change to another address: {'status': 409, 'error': 'conflict', 'message': 'the payout address for this agreement is locked'}
+[2026-10-19T16:50:13Z] withdraw before the start: {"status":409,"key":"28c26dd3-ad14-4fa4-a0de-d816b60fd397","duplicate":null,"error":"insufficient_available","message":"requested 0.00030000 ZEC but only 0.00000000 ZEC is available","payout":null}
+[2026-10-19T16:50:14Z] === 3: wait for 30000 zats vested and the company account funded
+[2026-10-19T16:55:26Z] company wallet: {"spendable_zats":1000000,"total_zats":null}
+[2026-10-19T17:00:12Z] available: {"phase":"vesting","status":"active","balance":{"as_of":1792429212,"total_zats":5000000,"vested_zats":30324,"unvested_zats":4969676,"reserved_zats":0,"paid_zats":0,"available_zats":30324},"withdrawable_zats":30324,"address_locked":true,"claims":[],"payouts":[]}
+[2026-10-19T17:00:14Z] quote: {"status":200,"claim_id":"","amount_zats":30000,"amount_zec":"0.00030000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":40000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[2026-10-19T17:00:17Z] accounting BEFORE: {"phase":"vesting","status":"active","balance":{"as_of":1792429217,"total_zats":5000000,"vested_zats":30613,"unvested_zats":4969387,"reserved_zats":0,"paid_zats":0,"available_zats":30613},"withdrawable_zats":30613,"address_locked":true,"claims":[],"payouts":[]}
+[2026-10-19T17:00:17Z] company account total before: 1000000
+[2026-10-19T17:00:17Z] === 4: ONE withdrawal; retries must return it
+[2026-10-19T17:00:58Z] withdraw: {"status":201,"key":"a93d4afc-fedd-4956-9a8b-e3acd0de6232","duplicate":false,"payout":{"id":"e43b1e7a-4a59-4861-8124-63548eccd661","type":"vesting","state":"submitted","amount_zats":30000,"fee_estimate_zats":10000,"txid":"8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93"}}
+[2026-10-19T17:01:02Z] retry, same key: {"status":200,"key":"a93d4afc-fedd-4956-9a8b-e3acd0de6232","duplicate":true,"payout":{"id":"e43b1e7a-4a59-4861-8124-63548eccd661","type":"vesting","state":"submitted","amount_zats":30000,"fee_estimate_zats":10000,"txid":"8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93"}}
+[2026-10-19T17:01:04Z] new key while in flight: {"status":200,"key":"0cb44b4b-34da-4f3f-908f-0b69255f3902","duplicate":true,"payout":{"id":"e43b1e7a-4a59-4861-8124-63548eccd661","type":"vesting","state":"submitted","amount_zats":30000,"fee_estimate_zats":10000,"txid":"8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93"}}
+[2026-10-19T17:01:05Z] after withdraw: {"phase":"vesting","status":"active","balance":{"as_of":1792429265,"total_zats":5000000,"vested_zats":33391,"unvested_zats":4966609,"reserved_zats":30000,"paid_zats":0,"available_zats":3391},"withdrawable_zats":null,"address_locked":true,"claims":[{"id":"f21dc5e9-3cc9-43af-8ede-31035c4add64","status":"reserved","amount_zats":30000,"payout":"e43b1e7a-4a59-4861-8124-63548eccd661"}],"payouts":[{"id":"e43b1e7a-4a59-4861-8124-63548eccd661","type":"vesting","state":"submitted","amount_zats":30000,"fee_estimate_zats":10000,"fee_zats":10000,"txid":"8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93","mined_height":null,"confirmations":0,"required":10,"submitted_at":1792429258,"resolved_at":null}]}
+[2026-10-19T17:01:05Z] === 5: restart this run's payroll-api while the payout confirms
+[17:01:06] payout e43b1e7a: submitted 0/10
+[2026-10-19T17:01:10Z] payroll-api stopped (pid 124246)
+[2026-10-19T17:01:11Z] payroll-api started again (pid 124968)
+[2026-10-19T17:01:11Z] === 6: confirmations
+[17:01:12] payout e43b1e7a: submitted 0/10
+[17:02:23] payout e43b1e7a: submitted 1/10 mined 4519265
+[17:03:33] payout e43b1e7a: submitted 2/10 mined 4519265
+[17:03:53] payout e43b1e7a: submitted 4/10 mined 4519265
+[17:04:03] payout e43b1e7a: submitted 6/10 mined 4519265
+[17:04:23] payout e43b1e7a: submitted 7/10 mined 4519265
+[17:05:13] payout e43b1e7a: submitted 9/10 mined 4519265
+[17:05:43] payout e43b1e7a: confirmed 10/10 mined 4519265
+[2026-10-19T17:05:45Z] accounting AFTER: {"phase":"vesting","status":"active","balance":{"as_of":1792429544,"total_zats":5000000,"vested_zats":49537,"unvested_zats":4950463,"reserved_zats":0,"paid_zats":30000,"available_zats":19537},"withdrawable_zats":19537,"address_locked":true,"claims":[{"id":"f21dc5e9-3cc9-43af-8ede-31035c4add64","status":"settled","amount_zats":30000,"payout":"e43b1e7a-4a59-4861-8124-63548eccd661"}],"payouts":[{"id":"e43b1e7a-4a59-4861-8124-63548eccd661","type":"vesting","state":"confirmed","amount_zats":30000,"fee_estimate_zats":10000,"fee_zats":10000,"txid":"8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93","mined_height":4519265,"confirmations":10,"required":10,"submitted_at":1792429258,"resolved_at":1792429534}]}
+accounting: vested = paid + reserved + available, total = vested + unvested; one settled claim of 30000 zats; one confirmed vesting payout
+[2026-10-19T17:05:50Z] txid 8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93 fee 10000 (estimate 10000) mined 4519265 confirmations 10/10
+carol received exactly once: 30000 zats in 8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93
+[2026-10-19T17:05:54Z] carol tx status (lightwalletd, independent of the app): {
+  "txid": "8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93",
+  "mined_height": 4519265,
+  "chain_tip": 4519274,
+  "confirmations": 10
+}
+[2026-10-19T17:05:56Z] treasury-wallet transactions carrying payout e43b1e7a-4a59-4861-8124-63548eccd661's memo: 1
+[2026-10-19T17:05:57Z] carol total 1987999 → 2017999 (delta 30000, expected 30000)
+[2026-10-19T17:06:22Z] company account total 1000000 → 960000 (delta 40000, expected 40000 = withdrawal + fee)
+[2026-10-19T17:06:24Z] treasury total 12287167 → 11277167 (delta 1010000, expected 1010000 = faucet top-up + its fee)
+[2026-10-19T17:06:26Z] pages: {"employee_page_200":true,"employee_sees_paid":true,"employer_sees_paid":true,"employee_sees_txid":true,"employee_sees_own_address":true,"employer_page_200":true,"employer_sees_txid":true,"employer_never_sees_address":true}
+[2026-10-19T17:06:26Z] faucet txid: f9110c845d4309b2dd9dc5ab9cf22cc12e34f1cf663e6e4089e4aed576e424db
+[2026-10-19T17:06:27Z] paid txid: 8571ed19b8ea556b59a7349a8655666fd1d46e30e74258a780b5c70e2f19be93
+[2026-10-19T17:06:27Z] PASS: vesting withdrawal live on testnet — agreement activated, vested balance withdrawn once, confirmed (10), claim settled once, payroll-api restart mid-confirmation

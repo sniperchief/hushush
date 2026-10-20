@@ -1,0 +1,284 @@
+2026-10-19T19:14:52.682398Z  INFO hushush_payout_wallet: starting payout wallet (TESTNET); syncing and recovering wallet=treasury lightwalletd=https://testnet.zec.rocks:443
+2026-10-19T19:14:53.581051Z  INFO schemerz: Migrating everything
+2026-10-19T19:14:53.966845Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:14:54.406299Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:14:54.785690Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:14:54.989486Z  INFO zcash_client_backend::sync: Latest block height is 4519604
+2026-10-19T19:14:55.007831Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519584..4519605)
+2026-10-19T19:14:57.209494Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519584..4519605)
+2026-10-19T19:14:57.456604Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:14:58.912974Z  INFO hushush_payout_wallet: treasury account (ZIP 32 index 0) treasury=110f5d76-d59d-4000-85eb-30ac52fb7d1f
+2026-10-19T19:15:02.597401Z  INFO hushush_payout_wallet: payout wallet listening on 127.0.0.1:7979
+2026-10-19T19:15:19.567304Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:15:19.923712Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:15:20.496742Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:15:21.115332Z  INFO zcash_client_backend::sync: Latest block height is 4512026-10-19T19:16:24.723612Z  INFO hushush_payroll_api::payouts: faucet top-up requested payment_id=f38da9b2-f47d-445d-a4ff-322dd6e502ca state=Broadcast
+2026-10-19T19:24:26.516491Z  INFO hushush_payroll_api::vesting: vesting withdrawal reserved; submitting to wallet payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 agreement_id=095da8af-d3b8-4b1b-9eae-3fedc2690f06 amount_zats=20000
+2026-10-19T19:24:26.602910Z  INFO hushush_payroll_api::vesting: vesting withdrawal submission recorded payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 state="requires_reconciliation" txid=None
+t_key="8d29e7dd-199a-40e7-91ec-8b0dee74faa2" payment_id="f38da9b2-f47d-445d-a4ff-322dd6e502ca" amount_zats=1000000
+2026-10-19T19:15:27.674979Z  INFO hushush_payout_wallet::actor: payment accepted; building payment_id="f38da9b2-f47d-445d-a4ff-322dd6e502ca" amount_zats=1000000
+2026-10-19T19:15:28.576590Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:15:29.038381Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:15:29.601491Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:15:30.113194Z  INFO zcash_client_backend::sync: Latest block height is 4519608
+2026-10-19T19:15:30.129080Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519608..4519609)
+2026-10-19T19:15:30.830219Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519608..4519609)
+2026-10-19T19:15:31.096775Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:16:20.119819Z  INFO hushush_payout_wallet::actor: transaction built and recorded payment_id="f38da9b2-f47d-445d-a4ff-322dd6e502ca" txid=a865055405c25775e2def63869e9b7c3664d682dcbcfeb6f5612799281aeab34 fee_zats=10000
+2026-10-19T19:16:23.014404Z  INFO hushush_payout_wallet::actor: broadcast accepted payment_id=f38da9b2-f47d-445d-a4ff-322dd6e502ca txid=Some("a865055405c25775e2def63869e9b7c3664d682dcbcfeb6f5612799281aeab34")
+2026-10-19T19:16:24.675661Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:16:25.002160Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:16:25.356098Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:16:25.758151Z  INFO zcash_client_backend::sync: Latest block height is 4519608
+2026-10-19T19:16:25.772212Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:17:28.158517Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:17:29.338793Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:17:30.872614Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:17:31.600198Z  INFO zcash_client_backend::sync: Latest block height is 4519610
+2026-10-19T19:17:31.613651Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519609..4519611)
+2026-10-19T19:17:34.858806Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519609..4519611)
+2026-10-19T19:17:35.109309Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:17:39.035905Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:17:39.446061Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:17:40.777387Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:17:41.393134Z  INFO zcash_client_backend::sync: Latest block height is 4519610
+2026-10-19T19:17:41.406842Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:17:57.064413Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:17:57.779404Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:17:58.828459Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:18:03.004301Z  INFO zcash_client_backend::sync: Latest block height is 4519611
+2026-10-19T19:18:03.019067Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519611..4519612)
+2026-10-19T19:18:07.180982Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519611..4519612)
+2026-10-19T19:18:07.432958Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:18:21.081040Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:18:21.430437Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:18:22.865589Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:18:23.279447Z  INFO zcash_client_backend::sync: Latest block height is 4519614
+2026-10-19T19:18:23.295363Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519612..4519615)
+2026-10-19T19:18:26.024543Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519612..4519615)
+2026-10-19T19:18:26.396607Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:18:39.374846Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:18:39.965054Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:18:40.271265Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:18:41.821409Z  INFO zcash_client_backend::sync: Latest block height is 4519614
+2026-10-19T19:18:41.835304Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:18:58.874680Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:19:00.201209Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:19:00.447604Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:19:00.735921Z  INFO zcash_client_backend::sync: Latest block height is 4519614
+2026-10-19T19:19:00.747017Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:19:24.165359Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:19:33.147555Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:19:37.965950Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:19:44.182398Z  INFO zcash_client_backend::sync: Latest block height is 4519614
+2026-10-19T19:19:44.195415Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:19:57.994395Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:19:58.299494Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:19:58.619876Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:19:58.843991Z  INFO zcash_client_backend::sync: Latest block height is 4519615
+2026-10-19T19:19:58.857249Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519615..4519616)
+2026-10-19T19:19:59.441140Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519615..4519616)
+2026-10-19T19:19:59.601314Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:20:18.064997Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:20:18.479263Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:20:18.754982Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:20:18.932770Z  INFO zcash_client_backend::sync: Latest block height is 4519616
+2026-10-19T19:20:18.943789Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519616..4519617)
+2026-10-19T19:20:19.500391Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519616..4519617)
+2026-10-19T19:20:19.694463Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:20:38.081920Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:20:38.446230Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:20:38.777092Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:20:39.261442Z  INFO zcash_client_backend::sync: Latest block height is 4519617
+2026-10-19T19:20:39.280825Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519617..4519618)
+2026-10-19T19:20:40.473191Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519617..4519618)
+2026-10-19T19:20:41.080611Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:20:59.220022Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:20:59.537730Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:20:59.975343Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:21:00.293224Z  INFO zcash_client_backend::sync: Latest block height is 4519618
+2026-10-19T19:21:00.308627Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519618..4519619)
+2026-10-19T19:21:01.283231Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519618..4519619)
+2026-10-19T19:21:01.479371Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:21:16.791195Z  WARN hushush_payout_wallet: built with fault injection (test-only); WALLET_FAULT=Some("crash_before_build")
+2026-10-19T19:21:16.793520Z  INFO hushush_payout_wallet: starting payout wallet (TESTNET); syncing and recovering wallet=treasury lightwalletd=https://testnet.zec.rocks:443
+2026-10-19T19:21:27.954041Z  INFO schemerz: Migrating everything
+2026-10-19T19:21:31.995711Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:22:04.971416Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:22:07.450528Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:22:13.161102Z  INFO zcash_client_backend::sync: Latest block height is 4519618
+2026-10-19T19:22:13.181668Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:24:21.452975Z  INFO hushush_payout_wallet: treasury account (ZIP 32 index 0) treasury=110f5d76-d59d-4000-85eb-30ac52fb7d1f
+2026-10-19T19:24:24.818013Z  INFO hushush_payout_wallet: payout wallet listening on 127.0.0.1:7979
+2026-10-19T19:24:26.577754Z ERROR hushush_payout_wallet::actor: FAULT INJECTION: exiting at 'crash_before_build'
+2026-10-19T19:24:34.552342Z  INFO postgres::config: NOTICE: relation "payroll_schema_migrations" already exists, skipping
+2026-10-19T19:24:34.876616Z  INFO hushush_payroll_api: payouts ENABLED (testnet payout wallet configured) confirmations=10
+2026-10-19T19:24:34.876995Z  INFO hushush_payroll_api::payouts: payout worker started owner=payroll-api-f420c911-204e-414f-8604-e9dca89dd05a
+2026-10-19T19:24:34.877265Z  INFO hushush_payroll_api: payroll-api listening on 127.0.0.1:7980
+2026-10-19T19:24:36.932779Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 claim_id=23b6eb1a-e235-4921-9906-b79962c06dd7 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:24:53.972388Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 claim_id=23b6eb1a-e235-4921-9906-b79962c06dd7 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:25:11.003153Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 claim_id=23b6eb1a-e235-4921-9906-b79962c06dd7 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:25:28.039745Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 claim_id=23b6eb1a-e235-4921-9906-b79962c06dd2026-10-19T19:25:31.219738Z  INFO schemerz: Migrating everything
+2026-10-19T19:25:34.081969Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:25:34.599720Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:25:34.822318Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:25:35.159960Z  INFO zcash_clie2026-10-19T19:25:43.061522Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=bd9ab0b5-1656-4388-b128-14c81cb60f05 claim_id=23b6eb1a-e235-4921-9906-b79962c06dd7 compensation_type="vesting" state="failed" confirmations=0 txid=None detail=Some("interrupted before a transaction was built")
+2026-10-19T19:26:04.917180Z  INFO hushush_payroll_api::vesting: vesting withdrawal reserved; submitting to wallet payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 agreement_id=387e29cc-98c4-4dcd-96a3-966b39fec515 amount_zats=20000
+2026-10-19T19:26:53.837052Z  INFO hushush_payroll_api::vesting: vesting withdrawal submission recorded payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 state="requires_reconciliation" txid=None
+2026-10-19T19:27:00.478510Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:27:17.512961Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:27:34.550755Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:27:52.179570Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=0 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:28:07.856296Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=0 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:28:23.402452Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=1 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:28:39.070028Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=2 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:28:54.581550Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=2 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:29:10.212357Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=4 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:29:26.231775Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=4 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:29:43.267035Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=4 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:29:59.710764Z  INFO hushush_payroll_api::vesting: vesting withdrawal reserved; submitting to wallet payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f agreement_id=77b1d214-3945-42ae-a3b8-64e6c9514180 amount_zats=20000
+2026-10-19T19:29:59.807684Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=6 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:30:15.315630Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=6 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:30:30.802972Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=6 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:30:46.420982Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=7 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:30:48.392042Z  INFO hushush_payroll_api::vesting: vesting withdrawal submission recorded payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f state="requires_reconciliation" txid=None
+2026-10-19T19:31:05.527264Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:31:05.527356Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=7 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:31:24.609886Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="submitted" confirmations=7 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:31:24.609975Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:31:40.861183Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=0 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:31:40.861257Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=2873eb22-9f59-4cac-a537-7c373539ac15 claim_id=1b692fe7-48b2-460c-89d0-1f9c6ec073c4 compensation_type="vesting" state="confirmed" confirmations=10 txid=Some("4f290c10fcd829e1fee15bff8a9bc903ab5b4ab317c28c12d787ab83ee9ade03") detail=None
+2026-10-19T19:31:56.916462Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=0 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:32:12.973938Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=0 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:32:28.562387Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=0 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:32:44.549601Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=0 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:33:20.769900Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=1 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:33:38.950872Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=2 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:33:55.689540Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=2 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:34:11.187888Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=2 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:34:26.821830Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=2 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:34:43.047611Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=3 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:35:03.146310Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=5 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:35:19.451469Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=5 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:35:49.985241Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=7 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:36:36.231635Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="submitted" confirmations=9 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:37:31.678579Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f6ef362b-ca27-4288-9334-2d587b7a288f claim_id=f930dd05-0516-4a28-8c9b-d83e4937883b compensation_type="vesting" state="confirmed" confirmations=11 txid=Some("f18f8d5467c184444619afba4054eb6db18508f83ee2ed8c7b941996c8e31e0a") detail=None
+2026-10-19T19:38:12.241957Z  WARN hushush_payroll_api::payouts: payout wallet call failed: wallet unavailable: http://127.0.0.1:7979/v1/accounts: Network Error: Network Error: Error encountered in the status line: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond. (os error 10060)
+2026-10-19T19:40:15.336599Z  INFO hushush_payroll_api::vesting: vesting withdrawal reserved; submitting to wallet payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 agreement_id=30067689-79db-4495-9336-107e70020df0 amount_zats=20000
+2026-10-19T19:41:06.180318Z  INFO hushush_payroll_api::vesting: vesting withdrawal submission recorded payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 state="requires_reconciliation" txid=None
+2026-10-19T19:41:19.092994Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:41:36.127500Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:41:53.172951Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:42:10.207383Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="requires_reconciliation" confirmations=0 txid=None detail=Some("payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet")
+2026-10-19T19:42:45.110548Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=5 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:42:57.761639Z  INFO hushush_payroll_api::vesting: vesting withdrawal reserved; submitting to wallet payout_id=f76cd89b-2f45-4add-9635-39ad307d716e agreement_id=723568df-6cc3-4e37-b3bb-67daff810af7 amount_zats=20000
+2026-10-19T19:43:00.576316Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=6 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:43:16.174586Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=7 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:43:31.697099Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=7 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:43:47.181234Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=7 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:43:47.940932Z  INFO hushush_payroll_api::vesting: vesting withdrawal submission recorded payout_id=f76cd89b-2f45-4add-9635-39ad307d716e state="submitted" txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb")
+2026-10-19T19:44:03.545523Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=7 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:44:03.545610Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=0 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:44:19.616356Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=7 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:44:19.616455Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=1 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:44:35.559140Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=9 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:44:35.559279Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=2 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:44:51.481575Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=9 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:44:51.481650Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=2 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:45:07.354372Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="submitted" confirmations=9 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:45:07.354455Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=2 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:45:23.766968Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=d91782bb-8dc7-41f1-8345-1465ded155d2 claim_id=b220cc9a-e99b-45eb-ada8-c78a62d4534e compensation_type="vesting" state="confirmed" confirmations=10 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d") detail=None
+2026-10-19T19:45:23.767081Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=3 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:45:44.596374Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=5 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:46:12.981614Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=5 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:46:28.875743Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=5 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:46:44.518855Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=5 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:47:02.443208Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=5 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:47:26.784917Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=6 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:47:42.273567Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=7 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:47:58.451275Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=8 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:48:15.122800Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=8 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:48:30.826786Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="submitted" confirmations=8 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+2026-10-19T19:48:46.652517Z  INFO hushush_payroll_api::payouts: payout reconciled payout_id=f76cd89b-2f45-4add-9635-39ad307d716e claim_id=da7ba545-599e-47e0-b7d3-ce497448b6fb compensation_type="vesting" state="confirmed" confirmations=10 txid=Some("87110fa2172bf461d43e5eacaf75a043ce50e8af4e63783753e6065d1694c0cb") detail=None
+ubtrees
+2026-10-19T19:44:28.264142Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:44:28.468610Z  INFO zcash_client_backend::sync: Latest block height is 4519674
+2026-10-19T19:44:28.481649Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519673..4519675)
+2026-10-19T19:44:28.925794Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519673..4519675)
+2026-10-19T19:44:29.510244Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:44:30.075703Z  INFO hushush_payout_wallet::actor: broadcast accepted payment_id=d91782bb-8dc7-41f1-8345-1465ded155d2 txid=Some("3fc96b8f496f948efaf3c7959ddeb64db8903e093e4120d42b7df3d3b962a02d")
+2026-10-19T19:44:48.199702Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:44:48.437250Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:44:48.628686Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:44:48.847266Z  INFO zcash_client_backend::sync: Latest block height is 4519674
+2026-10-19T19:44:48.860458Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:45:07.944714Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:45:08.119732Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:45:08.303211Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:45:08.507407Z  INFO zcash_client_backend::sync: Latest block height is 4519674
+2026-10-19T19:45:08.522622Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:45:28.170914Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:45:28.448745Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:45:28.686499Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:45:28.926766Z  INFO zcash_client_backend::sync: Latest block height is 4519677
+2026-10-19T19:45:28.942248Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519675..4519678)
+2026-10-19T19:45:31.071841Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519675..4519678)
+2026-10-19T19:45:31.281936Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:45:52.031075Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:45:52.558507Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:45:52.950492Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:45:53.650983Z  INFO zcash_client_backend::sync: Latest block height is 4519677
+2026-10-19T19:45:53.665075Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:46:40.492907Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:46:41.078577Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:46:41.286551Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:46:41.492452Z  INFO zcash_client_backend::sync: Latest block height is 4519677
+2026-10-19T19:46:41.506966Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:46:43.639031Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:46:43.814329Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:46:43.991184Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:46:44.173026Z  INFO zcash_client_backend::sync: Latest block height is 4519677
+2026-10-19T19:46:44.183905Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:47:12.581139Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:47:12.911931Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:47:13.172331Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:47:13.444679Z  INFO zcash_client_backend::sync: Latest block height is 4519678
+2026-10-19T19:47:13.456705Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519678..4519679)
+2026-10-19T19:47:14.458249Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519678..4519679)
+2026-10-19T19:47:14.739557Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:47:37.296106Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:47:37.602910Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:47:38.021093Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:47:38.422076Z  INFO zcash_client_backend::sync: Latest block height is 4519679
+2026-10-19T19:47:38.434475Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519679..4519680)
+2026-10-19T19:47:38.934578Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519679..4519680)
+2026-10-19T19:47:39.122487Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:47:44.053607Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:47:44.852999Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:47:45.180512Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:47:46.409166Z  INFO zcash_client_backend::sync: Latest block height is 4519680
+2026-10-19T19:47:46.421407Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519680..4519681)
+2026-10-19T19:47:49.413797Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519680..4519681)
+2026-10-19T19:47:49.610985Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:48:03.715230Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:48:03.908954Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:48:04.132629Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:48:04.466206Z  INFO zcash_client_backend::sync: Latest block height is 4519680
+2026-10-19T19:48:04.480622Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:48:24.815572Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:48:25.434100Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:48:25.823761Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:48:26.072619Z  INFO zcash_client_backend::sync: Latest block height is 4519680
+2026-10-19T19:48:26.084329Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:48:45.700167Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:48:46.053437Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:48:46.520335Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:48:52.668529Z  INFO zcash_client_backend::sync: Latest block height is 4519682
+2026-10-19T19:48:52.681532Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519681..4519683)
+2026-10-19T19:48:53.486405Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519681..4519683)
+2026-10-19T19:48:53.737640Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:49:10.800712Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:49:11.732193Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:49:12.438645Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:49:13.144080Z  INFO zcash_client_backend::sync: Latest block height is 4519682
+2026-10-19T19:49:13.158206Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...

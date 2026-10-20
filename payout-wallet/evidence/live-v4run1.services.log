@@ -1,0 +1,51 @@
+2026-10-19T19:04:34.643620Z  INFO hushush_payout_wallet: starting payout wallet (TESTNET); syncing and recovering wallet=treasury lightwalletd=https://testnet.zec.rocks:443
+2026-10-19T19:04:35.401750Z  INFO schemerz: Migrating everything
+2026-10-19T19:04:36.034508Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:04:36.352379Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:04:37.142359Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:04:37.396402Z  INFO zcash_client_backend::sync: Latest block height is 4519578
+2026-10-19T19:04:37.414030Z  INFO zcash_client_backend::sync: Fetching Verify(4519276..4519286)
+2026-10-19T19:04:38.296339Z  INFO zcash_client_backend::sync: Scanning Verify(4519276..4519286)
+2026-10-19T19:04:38.554382Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519286..4519579)
+2026-10-19T19:04:40.509029Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519286..4519579)
+2026-10-19T19:04:41.726599Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:04:42.174812Z  INFO hushush_payout_wallet: treasury account (ZIP 32 index 0) treasury=110f5d76-d59d-4000-85eb-30ac52fb7d1f
+2026-10-19T19:04:44.822933Z  INFO hushush_payout_wallet: payout wallet listening on 127.0.0.1:7979
+2026-10-19T19:05:02.830892Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:05:03.094807Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:05:03.306328Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:05:03.515720Z  INFO zcash_client_backend::sync: Latest block height is 4512026-10-19T19:08:29.050888Z  INFO hushush_payroll_api::payouts: faucet top-up requested payment_id=f9da3185-5168-4094-8f90-3c084df21d5d state=Failed
+781ms
+(node:27216) ExperimentalWarning: The supports Web Crypto API method is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27216) ExperimentalWarning: The ML-DSA-44 Web Crypto API algorithm is an experimental feature and might change at any time
+rees
+2026-10-19T19:05:28.137738Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:05:28.915207Z  INFO zcash_client_backend::sync: Latest block height is 4519581
+2026-10-19T19:05:28.928007Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519580..4519582)
+2026-10-19T19:05:29.595459Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519580..4519582)
+2026-10-19T19:05:29.815606Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:05:43.775782Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:05:44.213343Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:05:45.636715Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:05:46.282459Z  INFO zcash_client_backend::sync: Latest block height is 4519581
+2026-10-19T19:05:46.296061Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:06:03.145290Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:06:03.723698Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:06:04.239067Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:06:05.261121Z  INFO zcash_client_backend::sync: Latest block height is 4519582
+2026-10-19T19:06:05.275558Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519582..4519583)
+2026-10-19T19:06:05.863874Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519582..4519583)
+2026-10-19T19:06:06.025989Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:06:23.757854Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:06:23.993121Z  INFO zcash_client_backend::sync: Orchard tree has 3 subtrees
+2026-10-19T19:06:24.352611Z  INFO zcash_client_backend::sync: Ironwood tree has 8 subtrees
+2026-10-19T19:06:24.760657Z  INFO zcash_client_backend::sync: Latest block height is 4519584
+2026-10-19T19:06:24.774990Z  INFO zcash_client_backend::sync: Fetching ChainTip(4519583..4519585)
+2026-10-19T19:06:25.364071Z  INFO zcash_client_backend::sync: Scanning ChainTip(4519583..4519585)
+2026-10-19T19:06:25.532496Z  INFO zcash_client_backend::sync: Waiting for cached blocks to be deleted...
+2026-10-19T19:06:26.686446Z  INFO hushush_payout_wallet::actor: created a company payout account account_key="a4ae783c-eafc-47ee-b465-2dcc567df3d2" birthday=4519584
+2026-10-19T19:06:26.725798Z  INFO hushush_payout_wallet::actor: faucet top-up from the treasury account_key="a4ae783c-eafc-47ee-b465-2dcc567df3d2" payment_id="f9da3185-5168-4094-8f90-3c084df21d5d" amount_zats=1000000
+2026-10-19T19:06:26.782599Z  INFO hushush_payout_wallet::actor: payment accepted; building payment_id="f9da3185-5168-4094-8f90-3c084df21d5d" amount_zats=1000000
+2026-10-19T19:06:29.027972Z  INFO zcash_client_backend::sync: Sapling tree has 6 subtrees
+2026-10-19T19:08:29.049169Z  INFO hushush_payout_wallet::actor: payment failed before building: could not sync the wallet: sync failed: Error while communicating with lightwalletd server: code: 'The operation was cancelled', message: "Timeout expired", source: tonic::transport::Error(Transport, TimeoutExpired(())) payment_id="f9da3185-5168-4094-8f90-3c084df21d5d"

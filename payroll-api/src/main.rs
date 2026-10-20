@@ -14,6 +14,7 @@
 mod flow;
 mod payouts;
 mod seal;
+mod vesting;
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -677,6 +678,18 @@ fn app(state: AppState) -> Router {
         .route("/v1/flow-streams/{id}", get(flow::flow_stream))
         .route("/v1/flow-streams/{id}/address", post(flow::set_address))
         .route("/v1/flow-streams/{id}/withdraw", post(flow::withdraw))
+        // Vesting
+        .route(
+            "/v1/orgs/{org}/vesting",
+            get(vesting::list_org).post(vesting::create),
+        )
+        .route("/v1/me/vesting", get(vesting::mine))
+        .route("/v1/vesting/{id}", get(vesting::detail))
+        .route("/v1/vesting/{id}/activate", post(vesting::activate))
+        .route("/v1/vesting/{id}/cancel", post(vesting::cancel))
+        .route("/v1/vesting/{id}/address", post(vesting::set_address))
+        .route("/v1/vesting/{id}/quote", post(vesting::quote))
+        .route("/v1/vesting/{id}/withdraw", post(vesting::withdraw))
         .with_state(state)
 }
 

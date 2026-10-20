@@ -1,0 +1,9 @@
+[2026-10-19T19:04:17Z] === hushush Vesting Phase 4 live fault-injection run v4run1 (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, 0.0002 ZEC per withdrawal)
+[2026-10-19T19:04:25Z] binaries: wallet cd4ba50d6836635f fault 7640b0c4042bc307 payroll-api ac500ccfbaf5171d
+[2026-10-19T19:04:26Z] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4519577 sapling_activation=280000 branch_id=77190ad9
+[2026-10-19T19:04:27Z] network check: chain=test, NU7 testnet branch 77190ad9
+[2026-10-19T19:04:32Z] database hushush_live_v4run1 created
+[2026-10-19T19:05:48Z] services up: wallet pid 128862, payroll-api pid 128878, web pid 128886
+[2026-10-19T19:05:49Z] payroll schema: [{"v":6}]
+[2026-10-19T19:06:12Z] treasury total=11277167; carol total=2017999
+[2026-10-19T19:06:13Z] === setup: company, faucet, employee, five agreements

@@ -454,14 +454,18 @@ impl StoreTx for SqliteTx<'_> {
     fn insert_payout(&mut self, p: &Payout) -> Result<()> {
         self.0
             .execute(
-                "INSERT INTO payouts (id, claim_id, stream_id, requested_by, amount_zats,
-                     recipient_fingerprint, fee_estimate_zats, max_fee_zats, state, confirmations,
-                     lease_owner, lease_until, created_at, updated_at)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 0, ?10, ?11, ?12, ?12)",
+                "INSERT INTO payouts (id, compensation_type, claim_id, stream_id, vesting_claim_id,
+                     vesting_agreement_id, requested_by, amount_zats, recipient_fingerprint,
+                     fee_estimate_zats, max_fee_zats, state, confirmations, lease_owner,
+                     lease_until, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, 0, ?13, ?14, ?15, ?15)",
                 params![
                     p.id,
-                    p.claim_id,
-                    p.stream_id,
+                    p.compensation_type.as_str(),
+                    stream_ref(p).0,
+                    stream_ref(p).1,
+                    vesting_ref(p).0,
+                    vesting_ref(p).1,
                     p.requested_by,
                     p.amount_zats,
                     p.recipient_fingerprint,
@@ -504,6 +508,25 @@ impl StoreTx for SqliteTx<'_> {
             "SELECT {PAYOUT_COLS} FROM payouts WHERE stream_id = ?1 ORDER BY created_at, id"
         ))?;
         let rows = q.query_map([stream_id], payout_from_row)?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    fn payout_by_vesting_claim(&mut self, claim_id: &str, _lock: bool) -> Result<Option<Payout>> {
+        Ok(self
+            .0
+            .query_row(
+                &format!("SELECT {PAYOUT_COLS} FROM payouts WHERE vesting_claim_id = ?1"),
+                [claim_id],
+                payout_from_row,
+            )
+            .optional()?)
+    }
+
+    fn payouts_of_vesting(&mut self, agreement_id: &str) -> Result<Vec<Payout>> {
+        let mut q = self.0.prepare(&format!(
+            "SELECT {PAYOUT_COLS} FROM payouts WHERE vesting_agreement_id = ?1 ORDER BY created_at, id"
+        ))?;
+        let rows = q.query_map([agreement_id], payout_from_row)?;
         Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
@@ -710,6 +733,305 @@ impl StoreTx for SqliteTx<'_> {
             )
             .optional()?)
     }
+
+    fn count_vesting_for_member(&mut self, org: &str, user: &str) -> Result<i64> {
+        Ok(self.0.query_row(
+            "SELECT COUNT(*) FROM vesting_agreements WHERE organization_id = ?1 AND employee_user_id = ?2",
+            params![org, user],
+            |r| r.get(0),
+        )?)
+    }
+
+    fn insert_vesting(&mut self, a: &VestingAgreement) -> Result<()> {
+        self.0.execute(
+            "INSERT INTO vesting_agreements (id, organization_id, employee_user_id, created_by,
+                 total_zats, start_at, duration_secs, cliff_secs, method, status, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?11)",
+            params![
+                a.id,
+                a.organization_id,
+                a.employee_user_id,
+                a.created_by,
+                a.terms.total_zats,
+                a.terms.start_at,
+                a.terms.duration_secs,
+                a.terms.cliff_secs,
+                a.terms.method.as_str(),
+                a.status.as_str(),
+                a.created_at
+            ],
+        )?;
+        Ok(())
+    }
+
+    fn load_vesting(&mut self, id: &str, _lock: bool) -> Result<Option<VestingAgreement>> {
+        Ok(self
+            .0
+            .query_row(
+                &format!("SELECT {VESTING_COLS} FROM vesting_agreements v WHERE v.id = ?1"),
+                [id],
+                vesting_from_row,
+            )
+            .optional()?)
+    }
+
+    fn activate_vesting_cas(&mut self, id: &str, actor: &str, now: i64) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE vesting_agreements
+             SET status = 'active', activated_at = ?1, activated_by = ?2, updated_at = ?1
+             WHERE id = ?3 AND status = 'draft'",
+            params![now, actor, id],
+        )?)
+    }
+
+    fn cancel_vesting_cas(
+        &mut self,
+        id: &str,
+        from: VestingStatus,
+        actor: &str,
+        now: i64,
+        vested: i64,
+    ) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE vesting_agreements
+             SET status = 'cancelled', cancelled_at = ?1, cancelled_by = ?2,
+                 vested_at_cancel_zats = ?3, updated_at = ?1
+             WHERE id = ?4 AND status = ?5",
+            params![now, actor, vested, id, from.as_str()],
+        )?)
+    }
+
+    fn insert_vesting_event(
+        &mut self,
+        agreement_id: &str,
+        kind: &str,
+        actor: &str,
+        now: i64,
+        vested_after: i64,
+    ) -> Result<()> {
+        self.0.execute(
+            "INSERT INTO vesting_events (agreement_id, kind, actor_user_id, occurred_at, vested_zats_after)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![agreement_id, kind, actor, now, vested_after],
+        )?;
+        Ok(())
+    }
+
+    fn vesting_events_of(&mut self, agreement_id: &str) -> Result<Vec<VestingEvent>> {
+        let mut q = self.0.prepare(
+            "SELECT kind, actor_user_id, occurred_at, vested_zats_after
+             FROM vesting_events WHERE agreement_id = ?1 ORDER BY id",
+        )?;
+        let rows = q.query_map([agreement_id], |r| {
+            Ok(VestingEvent {
+                kind: r.get(0)?,
+                actor_user_id: r.get(1)?,
+                occurred_at: r.get(2)?,
+                vested_zats_after: r.get(3)?,
+            })
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    fn list_vesting(&mut self, filter: VestingFilter<'_>) -> Result<Vec<VestingListedRow>> {
+        let (cond, arg) = match filter {
+            VestingFilter::Organization(o) => ("v.organization_id = ?1", o),
+            VestingFilter::Employee(u) => {
+                ("v.employee_user_id = ?1 AND v.activated_at IS NOT NULL", u)
+            }
+        };
+        let mut q = self.0.prepare(&format!(
+            "SELECT {VESTING_COLS}, o.name, u.display_name,
+                    COALESCE((SELECT SUM(amount_zats) FROM vesting_claims c WHERE c.agreement_id = v.id AND c.status = 'reserved'), 0),
+                    COALESCE((SELECT SUM(amount_zats) FROM vesting_claims c WHERE c.agreement_id = v.id AND c.status = 'settled'), 0)
+             FROM vesting_agreements v
+             JOIN organizations o ON o.id = v.organization_id
+             JOIN users u ON u.id = v.employee_user_id
+             WHERE {cond} ORDER BY v.created_at DESC, v.id"
+        ))?;
+        let rows = q.query_map([arg], |r| {
+            Ok(VestingListedRow {
+                agreement: vesting_from_row(r)?,
+                organization_name: r.get(17)?,
+                employee_display_name: r.get(18)?,
+                reserved: r.get(19)?,
+                paid: r.get(20)?,
+            })
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    fn vesting_claim_sums(&mut self, agreement_id: &str) -> Result<(i64, i64)> {
+        Ok(self.0.query_row(
+            "SELECT COALESCE(SUM(CASE WHEN status = 'reserved' THEN amount_zats END), 0),
+                    COALESCE(SUM(CASE WHEN status = 'settled'  THEN amount_zats END), 0)
+             FROM vesting_claims WHERE agreement_id = ?1",
+            [agreement_id],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )?)
+    }
+
+    fn vesting_claim_by_key(
+        &mut self,
+        agreement_id: &str,
+        key: &str,
+    ) -> Result<Option<VestingClaim>> {
+        Ok(self
+            .0
+            .query_row(
+                &format!(
+                    "SELECT {VCLAIM_COLS} FROM vesting_claims WHERE agreement_id = ?1 AND idempotency_key = ?2"
+                ),
+                params![agreement_id, key],
+                vesting_claim_from_row,
+            )
+            .optional()?)
+    }
+
+    fn insert_vesting_claim(
+        &mut self,
+        id: &str,
+        agreement_id: &str,
+        requested_by: &str,
+        key: &str,
+        amount: i64,
+        vested: i64,
+        now: i64,
+    ) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO vesting_claims (id, agreement_id, requested_by, idempotency_key,
+                     amount_zats, status, vested_at_reservation_zats, created_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, 'reserved', ?6, ?7)",
+                params![id, agreement_id, requested_by, key, amount, vested, now],
+            )
+            .map_err(|e| unique_to_conflict(e, "duplicate claim request"))?;
+        Ok(())
+    }
+
+    fn load_vesting_claim(&mut self, id: &str, _lock: bool) -> Result<Option<VestingClaim>> {
+        Ok(self
+            .0
+            .query_row(
+                &format!("SELECT {VCLAIM_COLS} FROM vesting_claims WHERE id = ?1"),
+                [id],
+                vesting_claim_from_row,
+            )
+            .optional()?)
+    }
+
+    fn update_vesting_claim_cas(
+        &mut self,
+        id: &str,
+        to: ClaimStatus,
+        now: i64,
+        actor: &str,
+        settlement_ref: Option<&str>,
+    ) -> Result<usize> {
+        Ok(self.0.execute(
+            "UPDATE vesting_claims SET status = ?1, resolved_at = ?2, resolved_by = ?3, settlement_ref = ?4
+             WHERE id = ?5 AND status = 'reserved'",
+            params![to.as_str(), now, actor, settlement_ref, id],
+        )?)
+    }
+
+    fn vesting_claims_of(&mut self, agreement_id: &str) -> Result<Vec<VestingClaim>> {
+        let mut q = self.0.prepare(&format!(
+            "SELECT {VCLAIM_COLS} FROM vesting_claims WHERE agreement_id = ?1 ORDER BY created_at, id"
+        ))?;
+        let rows = q.query_map([agreement_id], vesting_claim_from_row)?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    fn insert_vesting_address(&mut self, a: &VestingPayoutAddress) -> Result<()> {
+        self.0
+            .execute(
+                "INSERT INTO vesting_payout_addresses (agreement_id, set_by, address_fingerprint,
+                     address_sealed, set_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    a.agreement_id,
+                    a.set_by,
+                    a.address_fingerprint,
+                    a.address_sealed,
+                    a.set_at
+                ],
+            )
+            .map_err(|e| {
+                unique_to_conflict(e, "the payout address for this agreement is already set")
+            })?;
+        Ok(())
+    }
+
+    fn vesting_address(&mut self, agreement_id: &str) -> Result<Option<VestingPayoutAddress>> {
+        Ok(self
+            .0
+            .query_row(
+                "SELECT agreement_id, set_by, address_fingerprint, address_sealed, set_at
+                 FROM vesting_payout_addresses WHERE agreement_id = ?1",
+                [agreement_id],
+                |r| {
+                    Ok(VestingPayoutAddress {
+                        agreement_id: r.get(0)?,
+                        set_by: r.get(1)?,
+                        address_fingerprint: r.get(2)?,
+                        address_sealed: r.get(3)?,
+                        set_at: r.get(4)?,
+                    })
+                },
+            )
+            .optional()?)
+    }
+}
+
+const VESTING_COLS: &str = "v.id, v.organization_id, v.employee_user_id, v.created_by, v.total_zats, \
+     v.start_at, v.duration_secs, v.cliff_secs, v.method, v.status, v.created_at, v.updated_at, \
+     v.activated_at, v.activated_by, v.cancelled_at, v.cancelled_by, v.vested_at_cancel_zats";
+
+fn vesting_from_row(r: &Row<'_>) -> rusqlite::Result<VestingAgreement> {
+    let method: String = r.get(8)?;
+    let status: String = r.get(9)?;
+    Ok(VestingAgreement {
+        id: r.get(0)?,
+        organization_id: r.get(1)?,
+        employee_user_id: r.get(2)?,
+        created_by: r.get(3)?,
+        terms: VestingTerms {
+            total_zats: r.get(4)?,
+            start_at: r.get(5)?,
+            duration_secs: r.get(6)?,
+            cliff_secs: r.get(7)?,
+            method: VestingMethod::parse(&method).ok_or_else(|| bad_enum(method))?,
+        },
+        status: VestingStatus::parse(&status).ok_or_else(|| bad_enum(status))?,
+        created_at: r.get(10)?,
+        updated_at: r.get(11)?,
+        activated_at: r.get(12)?,
+        activated_by: r.get(13)?,
+        cancelled_at: r.get(14)?,
+        cancelled_by: r.get(15)?,
+        vested_at_cancel_zats: r.get(16)?,
+    })
+}
+
+const VCLAIM_COLS: &str = "id, agreement_id, requested_by, idempotency_key, amount_zats, status, \
+     vested_at_reservation_zats, created_at, resolved_at, settlement_ref";
+
+fn vesting_claim_from_row(r: &Row<'_>) -> rusqlite::Result<VestingClaim> {
+    let status: String = r.get(5)?;
+    Ok(VestingClaim {
+        id: r.get(0)?,
+        compensation_type: CompensationType::Vesting,
+        agreement_id: r.get(1)?,
+        requested_by: r.get(2)?,
+        idempotency_key: r.get(3)?,
+        amount_zats: r.get(4)?,
+        status: ClaimStatus::parse(&status).ok_or_else(|| bad_enum(status))?,
+        vested_at_reservation_zats: r.get(6)?,
+        created_at: r.get(7)?,
+        resolved_at: r.get(8)?,
+        settlement_ref: r.get(9)?,
+    })
 }
 
 impl SqliteTx<'_> {
@@ -748,33 +1070,60 @@ fn offer_from_row(r: &Row<'_>) -> rusqlite::Result<StreamOffer> {
     })
 }
 
-const PAYOUT_COLS: &str = "id, claim_id, stream_id, requested_by, amount_zats, recipient_fingerprint, \
-     fee_estimate_zats, max_fee_zats, state, txid, fee_zats, expiry_height, mined_height, \
-     confirmations, detail, created_at, updated_at, submitted_at, resolved_at, lease_owner, lease_until";
+const PAYOUT_COLS: &str = "id, compensation_type, claim_id, stream_id, vesting_claim_id, \
+     vesting_agreement_id, requested_by, amount_zats, recipient_fingerprint, fee_estimate_zats, \
+     max_fee_zats, state, txid, fee_zats, expiry_height, mined_height, confirmations, detail, \
+     created_at, updated_at, submitted_at, resolved_at, lease_owner, lease_until";
+
+/// (claim_id, stream_id) columns of a stream payout; NULLs otherwise.
+fn stream_ref(p: &Payout) -> (Option<&str>, Option<&str>) {
+    match p.compensation_type {
+        CompensationType::Stream => (Some(&p.claim_id), Some(&p.source_id)),
+        CompensationType::Vesting => (None, None),
+    }
+}
+
+/// (vesting_claim_id, vesting_agreement_id) columns of a vesting payout; NULLs otherwise.
+fn vesting_ref(p: &Payout) -> (Option<&str>, Option<&str>) {
+    match p.compensation_type {
+        CompensationType::Vesting => (Some(&p.claim_id), Some(&p.source_id)),
+        CompensationType::Stream => (None, None),
+    }
+}
 
 fn payout_from_row(r: &Row<'_>) -> rusqlite::Result<Payout> {
-    let state: String = r.get(8)?;
+    let kind: String = r.get(1)?;
+    let kind = CompensationType::parse(&kind).ok_or_else(|| bad_enum(kind))?;
+    let (claim, source): (Option<String>, Option<String>) = match kind {
+        CompensationType::Stream => (r.get(2)?, r.get(3)?),
+        CompensationType::Vesting => (r.get(4)?, r.get(5)?),
+    };
+    let (Some(claim_id), Some(source_id)) = (claim, source) else {
+        return Err(bad_enum("payout without its claim reference".into()));
+    };
+    let state: String = r.get(11)?;
     Ok(Payout {
         id: r.get(0)?,
-        claim_id: r.get(1)?,
-        stream_id: r.get(2)?,
-        requested_by: r.get(3)?,
-        amount_zats: r.get(4)?,
-        recipient_fingerprint: r.get(5)?,
-        fee_estimate_zats: r.get(6)?,
-        max_fee_zats: r.get(7)?,
+        compensation_type: kind,
+        claim_id,
+        source_id,
+        requested_by: r.get(6)?,
+        amount_zats: r.get(7)?,
+        recipient_fingerprint: r.get(8)?,
+        fee_estimate_zats: r.get(9)?,
+        max_fee_zats: r.get(10)?,
         state: PayoutState::parse(&state).ok_or_else(|| bad_enum(state))?,
-        txid: r.get(9)?,
-        fee_zats: r.get(10)?,
-        expiry_height: r.get(11)?,
-        mined_height: r.get(12)?,
-        confirmations: r.get(13)?,
-        detail: r.get(14)?,
-        created_at: r.get(15)?,
-        updated_at: r.get(16)?,
-        submitted_at: r.get(17)?,
-        resolved_at: r.get(18)?,
-        lease_owner: r.get(19)?,
-        lease_until: r.get(20)?,
+        txid: r.get(12)?,
+        fee_zats: r.get(13)?,
+        expiry_height: r.get(14)?,
+        mined_height: r.get(15)?,
+        confirmations: r.get(16)?,
+        detail: r.get(17)?,
+        created_at: r.get(18)?,
+        updated_at: r.get(19)?,
+        submitted_at: r.get(20)?,
+        resolved_at: r.get(21)?,
+        lease_owner: r.get(22)?,
+        lease_until: r.get(23)?,
     })
 }

@@ -28,6 +28,16 @@ pub const MIGRATIONS: &[Migration] = &[
         name: "0003_flow",
         sql: include_str!("../migrations/0003_flow.sql"),
     },
+    Migration {
+        version: 4,
+        name: "0004_vesting",
+        sql: include_str!("../migrations/0004_vesting.sql"),
+    },
+    Migration {
+        version: 5,
+        name: "0005_vesting_payouts",
+        sql: include_str!("../migrations/0005_vesting_payouts.sql"),
+    },
 ];
 
 pub fn latest_version() -> i64 {
@@ -90,6 +100,16 @@ pub const PG_MIGRATIONS: &[Migration] = &[
         version: 4,
         name: "0004_flow",
         sql: include_str!("../migrations_pg/0004_flow.sql"),
+    },
+    Migration {
+        version: 5,
+        name: "0005_vesting",
+        sql: include_str!("../migrations_pg/0005_vesting.sql"),
+    },
+    Migration {
+        version: 6,
+        name: "0006_vesting_payouts",
+        sql: include_str!("../migrations_pg/0006_vesting_payouts.sql"),
     },
 ];
 
