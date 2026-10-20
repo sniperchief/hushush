@@ -1,0 +1,57 @@
+{
+  "database": "hushush_live_obs1c1 (copy of hushush_live_v4run2)",
+  "payout": {
+    "id": "0341c5b2-a9d9-4136-9fa2-af15c7df3007",
+    "compensation_type": "vesting",
+    "state": "confirmed",
+    "amount_zats": "20000",
+    "fee_estimate_zats": "10000",
+    "fee_zats": "10000",
+    "max_fee_zats": "20000",
+    "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff",
+    "mined_height": "4521791",
+    "confirmations": "10",
+    "claim_id": null,
+    "stream_id": null,
+    "vesting_claim_id": "1000cd86-f0d9-4d9a-b4e6-9be47078461e",
+    "vesting_agreement_id": "ab4ab0aa-3bb0-4fc1-9242-ad00ad944e92",
+    "created_at": "1792491764",
+    "submitted_at": "1792491856",
+    "resolved_at": "1792492109"
+  },
+  "events": [
+    {
+      "from_state": null,
+      "to_state": "reserved",
+      "occurred_at": "1792491764",
+      "detail": null
+    },
+    {
+      "from_state": "reserved",
+      "to_state": "requires_reconciliation",
+      "occurred_at": "1792491812",
+      "detail": "payout submission outcome unknown (wallet unavailable: http://127.0.0.1:7979/v1/payments: Network Error: Network Error: Error encountered in the status line: An existing connection was forcibly closed by the remote host. (os error 10054)); the reconciler will check the wallet"
+    },
+    {
+      "from_state": "requires_reconciliation",
+      "to_state": "submitted",
+      "occurred_at": "1792491856",
+      "detail": null
+    },
+    {
+      "from_state": "submitted",
+      "to_state": "confirmed",
+      "occurred_at": "1792492109",
+      "detail": null
+    }
+  ],
+  "claim": {
+    "id": "1000cd86-f0d9-4d9a-b4e6-9be47078461e",
+    "status": "settled",
+    "amount_zats": "20000",
+    "settlement_ref": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff",
+    "created_at": "1792491764",
+    "resolved_at": "1792492109"
+  },
+  "payouts_total": 6
+}

@@ -37,6 +37,7 @@ use hushush_wallet_proof::{NETWORK, config::WalletPaths, payment, remote, secret
 use crate::chain;
 use crate::intents::{Intent, IntentState, IntentStore, memo_for, now};
 use crate::policy::{self, pool_name};
+use crate::resend;
 
 /// Viewing keys of every account, shared with the HTTP side for verification.
 pub type SharedUfvks = Arc<RwLock<HashMap<AccountUuid, UnifiedFullViewingKey>>>;
@@ -639,12 +640,15 @@ impl Actor {
         self.intents.get(id)?.context("intent vanished")
     }
 
-    /// (Re)broadcasts built transactions, and broadcast ones the node has
-    /// forgotten, while they can still be mined.
+    /// (Re)broadcasts built transactions the network doesn't have yet, and
+    /// broadcast ones the node has forgotten, while they can still be mined.
+    /// The chain is asked first (see `resend`): a built transaction that is
+    /// already mined or in the mempool is recorded as broadcast, not re-sent.
     async fn rebroadcast(&mut self) {
         let Ok(tip) = remote::chain_tip(&mut self.client).await else {
             return;
         };
+        let tip = BlockHeight::from_u32(tip);
         let mut todo = vec![];
         for state in [IntentState::Built, IntentState::Broadcast] {
             if let Ok(v) = self.intents.in_state(state) {
@@ -652,19 +656,9 @@ impl Actor {
             }
         }
         for i in todo {
-            if i.expiry_height.is_some_and(|e| i64::from(tip) > e) {
-                continue; // can no longer be mined; the payroll side will fail it
+            if resend::step(&self.intents, &mut self.client, tip, &i).await == resend::Step::Send {
+                self.broadcast(&i).await;
             }
-            if i.state == IntentState::Broadcast {
-                let Some(txid) = i.txid.as_deref().and_then(|t| wallet::parse_txid(t).ok()) else {
-                    continue;
-                };
-                match chain::fetch(&mut self.client, BlockHeight::from_u32(tip), txid).await {
-                    Ok(chain::Fetched::Missing) => {}
-                    _ => continue, // mined, in the mempool, or unknown right now
-                }
-            }
-            self.broadcast(&i).await;
         }
     }
 

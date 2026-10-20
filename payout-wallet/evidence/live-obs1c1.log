@@ -1,0 +1,50 @@
+[2026-10-20T10:17:20Z] === hushush OBS-1 live validation obs1c1: scenario C only (TESTNET, https://testnet.zec.rocks:443, 10 confirmations, 0.0002 ZEC, company from v4run2)
+[2026-10-20T10:17:23Z] binaries: wallet a4e7ae7284ce9102 fault bf5dc27f800f3364 payroll-api ac500ccfbaf5171d
+[2026-10-20T10:17:24Z] lightwalletd: server=https://testnet.zec.rocks:443 chain=test version=v0.5.4 block_height=4521772 sapling_activation=280000 branch_id=77190ad9
+[2026-10-20T10:17:24Z] network check: chain=test, NU7 testnet branch 77190ad9
+[2026-10-20T10:17:28Z] database hushush_live_obs1c1 created as a copy of hushush_live_v4run2 (template untouched)
+[2026-10-20T10:19:06Z] services up: wallet pid 134618, payroll-api pid 134670, web pid 134675
+[2026-10-20T10:19:07Z] payroll schema: [{"v":6}]
+[2026-10-20T10:20:38Z] treasury total=10267167; company account 8d29e7dd-199a-40e7-91ec-8b0dee74faa2 total=880000; carol total=2097999; wallet unfinished payments=0
+[2026-10-20T10:20:39Z] === setup: one new agreement on the existing company (no faucet)
+[2026-10-20T10:20:41Z] agreement C2: {"label":"C2","agreementId":"ab4ab0aa-3bb0-4fc1-9242-ad00ad944e92","status":"active","phase":"not_started","total_zats":100000000,"start_at":1792491730}
+[2026-10-20T10:20:44Z] carol's address locked on C2
+[2026-10-20T10:22:31Z] available: 23148
+[2026-10-20T10:22:32Z] quote: {"status":200,"claim_id":"","amount_zats":20000,"amount_zec":"0.00020000","fee_zats":10000,"fee_zec":"0.00010000","wallet_debit_zats":30000,"valid_recipient":true,"sufficient":true,"reason":null,"network":"testnet","required_confirmations":10}
+[2026-10-20T10:22:33Z] === C: wallet dies right AFTER the network accepted the transaction
+[2026-10-20T10:22:43Z] fault-injection wallet started (pid 134882, WALLET_FAULT=crash_after_broadcast)
+[2026-10-20T10:23:32Z] withdraw: {"status":201,"key":"2e767169-f546-4a49-af95-3cab400cd494","duplicate":false,"payout":{"id":"0341c5b2-a9d9-4136-9fa2-af15c7df3007","type":"vesting","state":"requires_reconciliation","amount_zats":20000,"fee_estimate_zats":10000,"txid":null}}
+[2026-10-20T10:23:33Z] fault wallet exit code: 86 (86 = injected crash at crash_after_broadcast)
+[2026-10-20T10:23:35Z] intent BEFORE recovery: {"state": "built", "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff", "broadcast_attempts": 0, "last_broadcast_error": null, "fee_zats": 10000, "raw_persisted": true, "updated_at": 1792491811}
+[2026-10-20T10:23:38Z] payroll while the wallet is down: {"payout": "requires_reconciliation", "confirmations": 0, "txid": null, "claim": "reserved", "reserved": 20000, "paid": 0}
+[2026-10-20T10:23:38Z] === waiting (wallet down) until the transaction is MINED: the OBS-1 condition
+[2026-10-20T10:23:57Z] chain view before restart: {   "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff",   "mined_height": 4521791,   "size_bytes": 9166,   "tx_version": "V6",   "consensus_branch_id": "Nu7",   "lock_time": 0,   "expiry_height": 4521828,   "transpar
+[2026-10-20T10:23:57Z] transaction 100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff mined at 4521791 while the wallet was down
+[2026-10-20T10:23:58Z] payroll while the wallet is down: {"payout": "requires_reconciliation", "confirmations": 0, "txid": null, "claim": "reserved", "reserved": 20000, "paid": 0}
+[2026-10-20T10:23:59Z] === restart with the FIXED normal wallet
+[2026-10-20T10:24:09Z] normal wallet started (pid 135008); start-up recovery ran before it listened
+[2026-10-20T10:24:10Z] intent AFTER start-up recovery: {"state": "broadcast", "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff", "broadcast_attempts": 0, "last_broadcast_error": null, "fee_zats": 10000, "raw_persisted": true, "updated_at": 1792491846}
+[2026-10-20T10:24:11Z] wallet log lines for this payment since restart:
+2026-10-20T10:24:06.983353Z  INFO hushush_payout_wallet::resend: transaction already on the network; recorded as broadcast without resending payment_id=0341c5b2-a9d9-4136-9fa2-af15c7df3007 txid=Some("100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff") seen=Mined(BlockHeight(4521791))
+intent: built → broadcast, attempts 0 → 0, same txid 100b164f1343d6b8…
+[2026-10-20T10:24:12Z] no send attempted for 0341c5b2-a9d9-4136-9fa2-af15c7df3007 after restart
+[2026-10-20T10:24:12Z] === three background syncs later (WALLET_SYNC_SECS=20): still no attempt
+[2026-10-20T10:25:23Z] intent 70 s later: {"state": "broadcast", "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff", "broadcast_attempts": 0, "last_broadcast_error": null, "fee_zats": 10000, "raw_persisted": true, "updated_at": 1792491846}
+[2026-10-20T10:25:25Z] wallet unfinished payments now: 0 (before the run: 0)
+[2026-10-20T10:25:25Z] === payroll: settles only at 10 confirmations with chain verification
+[10:25:26] payout 0341c5b2: submitted 6/10 mined 4521791
+[10:25:56] payout 0341c5b2: submitted 7/10 mined 4521791
+[10:27:26] payout 0341c5b2: submitted 8/10 mined 4521791
+[10:28:37] payout 0341c5b2: confirmed 10/10 mined 4521791
+[2026-10-20T10:28:38Z] agreement C2 final: {"phase":"vesting","status":"active","cancelled_at":null,"balance":{"as_of":1792492118,"total_zats":100000000,"vested_zats":449074,"unvested_zats":99550926,"reserved_zats":0,"paid_zats":20000,"available_zats":429074},"withdrawable_zats":429074,"address_locked":true,"claims":[{"id":"1000cd86-f0d9-4d9a-b4e6-9be47078461e","status":"settled","amount_zats":20000,"payout":"0341c5b2-a9d9-4136-9fa2-af15c7df3007"}],"payouts":[{"id":"0341c5b2-a9d9-4136-9fa2-af15c7df3007","type":"vesting","state":"confirmed","amount_zats":20000,"fee_estimate_zats":10000,"fee_zats":10000,"txid":"100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff","mined_height":4521791,"confirmations":10,"required":10,"submitted_at":1792491856,"resolved_at":1792492109,"detail":null}]}
+[2026-10-20T10:28:41Z] payout history: reserved > requires_reconciliation > submitted > confirmed
+[2026-10-20T10:28:41Z] claim: [{"status":"settled","ref_is_txid":true}]
+[2026-10-20T10:28:42Z] intent at the end: {"state": "broadcast", "txid": "100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff", "broadcast_attempts": 0, "last_broadcast_error": null, "fee_zats": 10000, "raw_persisted": true, "updated_at": 1792491846}
+[2026-10-20T10:28:43Z] === verification
+carol received exactly once: 20000 zats in 100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff
+[2026-10-20T10:28:49Z] treasury-wallet transactions carrying the payout memo: 1
+[2026-10-20T10:28:50Z] carol 2097999 → 2117999 (delta 20000, expected 20000)
+[2026-10-20T10:29:17Z] company account 880000 → 850000 (delta 30000, expected 30000)
+[2026-10-20T10:29:17Z] treasury 10267167 → 10267167 (expected unchanged: no faucet)
+[2026-10-20T10:29:17Z] payout 0341c5b2-a9d9-4136-9fa2-af15c7df3007 txid 100b164f1343d6b8944ac5967c8308570509a2b27060abe223217dddcb89a3ff
+[2026-10-20T10:29:17Z] PASS: OBS-1 scenario C — mined transaction recorded as broadcast without a send (attempts 0), never re-sent, settled once at 10 confirmations

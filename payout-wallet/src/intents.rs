@@ -460,6 +460,21 @@ impl IntentStore {
         anyhow::ensure!(n == 1, "intent {id} has no transaction");
         Ok(())
     }
+
+    /// Records that a `built` intent's transaction was found on the network
+    /// (mined or in the mempool) by a chain lookup, without sending it again:
+    /// the network has it, so it counts as broadcast. Nothing was sent, so
+    /// `broadcast_attempts` is unchanged, and `last_broadcast_error` keeps the
+    /// last refusal (if any) for diagnosis.
+    pub fn mark_observed_on_chain(&self, id: &str) -> anyhow::Result<()> {
+        let n = self.conn.execute(
+            "UPDATE payment_intents SET state = 'broadcast', updated_at = ?2
+             WHERE payment_id = ?1 AND state = 'built'",
+            params![id, now()],
+        )?;
+        anyhow::ensure!(n == 1, "intent {id} is not built");
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -498,6 +513,44 @@ mod tests {
         assert_eq!((i.state, i.broadcast_attempts), (IntentState::Broadcast, 2));
         assert_eq!(i.raw_tx.as_deref(), Some(&b"raw"[..]));
         assert_eq!(s.count_unfinished().unwrap(), 0);
+    }
+
+    #[test]
+    fn observed_on_chain_is_broadcast_without_an_attempt() {
+        let (_d, s) = store();
+        s.insert_pending(ID, None, "utest1x", 5, 10, &memo_for(ID))
+            .unwrap();
+        // Only a built intent can be observed.
+        assert!(s.mark_observed_on_chain(ID).is_err());
+        s.mark_built(ID, &"a".repeat(64), b"raw", Some(10), Some(100))
+            .unwrap();
+        s.record_broadcast(
+            ID,
+            Some("lightwalletd rejected transaction (code -1): committed"),
+        )
+        .unwrap();
+        s.mark_observed_on_chain(ID).unwrap();
+        let i = s.get(ID).unwrap().unwrap();
+        assert_eq!(i.state, IntentState::Broadcast);
+        assert_eq!(i.broadcast_attempts, 1, "observing is not a send attempt");
+        assert_eq!(
+            i.last_broadcast_error.as_deref(),
+            Some("lightwalletd rejected transaction (code -1): committed"),
+            "the last refusal stays readable"
+        );
+        assert_eq!(i.txid.as_deref(), Some("a".repeat(64).as_str()));
+        assert_eq!(i.raw_tx.as_deref(), Some(&b"raw"[..]));
+        assert_eq!(s.count_unfinished().unwrap(), 0);
+        // Once broadcast, it can't be observed again; a later accepted send
+        // still records normally.
+        assert!(s.mark_observed_on_chain(ID).is_err());
+        s.record_broadcast(ID, None).unwrap();
+        assert_eq!(s.get(ID).unwrap().unwrap().broadcast_attempts, 2);
+        // Failed intents can't be observed.
+        const F: &str = "22222222-2222-2222-2222-222222222222";
+        s.insert_failed(F, None, None, 0, 0, "m", "fence").unwrap();
+        assert!(s.mark_observed_on_chain(F).is_err());
+        assert_eq!(s.get(F).unwrap().unwrap().state, IntentState::Failed);
     }
 
     #[test]

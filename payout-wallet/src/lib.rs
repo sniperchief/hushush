@@ -17,6 +17,7 @@ pub mod chain;
 pub mod http;
 pub mod intents;
 pub mod policy;
+mod resend;
 
 /// Halo 2 proving recurses deeply; Windows' default 1 MiB stack overflows
 /// (found in Phase 0). Every thread that may prove or decrypt gets this much.

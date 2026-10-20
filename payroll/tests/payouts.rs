@@ -1382,6 +1382,55 @@ fn decide_confirms_only_with_chain_verification() {
     assert!(matches!(decide(&p, &none, &pol), Decision::Submitted(_)));
 }
 
+/// OBS-1: the wallet may now record a transaction it finds on the network as
+/// `broadcast` without sending it. Whatever state the wallet reports, the
+/// payout is confirmed (and its claim settled) only at the required depth
+/// with chain-source verification; a mempool sighting never settles.
+#[test]
+fn decide_wallet_acknowledgement_never_settles_early() {
+    let (p, pol) = (sample_payout(), PayoutPolicy::default());
+    for state in [WalletPaymentState::Built, WalletPaymentState::Broadcast] {
+        let mut w = sample_wallet(&p);
+        w.state = state;
+        // Mined, below the threshold: submitted, never confirmed.
+        for confs in 1..pol.required_confirmations {
+            let c = w.chain.as_mut().unwrap();
+            c.confirmations = confs;
+            c.tip_height = 111 + confs - 1;
+            let d = decide(&p, &w, &pol);
+            assert!(
+                matches!(d, Decision::Submitted(_)),
+                "{state:?} {confs}: {d:?}"
+            );
+        }
+        // At the threshold: confirmed only with chain-source verification.
+        let c = w.chain.as_mut().unwrap();
+        c.confirmations = pol.required_confirmations;
+        assert!(
+            matches!(decide(&p, &w, &pol), Decision::Confirmed(_)),
+            "{state:?}"
+        );
+        let mut local = w.clone();
+        local.verification.as_mut().unwrap().source = "local".into();
+        assert!(
+            matches!(decide(&p, &local, &pol), Decision::Submitted(_)),
+            "{state:?}"
+        );
+        // In the mempool only: never confirmed or failed.
+        let mut mempool = w.clone();
+        let c = mempool.chain.as_mut().unwrap();
+        c.mined_height = None;
+        c.confirmations = 0;
+        c.in_mempool = true;
+        c.wallet_mined_height = None;
+        let d = decide(&p, &mempool, &pol);
+        match state {
+            WalletPaymentState::Broadcast => assert!(matches!(d, Decision::Submitted(_)), "{d:?}"),
+            _ => assert!(matches!(d, Decision::NeedsReconciliation { .. }), "{d:?}"),
+        }
+    }
+}
+
 #[test]
 fn decide_never_fails_ambiguous_or_mismatched_reports() {
     let (p, pol) = (sample_payout(), PayoutPolicy::default());
