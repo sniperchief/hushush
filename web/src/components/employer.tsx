@@ -49,7 +49,7 @@ export function WorkerLink({ url }: { url: string }) {
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Worker link" className={`${inputClass} font-mono text-xs`} />
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Worker link" className={`${inputClass} mono text-xs`} />
         <div className="flex gap-2">
           <Button
             type="button"
@@ -69,11 +69,11 @@ export function WorkerLink({ url }: { url: string }) {
       </div>
       {showQr && qr && (
         // eslint-disable-next-line @next/next/no-img-element -- a generated data: URL
-        <img src={qr} alt="QR code of the worker link" width={240} height={240} className="rounded-xl border border-line bg-white p-2" />
+        <img src={qr} alt="QR code of the worker link" width={240} height={240} className="rounded-lg border border-linen bg-paper p-2" />
       )}
-      <p className="text-xs text-ink-soft">
+      <p className="m-0 text-[12.5px] leading-[1.45] text-bark">
         Send this link to your worker any way you like. It works once: the first person to sign up or sign in through it gets the stream.
-        For your security it is shown only now — if you lose it, issue a new one from your home screen.
+        For your security it is shown only now — if you lose it, issue a new one under Streams → Waiting to join.
       </p>
     </div>
   );
@@ -110,7 +110,7 @@ export function NewStreamForm() {
           Stream created: {created.total} ZEC for {created.worker}. Now send them their link.
         </Alert>
         <WorkerLink url={created.link} />
-        <Link href="/app" className="inline-flex min-h-10 items-center rounded-xl bg-ink px-4 text-sm font-medium text-surface hover:opacity-90">
+        <Link href="/app/streams" className="btn-amber inline-flex h-[42px] items-center rounded-lg px-[18px] text-[15px] font-semi no-underline">
           Done
         </Link>
       </div>
@@ -141,7 +141,7 @@ export function NewStreamForm() {
         <input name="workerName" required maxLength={100} className={inputClass} />
       </Field>
       <Field label="Total (ZEC)" hint="Paid out evenly, by the second, between start and end.">
-        <input name="totalZec" required inputMode="decimal" placeholder="1.5" pattern="[0-9]+(\.[0-9]{1,8})?" className={`${inputClass} font-mono`} />
+        <input name="totalZec" required inputMode="decimal" placeholder="1.5" pattern="[0-9]+(\.[0-9]{1,8})?" className={`${inputClass} mono`} />
       </Field>
       <Field label="Start">
         <div className="flex gap-2">

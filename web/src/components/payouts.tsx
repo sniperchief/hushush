@@ -7,7 +7,7 @@ const BLOCK_SECS = 75;
 
 export function Txid({ txid }: { txid: string }) {
   return (
-    <span className="font-mono text-xs" title={txid}>
+    <span className="mono text-xs" title={txid}>
       {txid.slice(0, 10)}…{txid.slice(-6)}
     </span>
   );
@@ -71,18 +71,18 @@ export function PayoutDetail({ p }: { p: PayoutView }) {
 }
 
 export function PayoutList({ payouts, empty = "No withdrawals yet." }: { payouts: PayoutView[]; empty?: string }) {
-  if (payouts.length === 0) return <p className="text-sm text-ink-soft">{empty}</p>;
+  if (payouts.length === 0) return <p className="text-sm text-bark">{empty}</p>;
   return (
-    <ul className="divide-y divide-line">
+    <ul className="divide-y divide-mist">
       {payouts.map((p) => (
         <li key={p.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
-            <div className="font-mono text-sm font-semibold tabular-nums">{compactZec(p.amount_zec)} ZEC</div>
-            <div className="mt-0.5 max-w-prose text-xs text-ink-soft">
+            <div className="mono text-sm font-semi tabular-nums">{compactZec(p.amount_zec)} ZEC</div>
+            <div className="mt-0.5 max-w-prose text-xs text-bark">
               <PayoutDetail p={p} />
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-xs text-ink-soft">
+          <div className="flex shrink-0 items-center gap-2 text-xs text-bark">
             {formatTime(p.created_at)}
             <PayoutBadge p={p} />
           </div>

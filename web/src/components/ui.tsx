@@ -1,28 +1,56 @@
 import type { ComponentProps, ReactNode } from "react";
+import { Icon, type IconName } from "./dashboard/icons";
+
+// Shared building blocks for the signed-in screens, in the product palette
+// (warm, light only): the same cards, tags and figures as the dashboards.
 
 export function cx(...c: (string | false | null | undefined)[]): string {
   return c.filter(Boolean).join(" ");
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <section className={cx("rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-sm", className)}>{children}</section>;
+  return <section className={cx("min-w-0 rounded-xl border border-linen bg-paper p-[18px] sm:px-6 sm:py-[22px]", className)}>{children}</section>;
 }
 
-export function CardTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+/** A section's heading: an icon tile (optional), the title, and an action on the right. */
+export function SectionTitle({ icon, children, count, action, id }: { icon?: IconName; children: ReactNode; count?: number; action?: ReactNode; id?: string }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-base font-semibold tracking-tight">{children}</h2>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        {icon && (
+          <span aria-hidden="true" className="flex size-9 flex-none items-center justify-center rounded-lg border border-linen bg-cream text-espresso">
+            <Icon name={icon} size={18} />
+          </span>
+        )}
+        <h2 id={id} className="m-0 text-[19px] leading-[1.2] font-semi tracking-[-0.3px]">
+          {children}
+        </h2>
+        {count !== undefined && <span className="rounded-full border border-linen bg-cream px-2 py-0.5 text-xs font-semi">{count}</span>}
+      </div>
       {action}
     </div>
   );
 }
 
+export function CardTitle({ children, action, icon }: { children: ReactNode; action?: ReactNode; icon?: IconName }) {
+  return (
+    <div className="mb-4">
+      <SectionTitle icon={icon} action={action}>
+        {children}
+      </SectionTitle>
+    </div>
+  );
+}
+
 const tones = {
-  neutral: "bg-muted text-ink-soft",
-  green: "bg-ok-bg text-ok",
-  amber: "bg-warn-bg text-warn",
-  red: "bg-bad-bg text-bad",
-  accent: "bg-accent-bg text-accent-ink",
+  neutral: "bg-mist text-espresso",
+  /** Running: "Active", "Vesting". */
+  green: "border border-linen bg-paper text-espresso",
+  /** Needs attention: drafts, "Checking". */
+  amber: "border border-honey bg-honey-soft text-espresso",
+  red: "bg-failed-bg text-failed-ink",
+  /** Not started yet, in the cliff. */
+  accent: "bg-honey text-espresso",
   /** On its way: "Withdrawing", "Confirming n/10". */
   withdrawing: "bg-withdrawn-soft text-withdrawn-ink",
   paid: "bg-espresso text-cream",
@@ -30,25 +58,26 @@ const tones = {
 
 export function Badge({ children, tone = "neutral", title }: { children: ReactNode; tone?: keyof typeof tones; title?: string }) {
   return (
-    <span title={title} className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium", tones[tone])}>
+    <span title={title} className={cx("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-[3px] text-[12.5px] font-semi", tones[tone])}>
+      {tone === "green" && <span aria-hidden="true" className="size-[7px] rounded-full bg-earned" />}
       {children}
     </span>
   );
 }
 
+/** Amber is the only filled button colour; secondary is an espresso outline. */
 export function Button({ variant = "primary", className, ...props }: ComponentProps<"button"> & { variant?: "primary" | "secondary" | "danger" | "ghost" }) {
   const styles = {
-    primary: "bg-ink text-surface hover:opacity-90",
-    secondary: "border border-line bg-surface text-ink hover:bg-muted",
-    danger: "border border-bad/30 bg-bad-bg text-bad hover:border-bad/60",
-    ghost: "text-ink-soft hover:bg-muted hover:text-ink",
+    primary: "btn-amber",
+    secondary: "border border-espresso bg-transparent text-espresso hover:bg-paper",
+    danger: "border border-danger-line bg-danger-soft text-failed-ink hover:border-failed-line",
+    ghost: "text-bark hover:bg-mist hover:text-espresso",
   }[variant];
   return (
     <button
       {...props}
       className={cx(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        "inline-flex h-[42px] cursor-pointer items-center justify-center gap-2 rounded-lg px-[18px] text-[15px] font-semi transition-[transform,background-color] duration-150 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none",
         styles,
         className,
       )}
@@ -59,20 +88,25 @@ export function Button({ variant = "primary", className, ...props }: ComponentPr
 export function Field({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium">{label}</span>
+      <span className="mb-1.5 block text-sm font-semi text-espresso">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-ink-soft">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-[12.5px] leading-[1.45] text-bark">{hint}</span>}
     </label>
   );
 }
 
 export const inputClass =
-  "block w-full min-h-10 rounded-xl border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
+  "block w-full h-11 rounded-lg border border-linen bg-paper px-3.5 text-[15px] text-espresso placeholder:text-placeholder outline-none transition-[border-color,box-shadow] focus:border-amber-deep focus:ring-2 focus:ring-amber/25";
 
 export function Alert({ tone = "red", children }: { tone?: "red" | "green" | "amber" | "neutral"; children: ReactNode }) {
-  const t = { red: "border-bad/30 bg-bad-bg text-bad", green: "border-ok/30 bg-ok-bg text-ok", amber: "border-warn/30 bg-warn-bg text-warn", neutral: "border-line bg-muted text-ink-soft" }[tone];
+  const t = {
+    red: "border-failed-line bg-failed-bg text-failed-ink",
+    green: "border-honey bg-honey-soft text-espresso",
+    amber: "border-honey bg-honey-band text-espresso",
+    neutral: "border-linen bg-cream text-bark",
+  }[tone];
   return (
-    <div role={tone === "red" ? "alert" : "status"} className={cx("rounded-xl border px-3.5 py-2.5 text-sm", t)}>
+    <div role={tone === "red" ? "alert" : "status"} className={cx("rounded-lg border px-3.5 py-3 text-sm leading-[1.45]", t)}>
       {children}
     </div>
   );
@@ -80,16 +114,16 @@ export function Alert({ tone = "red", children }: { tone?: "red" | "green" | "am
 
 export function Stat({ label, value, unit = "ZEC", hint, emphasis }: { label: string; value: string; unit?: string; hint?: string; emphasis?: boolean }) {
   return (
-    <div className={cx("rounded-xl border border-line p-4", emphasis ? "bg-accent-bg" : "bg-surface")}>
-      <div className="text-xs font-medium uppercase tracking-wide text-ink-soft">{label}</div>
-      <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
-        {value} <span className="text-sm font-normal text-ink-soft">{unit}</span>
+    <div className={cx("flex min-w-0 flex-col gap-1.5 rounded-xl border px-4 py-3.5", emphasis ? "border-honey bg-honey-soft" : "border-linen bg-paper")}>
+      <div className="text-[13px] text-bark">{label}</div>
+      <div className="mono truncate text-[22px] leading-[1.15] font-medium tracking-[-0.4px]">
+        {value} <span className="font-landing text-sm font-normal tracking-normal text-bark">{unit}</span>
       </div>
-      {hint && <div className="mt-1 text-xs text-ink-soft">{hint}</div>}
+      {hint && <div className="text-[12.5px] leading-[1.4] text-bark">{hint}</div>}
     </div>
   );
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="rounded-xl border border-dashed border-line px-4 py-8 text-center text-sm text-ink-soft">{children}</p>;
+  return <p className="m-0 rounded-xl border-[1.5px] border-dashed border-stone px-5 py-10 text-center text-[15px] leading-normal text-bark">{children}</p>;
 }

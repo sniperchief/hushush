@@ -35,7 +35,7 @@ function SwitchCard({ role }: { role: ShellProps["role"] }) {
   );
 }
 
-/** Top bar, sidebar (desktop) or drawer + bottom tabs (phones), for the two home dashboards. */
+/** Top bar, sidebar (desktop) or drawer + bottom tabs (phones), around every dashboard page. */
 export function DashboardShell({ role, displayName, company, nav, account, tabs, children }: ShellProps) {
   const sidebar = (
     <>
@@ -81,7 +81,7 @@ export function DashboardShell({ role, displayName, company, nav, account, tabs,
             {sidebar}
           </nav>
         </aside>
-        <main id="overview" className="flex min-w-0 flex-1 scroll-mt-4 flex-col gap-4 px-4 pt-6 pb-28 min-[900px]:gap-5 min-[900px]:px-9 min-[900px]:pt-8 min-[900px]:pb-14">
+        <main className="flex min-w-0 flex-1 flex-col gap-4 px-4 pt-6 pb-28 min-[900px]:gap-5 min-[900px]:px-9 min-[900px]:pt-8 min-[900px]:pb-14">
           {children}
         </main>
       </div>

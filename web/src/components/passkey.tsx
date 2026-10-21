@@ -4,7 +4,6 @@ import { browserSupportsWebAuthn, startAuthentication, startRegistration } from 
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { api } from "@/lib/client-api";
-import { Alert, Button, Field, inputClass } from "./ui";
 
 function passkeyError(e: unknown): string {
   const name = (e as { name?: string })?.name;
@@ -104,60 +103,4 @@ export function usePasskeySignIn({ next = "/app", joinToken }: { next?: string; 
     router.refresh();
   };
   return { status, error, start };
-}
-
-/** Sign-up with a passkey: name, then Face ID / fingerprint / Windows Hello. (Worker-link page.) */
-export function PasskeySignUp({ defaultName = "", joinToken }: { defaultName?: string; joinToken?: string }) {
-  const supported = useWebAuthnSupport();
-  const { status, error, start } = usePasskeySignUp({ joinToken });
-
-  if (!supported) return <Alert>This browser doesn&apos;t support passkeys. Use a current Chrome, Safari, Edge or Firefox.</Alert>;
-
-  return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void start(String(new FormData(e.currentTarget).get("displayName") ?? "").trim());
-      }}
-    >
-      <Field label="Your name" hint={joinToken ? "Shown to the company paying you." : "Shown to the people you pay or who pay you."}>
-        <input name="displayName" required maxLength={100} defaultValue={defaultName} autoComplete="name" className={inputClass} />
-      </Field>
-      {error && <Alert>{error}</Alert>}
-      <Button type="submit" disabled={status !== "idle"} className="w-full">
-        {status !== "idle" ? "Waiting for your passkey…" : "Sign up with a passkey"}
-      </Button>
-      <p className="text-xs text-ink-soft">
-        Your device creates a passkey protected by Face ID, your fingerprint, Windows Hello or your device PIN. No password.
-      </p>
-    </form>
-  );
-}
-
-/** Sign-in with an existing passkey. (Worker-link page.) */
-export function PasskeySignIn({
-  next = "/app",
-  joinToken,
-  label = "Sign in with a passkey",
-  variant = "primary",
-}: {
-  next?: string;
-  joinToken?: string;
-  label?: string;
-  variant?: "primary" | "secondary";
-}) {
-  const supported = useWebAuthnSupport();
-  const { status, error, start } = usePasskeySignIn({ next, joinToken });
-
-  if (!supported) return <Alert>This browser doesn&apos;t support passkeys. Use a current Chrome, Safari, Edge or Firefox.</Alert>;
-
-  return (
-    <div className="space-y-3">
-      {error && <Alert>{error}</Alert>}
-      <Button variant={variant} disabled={status !== "idle"} className="w-full" onClick={() => void start()}>
-        {status !== "idle" ? "Waiting for your passkey…" : label}
-      </Button>
-    </div>
-  );
 }

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/dashboard/sections";
 import { Card } from "@/components/ui";
 import { NewVestingForm } from "@/components/vesting";
 import { employerCompany } from "@/lib/company";
@@ -17,17 +17,17 @@ export default async function NewVestingPage() {
   const members = await payroll.listMembers(user.id, company.id);
   const employees = members.filter((m) => m.user_id !== user.id).map((m) => ({ id: m.user_id, name: m.display_name }));
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <Link href="/app" className="text-sm text-ink-soft hover:underline">
-          ← Home
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">New vesting agreement</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          A fixed ZEC allocation that vests to one person over time, with an optional cliff. They withdraw what has vested, paid from your
-          company&apos;s payout wallet. Streams remain the way to pay for ongoing work.
-        </p>
-      </div>
+    <div className="flex w-full max-w-2xl flex-col gap-4 min-[900px]:gap-5">
+      <PageHeader
+        back={{ href: "/app/vesting", label: "Vesting" }}
+        title="New vesting agreement"
+        lead={
+          <>
+            A fixed ZEC allocation that vests to one person over time, with an optional cliff. They withdraw what has vested, paid from your
+            company&apos;s payout wallet. Streams remain the way to pay for ongoing work.
+          </>
+        }
+      />
       <Card>
         <NewVestingForm employees={employees} />
       </Card>

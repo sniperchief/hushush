@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icons";
 
@@ -10,25 +12,38 @@ export interface NavItem {
   count?: number;
   /** Amber badge, hidden when the count is 0. */
   alert?: boolean;
-  current?: boolean;
+}
+
+/**
+ * Whether `href` is the page being shown: "/app" only exactly, a section also
+ * for its sub-pages ("/app/streams" for "/app/streams/…"). Links to a part of
+ * a page ("…#waiting") are never "current", so one item is highlighted.
+ */
+function isCurrent(href: string, path: string): boolean {
+  if (href.includes("#")) return false;
+  return href === "/app" ? path === "/app" : path === href || path.startsWith(`${href}/`);
 }
 
 /** Sidebar links: the main sections, a divider, then the account section. */
 export function SidebarLinks({ items, account }: { items: NavItem[]; account: NavItem[] }) {
-  const link = (i: NavItem) => (
-    <a
-      key={i.label}
-      href={i.href}
-      aria-current={i.current ? "page" : undefined}
-      className={`flex h-11 items-center gap-3 rounded-lg px-3.5 text-[15px] text-espresso no-underline hover:bg-mist ${i.current ? "bg-mist font-semi" : ""}`}
-    >
-      <Icon name={i.icon} className={i.current ? "text-espresso" : "text-bark"} />
-      {i.label}
-      {i.count !== undefined && (!i.alert || i.count > 0) && (
-        <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-semi ${i.alert ? "bg-amber" : "border border-linen bg-cream"}`}>{i.count}</span>
-      )}
-    </a>
-  );
+  const path = usePathname();
+  const link = (i: NavItem) => {
+    const current = isCurrent(i.href, path);
+    return (
+      <Link
+        key={i.label}
+        href={i.href}
+        aria-current={current ? "page" : undefined}
+        className={`flex h-11 items-center gap-3 rounded-lg px-3.5 text-[15px] text-espresso no-underline hover:bg-mist ${current ? "bg-mist font-semi" : ""}`}
+      >
+        <Icon name={i.icon} className={current ? "text-espresso" : "text-bark"} />
+        {i.label}
+        {i.count !== undefined && (!i.alert || i.count > 0) && (
+          <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-semi ${i.alert ? "bg-amber" : "border border-linen bg-cream"}`}>{i.count}</span>
+        )}
+      </Link>
+    );
+  };
   return (
     <div className="flex flex-col gap-1">
       {items.map(link)}
@@ -117,25 +132,30 @@ export function MobileMenu({ children }: { children: ReactNode }) {
 
 /** Phones: fixed bottom tab bar. */
 export function BottomTabs({ tabs }: { tabs: NavItem[] }) {
+  const path = usePathname();
   return (
     <nav
       aria-label="Dashboard tabs"
-      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-linen bg-paper px-1 pt-1.5 pb-[max(14px,env(safe-area-inset-bottom))] min-[900px]:hidden"
+      style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+      className="fixed inset-x-0 bottom-0 z-30 grid border-t border-linen bg-paper px-1 pt-1.5 pb-[max(14px,env(safe-area-inset-bottom))] min-[900px]:hidden"
     >
-      {tabs.map((t) => (
-        <a
-          key={t.label}
-          href={t.href}
-          aria-current={t.current ? "page" : undefined}
-          className={`flex min-h-12 flex-col items-center justify-center gap-[3px] text-[11.5px] no-underline ${t.current ? "font-semi text-espresso" : "text-bark"}`}
-        >
-          <span className="relative">
-            <Icon name={t.icon} size={20} />
-            {t.alert && (t.count ?? 0) > 0 && <span className="absolute -top-1 -right-1.5 size-2 rounded-full bg-amber" aria-hidden="true" />}
-          </span>
-          {t.label}
-        </a>
-      ))}
+      {tabs.map((t) => {
+        const current = isCurrent(t.href, path);
+        return (
+          <Link
+            key={t.label}
+            href={t.href}
+            aria-current={current ? "page" : undefined}
+            className={`flex min-h-12 flex-col items-center justify-center gap-[3px] text-[11.5px] no-underline ${current ? "font-semi text-espresso" : "text-bark"}`}
+          >
+            <span className="relative">
+              <Icon name={t.icon} size={20} />
+              {t.alert && (t.count ?? 0) > 0 && <span className="absolute -top-1 -right-1.5 size-2 rounded-full bg-amber" aria-hidden="true" />}
+            </span>
+            {t.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

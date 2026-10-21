@@ -97,11 +97,11 @@ export function SwitchIntent({ to, children, className }: { to: Intent; children
         type="button"
         disabled={pending !== undefined}
         onClick={() => choose(to)}
-        className={className ?? "cursor-pointer text-sm text-ink-soft underline underline-offset-2 hover:text-ink disabled:cursor-wait disabled:opacity-60"}
+        className={className ?? "cursor-pointer text-sm text-bark underline underline-offset-2 hover:text-espresso disabled:cursor-wait disabled:opacity-60"}
       >
         {pending ? "One moment…" : children}
       </button>
-      {error && <span className="mt-1 text-xs text-bad">{error}</span>}
+      {error && <span className="mt-1 text-xs text-failed-ink">{error}</span>}
     </span>
   );
 }

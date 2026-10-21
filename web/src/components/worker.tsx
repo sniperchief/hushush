@@ -208,7 +208,7 @@ export function AddressForm({ streamId }: { streamId: string }) {
           spellCheck={false}
           placeholder="utest1…"
           onChange={() => setConfirming(undefined)}
-          className={cx(inputClass, "font-mono")}
+          className={cx(inputClass, "mono")}
         />
       </Field>
       {confirming && (

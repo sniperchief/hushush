@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/sections";
 import { PayoutList } from "@/components/payouts";
 import { Badge, Card, CardTitle, Stat } from "@/components/ui";
 import { VestingActions, VestingWithdrawPanel } from "@/components/vesting";
@@ -36,31 +36,25 @@ export default async function VestingPage({ params }: Props) {
   const cancelled = v.status === "cancelled";
 
   return (
-    <div className="space-y-6">
+    <>
       <AutoRefresh seconds={inFlight ? 5 : 30} />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link href="/app" className="text-sm text-ink-soft hover:underline">
-            ← Home
-          </Link>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Vesting · {employee ? v.organization_name : v.employee_display_name} · {compactZec(v.total_zec)} ZEC
-            </h1>
-            <Badge tone={phaseTone(v.phase)}>{phaseLabel(v.phase)}</Badge>
-          </div>
-          <p className="mt-1 text-sm text-ink-soft">
-            {formatTime(v.start_at)} → {formatTime(v.end_at)}
+      <PageHeader
+        back={{ href: "/app/vesting", label: "Vesting" }}
+        title={`${employee ? v.organization_name : v.employee_display_name} · ${compactZec(v.total_zec)} ZEC`}
+        tag={<Badge tone={phaseTone(v.phase)}>{phaseLabel(v.phase)}</Badge>}
+        lead={
+          <>
+            Vesting agreement · {formatTime(v.start_at)} → {formatTime(v.end_at)}
             {v.cancelled_at && <> · cancelled {formatTime(v.cancelled_at)}</>}
-          </p>
-        </div>
-        {!employee && <VestingActions v={v} />}
-      </div>
+          </>
+        }
+        action={!employee && <VestingActions v={v} />}
+      />
 
       <Card>
-        <CardTitle action={<span className="text-xs text-ink-soft">as of {formatTime(b.as_of)}</span>}>Balances</CardTitle>
+        <CardTitle icon="vesting" action={<span className="text-[12.5px] text-bark">as of {formatTime(b.as_of)}</span>}>Balances</CardTitle>
         <div
-          className="relative mb-4 h-3 overflow-hidden rounded-md bg-mist"
+          className="relative mb-4 h-2.5 overflow-hidden rounded bg-mist"
           role="img"
           aria-label={`${compactZec(b.vested_zec)} of ${compactZec(b.total_zec)} ZEC vested; ${compactZec(b.paid_zec)} ZEC paid`}
         >
@@ -79,14 +73,14 @@ export default async function VestingPage({ params }: Props) {
 
       {employee && (
         <Card>
-          <CardTitle>Withdraw</CardTitle>
+          <CardTitle icon="payments">Withdraw</CardTitle>
           <VestingWithdrawPanel d={d} />
           {d.address && (
-            <p className="mt-4 text-xs text-ink-soft">
-              Locked payout address: <span className="break-all font-mono">{d.address}</span>
+            <p className="m-0 mt-4 text-[12.5px] leading-[1.45] text-bark">
+              Locked payout address: <span className="mono break-all">{d.address}</span>
             </p>
           )}
-          <p className="mt-2 text-xs text-ink-soft">
+          <p className="m-0 mt-2 text-[12.5px] leading-[1.45] text-bark">
             Paid as a shielded Zcash transaction: the amount and the recipient aren&apos;t visible on chain. That a transaction happened, its
             timing and its fee are.
           </p>
@@ -94,20 +88,20 @@ export default async function VestingPage({ params }: Props) {
       )}
 
       <Card>
-        <CardTitle>Schedule</CardTitle>
-        <div className="space-y-2 text-sm leading-relaxed">
+        <CardTitle icon="overview">Schedule</CardTitle>
+        <div className="flex flex-col gap-2 text-sm leading-relaxed [&>p]:m-0">
           {scheduleSentences(v).map((l) => (
             <p key={l}>{l}</p>
           ))}
-          <p className="text-ink-soft">{CANCELLATION_RULE}</p>
+          <p className="text-bark">{CANCELLATION_RULE}</p>
           {v.status === "draft" && (
-            <p className="text-ink-soft">
+            <p className="text-bark">
               This is a draft: nothing vests and {v.employee_display_name} can&apos;t see it until it is activated, which must happen by{" "}
               {formatTime(v.start_at)}.
             </p>
           )}
           {!employee && (
-            <p className="text-ink-soft">
+            <p className="text-bark">
               Payout address: {d.address_locked ? "set and locked by the employee" : "not set yet"}. Only the employee can see it.
             </p>
           )}
@@ -115,21 +109,21 @@ export default async function VestingPage({ params }: Props) {
       </Card>
 
       <Card>
-        <CardTitle>Withdrawals</CardTitle>
+        <CardTitle icon="payments">Withdrawals</CardTitle>
         <PayoutList payouts={d.payouts} empty={employee ? "No withdrawals yet." : "The employee hasn't withdrawn yet."} />
       </Card>
 
       <Card>
-        <CardTitle>History</CardTitle>
-        <ul className="divide-y divide-line text-sm">
+        <CardTitle icon="waiting">History</CardTitle>
+        <ul className="m-0 list-none divide-y divide-mist p-0 text-sm">
           {d.events.map((e) => (
             <li key={`${e.kind}-${e.occurred_at}`} className="flex flex-wrap justify-between gap-2 py-2">
               <span>{eventLabel(e)}</span>
-              <span className="text-xs text-ink-soft">{formatTime(e.occurred_at)}</span>
+              <span className="text-[12.5px] text-bark">{formatTime(e.occurred_at)}</span>
             </li>
           ))}
         </ul>
       </Card>
-    </div>
+    </>
   );
 }

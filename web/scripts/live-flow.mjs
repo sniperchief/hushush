@@ -155,16 +155,18 @@ switch (cmd) {
     const [address, ...txids] = args;
     const st = state();
     const w = await browser(st.worker).get(`/app/streams/${st.streamId}`);
+    // Overview (payout wallet card) and Payments (the withdrawals list) are separate pages.
     const e = await browser(st.boss).get("/app");
+    const ep = await browser(st.boss).get("/app/payments");
     const ed = await browser(st.boss).get(`/app/streams/${st.streamId}`);
     const checks = {
       worker_page_200: w.status === 200,
       worker_sees_paid: w.html.includes("Paid ✓"),
       worker_sees_locked_address: w.html.includes("Locked for the life of this stream") && w.html.includes(address),
       employer_home_200: e.status === 200,
-      employer_sees_payments: txids.every((t) => e.html.includes(t.slice(0, 10))),
+      employer_sees_payments: ep.status === 200 && txids.every((t) => ep.html.includes(t.slice(0, 10))),
       employer_sees_payout_wallet: e.html.includes("Payout wallet"),
-      employer_never_sees_address: !e.html.includes(address) && !ed.html.includes(address) && ed.html.includes("set and locked by the worker"),
+      employer_never_sees_address: !e.html.includes(address) && !ep.html.includes(address) && !ed.html.includes(address) && ed.html.includes("set and locked by the worker"),
       worker_txids_shown: txids.every((t) => w.html.includes(t.slice(0, 10))),
     };
     out(checks);

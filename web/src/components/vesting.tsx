@@ -68,22 +68,22 @@ export function NewVestingForm({ employees }: { employees: EligibleEmployee[] })
     });
     return (
       <div className="space-y-4">
-        <h2 className="text-base font-semibold">Review the agreement</h2>
+        <h2 className="m-0 text-[17px] font-semi tracking-[-0.2px]">Review the agreement</h2>
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
-          <dt className="text-ink-soft">Employee</dt>
+          <dt className="text-bark">Employee</dt>
           <dd className="font-medium">{review.employee.name}</dd>
-          <dt className="text-ink-soft">Total</dt>
-          <dd className="font-mono">{zecOf(review.total)} ZEC</dd>
-          <dt className="text-ink-soft">Method</dt>
+          <dt className="text-bark">Total</dt>
+          <dd className="mono">{zecOf(review.total)} ZEC</dd>
+          <dt className="text-bark">Method</dt>
           <dd>Linear{review.cliffDays > 0 ? `, with a ${review.cliffDays}-day cliff` : ", no cliff"}</dd>
         </dl>
-        <div className="space-y-2 rounded-xl border border-line bg-muted px-4 py-3 text-sm leading-relaxed">
+        <div className="space-y-2 rounded-lg border border-linen bg-cream px-4 py-3 text-sm leading-relaxed">
           {lines.map((l) => (
             <p key={l} className="m-0">
               {l}
             </p>
           ))}
-          <p className="m-0 text-ink-soft">{CANCELLATION_RULE}</p>
+          <p className="m-0 text-bark">{CANCELLATION_RULE}</p>
         </div>
         <Alert tone="amber">
           This creates a <strong>draft</strong>. Nothing vests until you activate it, and it must be activated before its start date. The employee
@@ -154,7 +154,7 @@ export function NewVestingForm({ employees }: { employees: EligibleEmployee[] })
         </select>
       </Field>
       <Field label="Total (ZEC)" hint="The whole allocation. It vests over the duration.">
-        <input name="totalZec" required inputMode="decimal" placeholder="10" pattern="[0-9]+(\.[0-9]{1,8})?" className={`${inputClass} font-mono`} />
+        <input name="totalZec" required inputMode="decimal" placeholder="10" pattern="[0-9]+(\.[0-9]{1,8})?" className={`${inputClass} mono`} />
       </Field>
       <Field label="Start" hint="Vesting is counted from here. You activate the agreement before this.">
         <input type="datetime-local" name="startAt" required defaultValue={defaultStart} key={defaultStart} className={inputClass} />
@@ -224,7 +224,7 @@ export function VestingActions({ v }: { v: VestingView }) {
         )}
       </div>
       {draft && !v.activatable && (
-        <p className="text-xs text-ink-soft">The start date has passed, so this draft can no longer be activated. Discard it and create a new one.</p>
+        <p className="text-xs text-bark">The start date has passed, so this draft can no longer be activated. Discard it and create a new one.</p>
       )}
       {error && <Alert>{error}</Alert>}
     </div>
@@ -266,7 +266,7 @@ export function VestingAddressForm({ agreementId }: { agreementId: string }) {
           spellCheck={false}
           placeholder="utest1…"
           onChange={() => setConfirming(undefined)}
-          className={cx(inputClass, "font-mono")}
+          className={cx(inputClass, "mono")}
         />
       </Field>
       {confirming && (
@@ -299,11 +299,11 @@ export function VestingWithdrawPanel({ d }: { d: VestingDetail }) {
   const [pending, setPending] = useState<"quote" | "send">();
   const [error, setError] = useState<string>();
 
-  if (!d.payouts_enabled) return <p className="text-sm text-ink-soft">Withdrawals aren&apos;t enabled on this server.</p>;
+  if (!d.payouts_enabled) return <p className="text-sm text-bark">Withdrawals aren&apos;t enabled on this server.</p>;
   if (!d.address_locked) return <VestingAddressForm agreementId={v.id} />;
   if (open)
     return (
-      <div role="status" className="rounded-xl border border-line bg-muted px-4 py-3 text-sm leading-relaxed">
+      <div role="status" className="rounded-lg border border-linen bg-cream px-4 py-3 text-sm leading-relaxed">
         <strong>A withdrawal of {compactZec(open.amount_zec)} ZEC is in progress.</strong> <PayoutDetail p={open} />
       </div>
     );
@@ -312,7 +312,7 @@ export function VestingWithdrawPanel({ d }: { d: VestingDetail }) {
     if (v.phase === "not_started") why = "Vesting hasn't started yet.";
     else if (v.phase === "in_cliff") why = "Nothing has vested yet: the cliff hasn't been reached.";
     else if (v.balance.paid_zats === v.balance.vested_zats && v.balance.vested_zats > 0) why = "Everything vested so far has been withdrawn.";
-    return <p className="text-sm text-ink-soft">{why}</p>;
+    return <p className="text-sm text-bark">{why}</p>;
   }
 
   if (quote) {
@@ -320,16 +320,16 @@ export function VestingWithdrawPanel({ d }: { d: VestingDetail }) {
     return (
       <div className="space-y-3">
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
-          <dt className="text-ink-soft">You receive</dt>
-          <dd className="font-mono font-semibold">{compactZec(quote.amount_zec)} ZEC</dd>
-          <dt className="text-ink-soft">Network fee</dt>
+          <dt className="text-bark">You receive</dt>
+          <dd className="mono font-semi">{compactZec(quote.amount_zec)} ZEC</dd>
+          <dt className="text-bark">Network fee</dt>
           <dd>
-            {quote.fee_zec ? <span className="font-mono">{compactZec(quote.fee_zec)} ZEC</span> : "—"}{" "}
-            <span className="text-ink-soft">(paid by {v.organization_name}&apos;s payout wallet, not from your amount)</span>
+            {quote.fee_zec ? <span className="mono">{compactZec(quote.fee_zec)} ZEC</span> : "—"}{" "}
+            <span className="text-bark">(paid by {v.organization_name}&apos;s payout wallet, not from your amount)</span>
           </dd>
-          <dt className="text-ink-soft">To</dt>
-          <dd className="break-all font-mono text-xs">{d.address ? `${d.address.slice(0, 16)}…${d.address.slice(-8)}` : "your locked address"}</dd>
-          <dt className="text-ink-soft">Paid when</dt>
+          <dt className="text-bark">To</dt>
+          <dd className="break-all mono text-xs">{d.address ? `${d.address.slice(0, 16)}…${d.address.slice(-8)}` : "your locked address"}</dd>
+          <dt className="text-bark">Paid when</dt>
           <dd>{quote.required_confirmations} confirmations on the Zcash testnet</dd>
         </dl>
         {!canSend && <Alert tone="amber">{quote.reason ?? "This withdrawal can't be sent right now."}</Alert>}
@@ -355,7 +355,7 @@ export function VestingWithdrawPanel({ d }: { d: VestingDetail }) {
           </Button>
         </div>
         {pending === "send" && (
-          <p role="status" className="text-xs text-ink-soft">
+          <p role="status" className="text-xs text-bark">
             Building your shielded transaction. This takes about a minute — it will never be sent twice, even if you tap again or reload.
           </p>
         )}
@@ -384,7 +384,7 @@ export function VestingWithdrawPanel({ d }: { d: VestingDetail }) {
           required
           inputMode="decimal"
           pattern="[0-9]+(\.[0-9]{1,8})?"
-          className={cx(inputClass, "font-mono")}
+          className={cx(inputClass, "mono")}
           aria-label="Amount in ZEC"
         />
       </Field>
