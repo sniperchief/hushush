@@ -1,0 +1,14 @@
+# Only the Rust backend and the deploy files go into the Docker build context.
+*
+!payroll
+!payroll-api
+!payout-wallet
+!wallet-proof
+!deploy
+# Never send build output, wallets, evidence or local databases.
+**/target
+**/evidence
+**/*.sqlite
+**/*.sqlite-*
+**/*.age
+**/*identity*
