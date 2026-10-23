@@ -1,8 +1,14 @@
 # hushush
 
-**Private payroll in Zcash.** Companies pay people in shielded ZEC, either
-streamed by the second or vested over time. Amounts, recipients and memos stay
-private on chain.
+**Private streaming payroll in ZEC.**
+
+Pay your team **by the second** in shielded Zcash:
+- wages stream continuously from a start date to an end date;
+- workers watch their pay accrue live and withdraw it as they earn it, without
+  waiting for payday;
+- amounts, recipients and memos stay private on chain.
+
+Vesting allocations use the same private payout system.
 
 > **Status: running on the Zcash testnet.** It uses test coins (TAZ), which
 > have no monetary value. The network is fixed at compile time, so there is no
@@ -38,8 +44,16 @@ On a transparent blockchain, **paying someone exposes them**. Anyone can see
 who was paid, how much and how often, so salaries, team size and payroll
 timing become public. Most crypto payroll tools inherit this.
 
-Zcash's shielded pools hide the sender, the recipient, the amount and the
-memo. hushush builds a payroll product on top of them:
+Payroll also makes people wait. Work is done every day, but pay arrives once
+or twice a month.
+
+hushush fixes both:
+* **Streaming:** pay accrues every second, so a worker can withdraw what
+  they've earned so far, at each milestone, instead of waiting for payday.
+* **Shielding:** Zcash's shielded pools hide the sender, the recipient, the
+  amount and the memo of every withdrawal.
+
+On top of them, hushush builds a payroll product:
 - **employers** get a clear dashboard and a simple way to pay;
 - **workers** get their pay, privately, to a shielded address that only they
   control and only they can see;
